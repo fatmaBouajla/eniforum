@@ -1,0 +1,124 @@
+{
+  "_info": "Fiches de poste par comité du Forum ENICarthage (rédigées d'après le cahier des charges). 'requises' et 'atouts' utilisent les noms du catalogue competences.json. 'attentes' sert au score sémantique : une phrase = une attente du poste. Modifiez librement ce fichier : le service le recharge au démarrage.",
+  "roles": {
+    "MEMBRE": {
+      "libelle": "Membre",
+      "poids": {"competences": 40, "semantique": 25, "experience": 15, "formation": 5, "motivation": 15},
+      "requises_en_plus": [],
+      "attentes_en_plus": [
+        "Disponibilité et envie de s'investir dans l'organisation du forum",
+        "Capacité à travailler en équipe au sein d'un comité étudiant"
+      ]
+    },
+    "CHEF_COMITE": {
+      "libelle": "Chef de comité",
+      "poids": {"competences": 35, "semantique": 20, "experience": 25, "formation": 10, "motivation": 10},
+      "requises_en_plus": ["Leadership", "Gestion d'équipe"],
+      "attentes_en_plus": [
+        "Expérience de responsabilité dans un club, une association ou un projet étudiant",
+        "Capacité à diriger une équipe, répartir les tâches et suivre leur avancement",
+        "Prise de décision et gestion des imprévus le jour de l'événement"
+      ]
+    },
+    "COORDINATRICE": {
+      "libelle": "Coordinatrice générale",
+      "poids": {"competences": 30, "semantique": 20, "experience": 30, "formation": 10, "motivation": 10},
+      "requises_en_plus": ["Leadership", "Coordination", "Gestion de projet"],
+      "attentes_en_plus": [
+        "Vision globale de l'organisation d'un forum entreprises et coordination de plusieurs comités",
+        "Expérience significative de direction dans la vie associative ou l'organisation d'événements"
+      ]
+    }
+  },
+  "comites": {
+    "sponsoring": {
+      "libelle": "Comité Sponsoring",
+      "description": "Recherche de sponsors et de partenaires, négociation des offres de partenariat et relation avec les entreprises participantes au forum.",
+      "requises": ["Communication", "Négociation", "Prospection", "Partenariats"],
+      "atouts": ["Sponsoring", "Relation client", "Vente", "Rédaction", "Microsoft Excel", "Microsoft PowerPoint", "Anglais", "Prise de parole", "Marketing"],
+      "attentes": [
+        "Prospecter et contacter des entreprises pour obtenir des sponsors",
+        "Négocier des offres de partenariat et des packs sponsoring",
+        "Rédiger un dossier de sponsoring et des emails professionnels",
+        "Entretenir la relation avec les entreprises partenaires",
+        "Suivre les engagements des sponsors dans un tableau Excel"
+      ]
+    },
+    "design": {
+      "libelle": "Comité Design",
+      "description": "Création de l'identité visuelle du forum : logo, affiches, badges, supports imprimés et visuels pour les réseaux sociaux.",
+      "requises": ["Design graphique", "Créativité"],
+      "atouts": ["Figma", "Photoshop", "Illustrator", "Canva", "InDesign", "Suite Adobe", "Identité visuelle", "UI/UX Design", "Vidéo & montage", "Modélisation 3D"],
+      "attentes": [
+        "Concevoir l'identité visuelle et la charte graphique du forum",
+        "Réaliser des affiches, flyers, badges et kakémonos",
+        "Maîtriser des logiciels de design comme Figma, Photoshop, Illustrator ou Canva",
+        "Créer des visuels pour les réseaux sociaux",
+        "Respecter les délais de production des supports imprimés"
+      ]
+    },
+    "logistique": {
+      "libelle": "Comité Logistique",
+      "description": "Organisation matérielle du forum : salles, stands, matériel, accueil, restauration et déroulement le jour J.",
+      "requises": ["Organisation", "Logistique", "Organisation d'événements"],
+      "atouts": ["Planification", "Gestion de stock & matériel", "Gestion budgétaire", "Gestion de crise", "Gestion du stress", "Travail en équipe", "Microsoft Excel", "Négociation"],
+      "attentes": [
+        "Organiser l'aménagement des salles et des stands des entreprises",
+        "Gérer le matériel, l'inventaire et les fournisseurs",
+        "Planifier l'accueil des participants et la restauration",
+        "Gérer les imprévus le jour de l'événement",
+        "Suivre le budget logistique"
+      ]
+    },
+    "projet": {
+      "libelle": "Comité Projet",
+      "description": "Pilotage global du projet forum : planning, suivi des tâches des comités, reporting et respect des échéances.",
+      "requises": ["Gestion de projet", "Planification", "Organisation"],
+      "atouts": ["Méthodes agiles", "Reporting", "Trello", "Notion", "Jira", "Microsoft Excel", "Gestion budgétaire", "Coordination", "Gestion du temps"],
+      "attentes": [
+        "Établir le planning du projet et le rétroplanning des comités",
+        "Suivre l'avancement des tâches et relancer les retards",
+        "Produire des comptes rendus et des tableaux de bord",
+        "Utiliser des outils de gestion de projet comme Trello, Notion ou Jira",
+        "Coordonner les différents comités autour des échéances"
+      ]
+    },
+    "programme": {
+      "libelle": "Comité Programme",
+      "description": "Construction du programme du forum : conférences, workshops, tables rondes, choix et accueil des intervenants.",
+      "requises": ["Programmation de conférences", "Communication", "Organisation"],
+      "atouts": ["Prise de parole", "Animation", "Rédaction", "Anglais", "Planification", "Formation & mentorat", "Organisation d'événements", "Microsoft PowerPoint"],
+      "attentes": [
+        "Construire le programme des conférences, workshops et tables rondes",
+        "Identifier et contacter des intervenants et des speakers",
+        "Animer ou modérer une conférence ou un atelier",
+        "Planifier l'agenda de la journée et les horaires des salles",
+        "Rédiger les présentations des intervenants"
+      ]
+    },
+    "media": {
+      "libelle": "Comité Média",
+      "description": "Communication du forum : réseaux sociaux, couverture photo et vidéo, contenus et relations presse.",
+      "requises": ["Réseaux sociaux", "Création de contenu"],
+      "atouts": ["Photographie", "Vidéo & montage", "Rédaction", "Marketing", "Canva", "Photoshop", "Relations presse", "Créativité", "Anglais"],
+      "attentes": [
+        "Animer les réseaux sociaux du forum (Facebook, Instagram, LinkedIn)",
+        "Créer du contenu : publications, stories, vidéos teasers",
+        "Assurer la couverture photo et vidéo de l'événement",
+        "Rédiger les annonces et les communiqués",
+        "Monter des vidéos récapitulatives après l'événement"
+      ]
+    },
+    "general": {
+      "libelle": "Forum (comité non précisé)",
+      "description": "Participation à l'organisation du forum entreprises de l'ENICarthage.",
+      "requises": ["Communication", "Organisation", "Travail en équipe"],
+      "atouts": ["Organisation d'événements", "Leadership", "Pack Office", "Anglais", "Créativité", "Gestion du temps"],
+      "attentes": [
+        "Participer à l'organisation d'un forum entreprises",
+        "Travailler en équipe et communiquer avec les entreprises",
+        "S'impliquer dans la vie associative de l'école"
+      ]
+    }
+  }
+}
