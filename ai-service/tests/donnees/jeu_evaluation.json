@@ -1,0 +1,734 @@
+[
+ {
+  "id": "cv01",
+  "nom": "Amira Ben Amor",
+  "email": "amira.amor@exemple.tn",
+  "telephone": "+216 20 728 182",
+  "comite_cible": "Sponsoring",
+  "niveau": "fort",
+  "annee": 3,
+  "filiere": "Génie informatique",
+  "competences": [
+   "PowerPoint",
+   "Prospection d'entreprises",
+   "Prise de parole",
+   "Excel",
+   "Anglais professionnel",
+   "Partenariats",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Bénévole au Forum ENICarthage : accueil des entreprises partenaires",
+   "Stage commercial chez un opérateur télécom : relation client et vente",
+   "Responsable relations entreprises de Enactus ENICarthage : négociation des packs partenaires"
+  ],
+  "langues": "Arabe (maternelle), Français (courant), Anglais (B2)",
+  "texte": "Amira Ben Amor\namira.amor@exemple.tn | +216 20 728 182 | Tunis\nPROFIL\nÉtudiant(e) en 3ème année Génie informatique à l'ENICarthage.\nFORMATION\n2023 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Bénévole au Forum ENICarthage : accueil des entreprises partenaires\n- Stage commercial chez un opérateur télécom : relation client et vente\n- Responsable relations entreprises de Enactus ENICarthage : négociation des packs partenaires\nCOMPÉTENCES\nPowerPoint, Prospection d'entreprises, Prise de parole, Excel, Anglais professionnel, Partenariats, Travail en équipe, Leadership\nLANGUES\nArabe (maternelle), Français (courant), Anglais (B2)"
+ },
+ {
+  "id": "cv02",
+  "nom": "Youssef Khelifi",
+  "email": "youssef.khelifi@exemple.tn",
+  "telephone": "+216 65 924 485",
+  "comite_cible": "Sponsoring",
+  "niveau": "fort",
+  "annee": 4,
+  "filiere": "Génie civil",
+  "competences": [
+   "Prospection d'entreprises",
+   "Prise de parole",
+   "Négociation",
+   "PowerPoint",
+   "Partenariats",
+   "Communication",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Responsable relations entreprises de GDSC ENICarthage : négociation des packs partenaires",
+   "Bénévole au Forum ENICarthage : accueil des entreprises partenaires",
+   "Stage commercial chez un opérateur télécom : relation client et vente"
+  ],
+  "langues": "Arabe (maternelle), Français (courant), Anglais (B2)",
+  "texte": "Youssef Khelifi\nyoussef.khelifi@exemple.tn | +216 65 924 485 | Tunis\nPROFIL\nÉtudiant(e) en 4ème année Génie civil à l'ENICarthage.\nFORMATION\n2022 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Responsable relations entreprises de GDSC ENICarthage : négociation des packs partenaires\n- Bénévole au Forum ENICarthage : accueil des entreprises partenaires\n- Stage commercial chez un opérateur télécom : relation client et vente\nCOMPÉTENCES\nProspection d'entreprises, Prise de parole, Négociation, PowerPoint, Partenariats, Communication, Travail en équipe, Leadership\nLANGUES\nArabe (maternelle), Français (courant), Anglais (B2)"
+ },
+ {
+  "id": "cv03",
+  "nom": "Nour Zouari",
+  "email": "nour.zouari@exemple.tn",
+  "telephone": "+216 38 997 760",
+  "comite_cible": "Sponsoring",
+  "niveau": "moyen",
+  "annee": 3,
+  "filiere": "Génie civil",
+  "competences": [
+   "PowerPoint",
+   "Prospection d'entreprises",
+   "Excel",
+   "Langage C",
+   "Matlab"
+  ],
+  "experiences": [
+   "Chargé de sponsoring du hackathon Enactus ENICarthage : 25 entreprises contactées, 6 partenaires signés",
+   "Stage ouvrier dans une usine de production"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Nour Zouari\nnour.zouari@exemple.tn | +216 38 997 760 | Tunis\nPROFIL\nÉtudiant(e) en 3ème année Génie civil à l'ENICarthage.\nFORMATION\n2023 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Chargé de sponsoring du hackathon Enactus ENICarthage : 25 entreprises contactées, 6 partenaires signés\n- Stage ouvrier dans une usine de production\nCOMPÉTENCES\nPowerPoint, Prospection d'entreprises, Excel, Langage C, Matlab\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv04",
+  "nom": "Skander Baccouche",
+  "email": "skander.baccouche@exemple.tn",
+  "telephone": "+216 94 667 610",
+  "comite_cible": "Sponsoring",
+  "niveau": "moyen",
+  "annee": 3,
+  "filiere": "Génie informatique",
+  "competences": [
+   "Négociation",
+   "PowerPoint",
+   "Communication",
+   "SolidWorks",
+   "Linux"
+  ],
+  "experiences": [
+   "Chargé de sponsoring du hackathon GDSC ENICarthage : 25 entreprises contactées, 6 partenaires signés",
+   "Projet académique : simulation numérique sous Matlab"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Skander Baccouche\nskander.baccouche@exemple.tn | +216 94 667 610 | Tunis\nPROFIL\nÉtudiant(e) en 3ème année Génie informatique à l'ENICarthage.\nFORMATION\n2023 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Chargé de sponsoring du hackathon GDSC ENICarthage : 25 entreprises contactées, 6 partenaires signés\n- Projet académique : simulation numérique sous Matlab\nCOMPÉTENCES\nNégociation, PowerPoint, Communication, SolidWorks, Linux\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv05",
+  "nom": "Rania Tlili",
+  "email": "rania.tlili@exemple.tn",
+  "telephone": "+216 92 590 625",
+  "comite_cible": "Sponsoring",
+  "niveau": "faible",
+  "annee": 2,
+  "filiere": "Génie des procédés",
+  "competences": [
+   "Langage C",
+   "Linux",
+   "SolidWorks",
+   "Java"
+  ],
+  "experiences": [
+   "Mini-projet : application de gestion de bibliothèque en Java",
+   "Stage ouvrier dans une usine de production"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Rania Tlili\nrania.tlili@exemple.tn | +216 92 590 625 | Tunis\nPROFIL\nÉtudiant(e) en 2ème année Génie des procédés à l'ENICarthage.\nFORMATION\n2024 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Mini-projet : application de gestion de bibliothèque en Java\n- Stage ouvrier dans une usine de production\nCOMPÉTENCES\nLangage C, Linux, SolidWorks, Java\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv06",
+  "nom": "Hamza Hammami",
+  "email": "hamza.hammami@exemple.tn",
+  "telephone": "+216 49 970 224",
+  "comite_cible": "Design",
+  "niveau": "fort",
+  "annee": 4,
+  "filiere": "Génie civil",
+  "competences": [
+   "Canva",
+   "Illustrator",
+   "UI/UX design",
+   "Figma",
+   "Design graphique",
+   "Identité visuelle",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Création de l'identité visuelle d'un événement étudiant",
+   "Conception des badges et kakémonos du Forum ENICarthage",
+   "Responsable design de IEEE ENICarthage : affiches, flyers et charte graphique"
+  ],
+  "langues": "Arabe (maternelle), Français (courant), Anglais (B2)",
+  "texte": "Hamza Hammami\nhamza.hammami@exemple.tn | +216 49 970 224 | Tunis\nPROFIL\nÉtudiant(e) en 4ème année Génie civil à l'ENICarthage.\nFORMATION\n2022 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Création de l'identité visuelle d'un événement étudiant\n- Conception des badges et kakémonos du Forum ENICarthage\n- Responsable design de IEEE ENICarthage : affiches, flyers et charte graphique\nCOMPÉTENCES\nCanva, Illustrator, UI/UX design, Figma, Design graphique, Identité visuelle, Travail en équipe, Leadership\nLANGUES\nArabe (maternelle), Français (courant), Anglais (B2)"
+ },
+ {
+  "id": "cv07",
+  "nom": "Eya Dridi",
+  "email": "eya.dridi@exemple.tn",
+  "telephone": "+216 54 109 133",
+  "comite_cible": "Design",
+  "niveau": "fort",
+  "annee": 4,
+  "filiere": "Génie industriel",
+  "competences": [
+   "Créativité",
+   "Design graphique",
+   "InDesign",
+   "Canva",
+   "Illustrator",
+   "Identité visuelle",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Création de l'identité visuelle d'un événement étudiant",
+   "Conception des badges et kakémonos du Forum ENICarthage",
+   "Responsable design de Club Théâtre : affiches, flyers et charte graphique"
+  ],
+  "langues": "Arabe (maternelle), Français (courant), Anglais (B2)",
+  "texte": "Eya Dridi\neya.dridi@exemple.tn | +216 54 109 133 | Tunis\nPROFIL\nÉtudiant(e) en 4ème année Génie industriel à l'ENICarthage.\nFORMATION\n2022 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Création de l'identité visuelle d'un événement étudiant\n- Conception des badges et kakémonos du Forum ENICarthage\n- Responsable design de Club Théâtre : affiches, flyers et charte graphique\nCOMPÉTENCES\nCréativité, Design graphique, InDesign, Canva, Illustrator, Identité visuelle, Travail en équipe, Leadership\nLANGUES\nArabe (maternelle), Français (courant), Anglais (B2)"
+ },
+ {
+  "id": "cv08",
+  "nom": "Aziz Masmoudi",
+  "email": "aziz.masmoudi@exemple.tn",
+  "telephone": "+216 79 623 885",
+  "comite_cible": "Design",
+  "niveau": "moyen",
+  "annee": 3,
+  "filiere": "Génie mécanique",
+  "competences": [
+   "InDesign",
+   "Créativité",
+   "Illustrator",
+   "Java",
+   "Matlab"
+  ],
+  "experiences": [
+   "Membre design de Club Théâtre : affiches, flyers et charte graphique",
+   "Mini-projet : application de gestion de bibliothèque en Java"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Aziz Masmoudi\naziz.masmoudi@exemple.tn | +216 79 623 885 | Tunis\nPROFIL\nÉtudiant(e) en 3ème année Génie mécanique à l'ENICarthage.\nFORMATION\n2023 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Membre design de Club Théâtre : affiches, flyers et charte graphique\n- Mini-projet : application de gestion de bibliothèque en Java\nCOMPÉTENCES\nInDesign, Créativité, Illustrator, Java, Matlab\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv09",
+  "nom": "Mariem Hajji",
+  "email": "mariem.hajji@exemple.tn",
+  "telephone": "+216 76 805 833",
+  "comite_cible": "Design",
+  "niveau": "moyen",
+  "annee": 2,
+  "filiere": "Génie des procédés",
+  "competences": [
+   "InDesign",
+   "Figma",
+   "UI/UX design",
+   "Matlab",
+   "Linux"
+  ],
+  "experiences": [
+   "Membre design de AIESEC Carthage : affiches, flyers et charte graphique",
+   "Stage ouvrier dans une usine de production"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Mariem Hajji\nmariem.hajji@exemple.tn | +216 76 805 833 | Tunis\nPROFIL\nÉtudiant(e) en 2ème année Génie des procédés à l'ENICarthage.\nFORMATION\n2024 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Membre design de AIESEC Carthage : affiches, flyers et charte graphique\n- Stage ouvrier dans une usine de production\nCOMPÉTENCES\nInDesign, Figma, UI/UX design, Matlab, Linux\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv10",
+  "nom": "Ahmed Jlassi",
+  "email": "ahmed.jlassi@exemple.tn",
+  "telephone": "+216 83 479 198",
+  "comite_cible": "Design",
+  "niveau": "faible",
+  "annee": 2,
+  "filiere": "Génie industriel",
+  "competences": [
+   "SolidWorks",
+   "Java",
+   "Linux",
+   "Matlab"
+  ],
+  "experiences": [
+   "Stage ouvrier dans une usine de production",
+   "Projet académique : simulation numérique sous Matlab"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Ahmed Jlassi\nahmed.jlassi@exemple.tn | +216 83 479 198 | Tunis\nPROFIL\nÉtudiant(e) en 2ème année Génie industriel à l'ENICarthage.\nFORMATION\n2024 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Stage ouvrier dans une usine de production\n- Projet académique : simulation numérique sous Matlab\nCOMPÉTENCES\nSolidWorks, Java, Linux, Matlab\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv11",
+  "nom": "Sirine Ferchichi",
+  "email": "sirine.ferchichi@exemple.tn",
+  "telephone": "+216 35 735 145",
+  "comite_cible": "Logistique",
+  "niveau": "fort",
+  "annee": 3,
+  "filiere": "Génie des procédés",
+  "competences": [
+   "Gestion de stock",
+   "Excel",
+   "Organisation",
+   "Travail en équipe",
+   "Gestion du budget",
+   "Planification",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Responsable logistique de AIESEC Carthage : salles, matériel et restauration",
+   "Bénévole au Croissant-Rouge : gestion des stocks et distribution",
+   "Gestion des imprévus le jour J d'un salon étudiant"
+  ],
+  "langues": "Arabe (maternelle), Français (courant), Anglais (B2)",
+  "texte": "Sirine Ferchichi\nsirine.ferchichi@exemple.tn | +216 35 735 145 | Tunis\nPROFIL\nÉtudiant(e) en 3ème année Génie des procédés à l'ENICarthage.\nFORMATION\n2023 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Responsable logistique de AIESEC Carthage : salles, matériel et restauration\n- Bénévole au Croissant-Rouge : gestion des stocks et distribution\n- Gestion des imprévus le jour J d'un salon étudiant\nCOMPÉTENCES\nGestion de stock, Excel, Organisation, Travail en équipe, Gestion du budget, Planification, Travail en équipe, Leadership\nLANGUES\nArabe (maternelle), Français (courant), Anglais (B2)"
+ },
+ {
+  "id": "cv12",
+  "nom": "Fares Sassi",
+  "email": "fares.sassi@exemple.tn",
+  "telephone": "+216 95 234 712",
+  "comite_cible": "Logistique",
+  "niveau": "fort",
+  "annee": 4,
+  "filiere": "Génie civil",
+  "competences": [
+   "Gestion du budget",
+   "Gestion de stock",
+   "Organisation",
+   "Excel",
+   "Gestion de crise",
+   "Planification",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Organisation d'un gala de 300 personnes : fournisseurs et inventaire",
+   "Bénévole au Croissant-Rouge : gestion des stocks et distribution",
+   "Responsable logistique de GDSC ENICarthage : salles, matériel et restauration"
+  ],
+  "langues": "Arabe (maternelle), Français (courant), Anglais (B2)",
+  "texte": "Fares Sassi\nfares.sassi@exemple.tn | +216 95 234 712 | Tunis\nPROFIL\nÉtudiant(e) en 4ème année Génie civil à l'ENICarthage.\nFORMATION\n2022 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Organisation d'un gala de 300 personnes : fournisseurs et inventaire\n- Bénévole au Croissant-Rouge : gestion des stocks et distribution\n- Responsable logistique de GDSC ENICarthage : salles, matériel et restauration\nCOMPÉTENCES\nGestion du budget, Gestion de stock, Organisation, Excel, Gestion de crise, Planification, Travail en équipe, Leadership\nLANGUES\nArabe (maternelle), Français (courant), Anglais (B2)"
+ },
+ {
+  "id": "cv13",
+  "nom": "Ines Mzoughi",
+  "email": "ines.mzoughi@exemple.tn",
+  "telephone": "+216 84 521 499",
+  "comite_cible": "Logistique",
+  "niveau": "moyen",
+  "annee": 3,
+  "filiere": "Génie industriel",
+  "competences": [
+   "Logistique",
+   "Travail en équipe",
+   "Gestion du budget",
+   "Java",
+   "Linux"
+  ],
+  "experiences": [
+   "Membre logistique de GDSC ENICarthage : salles, matériel et restauration",
+   "Mini-projet : application de gestion de bibliothèque en Java"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Ines Mzoughi\nines.mzoughi@exemple.tn | +216 84 521 499 | Tunis\nPROFIL\nÉtudiant(e) en 3ème année Génie industriel à l'ENICarthage.\nFORMATION\n2023 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Membre logistique de GDSC ENICarthage : salles, matériel et restauration\n- Mini-projet : application de gestion de bibliothèque en Java\nCOMPÉTENCES\nLogistique, Travail en équipe, Gestion du budget, Java, Linux\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv14",
+  "nom": "Bilel Trabelsi",
+  "email": "bilel.trabelsi@exemple.tn",
+  "telephone": "+216 65 888 126",
+  "comite_cible": "Logistique",
+  "niveau": "moyen",
+  "annee": 3,
+  "filiere": "Génie informatique",
+  "competences": [
+   "Travail en équipe",
+   "Organisation",
+   "Excel",
+   "SolidWorks",
+   "Python"
+  ],
+  "experiences": [
+   "Membre logistique de Microsoft Tech Club : salles, matériel et restauration",
+   "Projet académique : simulation numérique sous Matlab"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Bilel Trabelsi\nbilel.trabelsi@exemple.tn | +216 65 888 126 | Tunis\nPROFIL\nÉtudiant(e) en 3ème année Génie informatique à l'ENICarthage.\nFORMATION\n2023 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Membre logistique de Microsoft Tech Club : salles, matériel et restauration\n- Projet académique : simulation numérique sous Matlab\nCOMPÉTENCES\nTravail en équipe, Organisation, Excel, SolidWorks, Python\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv15",
+  "nom": "Chaima Saidi",
+  "email": "chaima.saidi@exemple.tn",
+  "telephone": "+216 93 733 924",
+  "comite_cible": "Logistique",
+  "niveau": "faible",
+  "annee": 2,
+  "filiere": "Génie industriel",
+  "competences": [
+   "Matlab",
+   "Linux",
+   "SolidWorks",
+   "Java"
+  ],
+  "experiences": [
+   "Projet académique : simulation numérique sous Matlab",
+   "Stage ouvrier dans une usine de production"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Chaima Saidi\nchaima.saidi@exemple.tn | +216 93 733 924 | Tunis\nPROFIL\nÉtudiant(e) en 2ème année Génie industriel à l'ENICarthage.\nFORMATION\n2024 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Projet académique : simulation numérique sous Matlab\n- Stage ouvrier dans une usine de production\nCOMPÉTENCES\nMatlab, Linux, SolidWorks, Java\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv16",
+  "nom": "Oussama Haddad",
+  "email": "oussama.haddad@exemple.tn",
+  "telephone": "+216 24 300 762",
+  "comite_cible": "Projet",
+  "niveau": "fort",
+  "annee": 4,
+  "filiere": "Génie industriel",
+  "competences": [
+   "Diagramme de Gantt",
+   "Scrum",
+   "Reporting",
+   "Trello",
+   "Méthodes agiles",
+   "Jira",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Scrum master d'un projet étudiant : sprints, Jira et comptes rendus",
+   "Stage PMO : tableaux de bord et reporting hebdomadaire",
+   "Chef de projet de JCI Carthage : rétroplanning et suivi des tâches de 4 équipes"
+  ],
+  "langues": "Arabe (maternelle), Français (courant), Anglais (B2)",
+  "texte": "Oussama Haddad\noussama.haddad@exemple.tn | +216 24 300 762 | Tunis\nPROFIL\nÉtudiant(e) en 4ème année Génie industriel à l'ENICarthage.\nFORMATION\n2022 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Scrum master d'un projet étudiant : sprints, Jira et comptes rendus\n- Stage PMO : tableaux de bord et reporting hebdomadaire\n- Chef de projet de JCI Carthage : rétroplanning et suivi des tâches de 4 équipes\nCOMPÉTENCES\nDiagramme de Gantt, Scrum, Reporting, Trello, Méthodes agiles, Jira, Travail en équipe, Leadership\nLANGUES\nArabe (maternelle), Français (courant), Anglais (B2)"
+ },
+ {
+  "id": "cv17",
+  "nom": "Lina Toumi",
+  "email": "lina.toumi@exemple.tn",
+  "telephone": "+216 40 777 964",
+  "comite_cible": "Projet",
+  "niveau": "fort",
+  "annee": 3,
+  "filiere": "Génie industriel",
+  "competences": [
+   "Diagramme de Gantt",
+   "Gestion de projet",
+   "Scrum",
+   "Notion",
+   "Planification",
+   "Jira",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Chef de projet de IEEE ENICarthage : rétroplanning et suivi des tâches de 4 équipes",
+   "Coordination d'un hackathon : planning et suivi des échéances",
+   "Stage PMO : tableaux de bord et reporting hebdomadaire"
+  ],
+  "langues": "Arabe (maternelle), Français (courant), Anglais (B2)",
+  "texte": "Lina Toumi\nlina.toumi@exemple.tn | +216 40 777 964 | Tunis\nPROFIL\nÉtudiant(e) en 3ème année Génie industriel à l'ENICarthage.\nFORMATION\n2023 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Chef de projet de IEEE ENICarthage : rétroplanning et suivi des tâches de 4 équipes\n- Coordination d'un hackathon : planning et suivi des échéances\n- Stage PMO : tableaux de bord et reporting hebdomadaire\nCOMPÉTENCES\nDiagramme de Gantt, Gestion de projet, Scrum, Notion, Planification, Jira, Travail en équipe, Leadership\nLANGUES\nArabe (maternelle), Français (courant), Anglais (B2)"
+ },
+ {
+  "id": "cv18",
+  "nom": "Wassim Jaziri",
+  "email": "wassim.jaziri@exemple.tn",
+  "telephone": "+216 43 452 278",
+  "comite_cible": "Projet",
+  "niveau": "moyen",
+  "annee": 3,
+  "filiere": "Génie électrique",
+  "competences": [
+   "Trello",
+   "Jira",
+   "Diagramme de Gantt",
+   "SolidWorks",
+   "Python"
+  ],
+  "experiences": [
+   "Membre de projet de AIESEC Carthage : rétroplanning et suivi des tâches de 4 équipes",
+   "Stage ouvrier dans une usine de production"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Wassim Jaziri\nwassim.jaziri@exemple.tn | +216 43 452 278 | Tunis\nPROFIL\nÉtudiant(e) en 3ème année Génie électrique à l'ENICarthage.\nFORMATION\n2023 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Membre de projet de AIESEC Carthage : rétroplanning et suivi des tâches de 4 équipes\n- Stage ouvrier dans une usine de production\nCOMPÉTENCES\nTrello, Jira, Diagramme de Gantt, SolidWorks, Python\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv19",
+  "nom": "Malek Ayari",
+  "email": "malek.ayari@exemple.tn",
+  "telephone": "+216 76 222 639",
+  "comite_cible": "Projet",
+  "niveau": "moyen",
+  "annee": 3,
+  "filiere": "Génie des procédés",
+  "competences": [
+   "Reporting",
+   "Jira",
+   "Méthodes agiles",
+   "SolidWorks",
+   "Java"
+  ],
+  "experiences": [
+   "Membre de projet de Club Théâtre : rétroplanning et suivi des tâches de 4 équipes",
+   "Stage ouvrier dans une usine de production"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Malek Ayari\nmalek.ayari@exemple.tn | +216 76 222 639 | Tunis\nPROFIL\nÉtudiant(e) en 3ème année Génie des procédés à l'ENICarthage.\nFORMATION\n2023 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Membre de projet de Club Théâtre : rétroplanning et suivi des tâches de 4 équipes\n- Stage ouvrier dans une usine de production\nCOMPÉTENCES\nReporting, Jira, Méthodes agiles, SolidWorks, Java\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv20",
+  "nom": "Yasmine Mejri",
+  "email": "yasmine.mejri@exemple.tn",
+  "telephone": "+216 72 658 902",
+  "comite_cible": "Projet",
+  "niveau": "faible",
+  "annee": 2,
+  "filiere": "Génie civil",
+  "competences": [
+   "Python",
+   "Java",
+   "Langage C",
+   "Linux"
+  ],
+  "experiences": [
+   "Projet académique : simulation numérique sous Matlab",
+   "Stage ouvrier dans une usine de production"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Yasmine Mejri\nyasmine.mejri@exemple.tn | +216 72 658 902 | Tunis\nPROFIL\nÉtudiant(e) en 2ème année Génie civil à l'ENICarthage.\nFORMATION\n2024 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Projet académique : simulation numérique sous Matlab\n- Stage ouvrier dans une usine de production\nCOMPÉTENCES\nPython, Java, Langage C, Linux\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv21",
+  "nom": "Khalil Ghanmi",
+  "email": "khalil.ghanmi@exemple.tn",
+  "telephone": "+216 92 374 786",
+  "comite_cible": "Programme",
+  "niveau": "fort",
+  "annee": 4,
+  "filiere": "Génie des procédés",
+  "competences": [
+   "Organisation de conférences",
+   "Animation",
+   "Prise de parole",
+   "Contact des intervenants",
+   "Planification",
+   "Modération de tables rondes",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Animation d'ateliers de formation pour les nouveaux membres",
+   "Construction de l'agenda d'une journée scientifique",
+   "Responsable programme de JCI Carthage : conférences, workshops et speakers"
+  ],
+  "langues": "Arabe (maternelle), Français (courant), Anglais (B2)",
+  "texte": "Khalil Ghanmi\nkhalil.ghanmi@exemple.tn | +216 92 374 786 | Tunis\nPROFIL\nÉtudiant(e) en 4ème année Génie des procédés à l'ENICarthage.\nFORMATION\n2022 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Animation d'ateliers de formation pour les nouveaux membres\n- Construction de l'agenda d'une journée scientifique\n- Responsable programme de JCI Carthage : conférences, workshops et speakers\nCOMPÉTENCES\nOrganisation de conférences, Animation, Prise de parole, Contact des intervenants, Planification, Modération de tables rondes, Travail en équipe, Leadership\nLANGUES\nArabe (maternelle), Français (courant), Anglais (B2)"
+ },
+ {
+  "id": "cv22",
+  "nom": "Asma Belhadj",
+  "email": "asma.belhadj@exemple.tn",
+  "telephone": "+216 43 761 745",
+  "comite_cible": "Programme",
+  "niveau": "fort",
+  "annee": 4,
+  "filiere": "Génie informatique",
+  "competences": [
+   "Prise de parole",
+   "Contact des intervenants",
+   "Animation",
+   "Organisation de conférences",
+   "Rédaction",
+   "Anglais",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Responsable programme de JCI Carthage : conférences, workshops et speakers",
+   "Animation d'ateliers de formation pour les nouveaux membres",
+   "Construction de l'agenda d'une journée scientifique"
+  ],
+  "langues": "Arabe (maternelle), Français (courant), Anglais (B2)",
+  "texte": "Asma Belhadj\nasma.belhadj@exemple.tn | +216 43 761 745 | Tunis\nPROFIL\nÉtudiant(e) en 4ème année Génie informatique à l'ENICarthage.\nFORMATION\n2022 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Responsable programme de JCI Carthage : conférences, workshops et speakers\n- Animation d'ateliers de formation pour les nouveaux membres\n- Construction de l'agenda d'une journée scientifique\nCOMPÉTENCES\nPrise de parole, Contact des intervenants, Animation, Organisation de conférences, Rédaction, Anglais, Travail en équipe, Leadership\nLANGUES\nArabe (maternelle), Français (courant), Anglais (B2)"
+ },
+ {
+  "id": "cv23",
+  "nom": "Rayen Mansouri",
+  "email": "rayen.mansouri@exemple.tn",
+  "telephone": "+216 52 164 114",
+  "comite_cible": "Programme",
+  "niveau": "moyen",
+  "annee": 3,
+  "filiere": "Génie mécanique",
+  "competences": [
+   "Anglais",
+   "Modération de tables rondes",
+   "Organisation de conférences",
+   "Matlab",
+   "Linux"
+  ],
+  "experiences": [
+   "Membre programme de Club Robotique : conférences, workshops et speakers",
+   "Projet académique : simulation numérique sous Matlab"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Rayen Mansouri\nrayen.mansouri@exemple.tn | +216 52 164 114 | Tunis\nPROFIL\nÉtudiant(e) en 3ème année Génie mécanique à l'ENICarthage.\nFORMATION\n2023 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Membre programme de Club Robotique : conférences, workshops et speakers\n- Projet académique : simulation numérique sous Matlab\nCOMPÉTENCES\nAnglais, Modération de tables rondes, Organisation de conférences, Matlab, Linux\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv24",
+  "nom": "Ons Chebbi",
+  "email": "ons.chebbi@exemple.tn",
+  "telephone": "+216 35 196 802",
+  "comite_cible": "Programme",
+  "niveau": "moyen",
+  "annee": 3,
+  "filiere": "Génie des procédés",
+  "competences": [
+   "Contact des intervenants",
+   "Organisation de conférences",
+   "Modération de tables rondes",
+   "Python",
+   "Java"
+  ],
+  "experiences": [
+   "Membre programme de GDSC ENICarthage : conférences, workshops et speakers",
+   "Projet académique : simulation numérique sous Matlab"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Ons Chebbi\nons.chebbi@exemple.tn | +216 35 196 802 | Tunis\nPROFIL\nÉtudiant(e) en 3ème année Génie des procédés à l'ENICarthage.\nFORMATION\n2023 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Membre programme de GDSC ENICarthage : conférences, workshops et speakers\n- Projet académique : simulation numérique sous Matlab\nCOMPÉTENCES\nContact des intervenants, Organisation de conférences, Modération de tables rondes, Python, Java\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv25",
+  "nom": "Mohamed Kefi",
+  "email": "mohamed.kefi@exemple.tn",
+  "telephone": "+216 74 792 999",
+  "comite_cible": "Programme",
+  "niveau": "faible",
+  "annee": 2,
+  "filiere": "Génie informatique",
+  "competences": [
+   "Matlab",
+   "SolidWorks",
+   "Python",
+   "Java"
+  ],
+  "experiences": [
+   "Stage ouvrier dans une usine de production",
+   "Projet académique : simulation numérique sous Matlab"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Mohamed Kefi\nmohamed.kefi@exemple.tn | +216 74 792 999 | Tunis\nPROFIL\nÉtudiant(e) en 2ème année Génie informatique à l'ENICarthage.\nFORMATION\n2024 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Stage ouvrier dans une usine de production\n- Projet académique : simulation numérique sous Matlab\nCOMPÉTENCES\nMatlab, SolidWorks, Python, Java\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv26",
+  "nom": "Salma Nasri",
+  "email": "salma.nasri@exemple.tn",
+  "telephone": "+216 57 844 887",
+  "comite_cible": "Média",
+  "niveau": "fort",
+  "annee": 4,
+  "filiere": "Génie informatique",
+  "competences": [
+   "Canva",
+   "Montage vidéo",
+   "Photographie",
+   "Création de contenu",
+   "Premiere Pro",
+   "Réseaux sociaux",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Création de contenu et stories pour une page de 10 000 abonnés",
+   "Community manager de Club Robotique : Instagram, Facebook et LinkedIn",
+   "Photographe officiel du Forum ENICarthage"
+  ],
+  "langues": "Arabe (maternelle), Français (courant), Anglais (B2)",
+  "texte": "Salma Nasri\nsalma.nasri@exemple.tn | +216 57 844 887 | Tunis\nPROFIL\nÉtudiant(e) en 4ème année Génie informatique à l'ENICarthage.\nFORMATION\n2022 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Création de contenu et stories pour une page de 10 000 abonnés\n- Community manager de Club Robotique : Instagram, Facebook et LinkedIn\n- Photographe officiel du Forum ENICarthage\nCOMPÉTENCES\nCanva, Montage vidéo, Photographie, Création de contenu, Premiere Pro, Réseaux sociaux, Travail en équipe, Leadership\nLANGUES\nArabe (maternelle), Français (courant), Anglais (B2)"
+ },
+ {
+  "id": "cv27",
+  "nom": "Firas Gharbi",
+  "email": "firas.gharbi@exemple.tn",
+  "telephone": "+216 40 733 225",
+  "comite_cible": "Média",
+  "niveau": "fort",
+  "annee": 3,
+  "filiere": "Génie informatique",
+  "competences": [
+   "CapCut",
+   "Premiere Pro",
+   "Montage vidéo",
+   "Réseaux sociaux",
+   "Canva",
+   "Création de contenu",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Photographe officiel du Forum ENICarthage",
+   "Montage des vidéos récapitulatives d'événements étudiants",
+   "Community manager de GDSC ENICarthage : Instagram, Facebook et LinkedIn"
+  ],
+  "langues": "Arabe (maternelle), Français (courant), Anglais (B2)",
+  "texte": "Firas Gharbi\nfiras.gharbi@exemple.tn | +216 40 733 225 | Tunis\nPROFIL\nÉtudiant(e) en 3ème année Génie informatique à l'ENICarthage.\nFORMATION\n2023 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Photographe officiel du Forum ENICarthage\n- Montage des vidéos récapitulatives d'événements étudiants\n- Community manager de GDSC ENICarthage : Instagram, Facebook et LinkedIn\nCOMPÉTENCES\nCapCut, Premiere Pro, Montage vidéo, Réseaux sociaux, Canva, Création de contenu, Travail en équipe, Leadership\nLANGUES\nArabe (maternelle), Français (courant), Anglais (B2)"
+ },
+ {
+  "id": "cv28",
+  "nom": "Hiba Bouzid",
+  "email": "hiba.bouzid@exemple.tn",
+  "telephone": "+216 94 229 464",
+  "comite_cible": "Média",
+  "niveau": "moyen",
+  "annee": 3,
+  "filiere": "Génie mécanique",
+  "competences": [
+   "Création de contenu",
+   "Premiere Pro",
+   "Montage vidéo",
+   "Linux",
+   "Matlab"
+  ],
+  "experiences": [
+   "Community manager de IEEE ENICarthage : Instagram, Facebook et LinkedIn",
+   "Projet académique : simulation numérique sous Matlab"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Hiba Bouzid\nhiba.bouzid@exemple.tn | +216 94 229 464 | Tunis\nPROFIL\nÉtudiant(e) en 3ème année Génie mécanique à l'ENICarthage.\nFORMATION\n2023 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Community manager de IEEE ENICarthage : Instagram, Facebook et LinkedIn\n- Projet académique : simulation numérique sous Matlab\nCOMPÉTENCES\nCréation de contenu, Premiere Pro, Montage vidéo, Linux, Matlab\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv29",
+  "nom": "Adam Riahi",
+  "email": "adam.riahi@exemple.tn",
+  "telephone": "+216 89 129 777",
+  "comite_cible": "Média",
+  "niveau": "moyen",
+  "annee": 2,
+  "filiere": "Génie civil",
+  "competences": [
+   "CapCut",
+   "Photographie",
+   "Canva",
+   "SolidWorks",
+   "Java"
+  ],
+  "experiences": [
+   "Community manager de AIESEC Carthage : Instagram, Facebook et LinkedIn",
+   "Projet académique : simulation numérique sous Matlab"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Adam Riahi\nadam.riahi@exemple.tn | +216 89 129 777 | Tunis\nPROFIL\nÉtudiant(e) en 2ème année Génie civil à l'ENICarthage.\nFORMATION\n2024 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Community manager de AIESEC Carthage : Instagram, Facebook et LinkedIn\n- Projet académique : simulation numérique sous Matlab\nCOMPÉTENCES\nCapCut, Photographie, Canva, SolidWorks, Java\nLANGUES\nArabe, Français"
+ },
+ {
+  "id": "cv30",
+  "nom": "Emna Abidi",
+  "email": "emna.abidi@exemple.tn",
+  "telephone": "+216 73 370 422",
+  "comite_cible": "Média",
+  "niveau": "faible",
+  "annee": 2,
+  "filiere": "Génie industriel",
+  "competences": [
+   "Matlab",
+   "Java",
+   "Langage C",
+   "Python"
+  ],
+  "experiences": [
+   "Projet académique : simulation numérique sous Matlab",
+   "Stage ouvrier dans une usine de production"
+  ],
+  "langues": "Arabe, Français",
+  "texte": "Emna Abidi\nemna.abidi@exemple.tn | +216 73 370 422 | Tunis\nPROFIL\nÉtudiant(e) en 2ème année Génie industriel à l'ENICarthage.\nFORMATION\n2024 - présent : Cycle ingénieur, ENICarthage\nBaccalauréat mention Bien\nEXPÉRIENCES\n- Projet académique : simulation numérique sous Matlab\n- Stage ouvrier dans une usine de production\nCOMPÉTENCES\nMatlab, Java, Langage C, Python\nLANGUES\nArabe, Français"
+ }
+]

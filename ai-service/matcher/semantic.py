@@ -77,11 +77,13 @@ class SemanticScorer:
         self.embedding: Optional[EmbeddingEngine] = None
         self.status = "désactivé"
         self._lock = threading.Lock()
+        self._pret = threading.Event()   # levé quand le chargement est terminé (réussi ou non)
 
     # -- chargement -------------------------------------------------
     def load_async(self) -> None:
         if os.getenv("CV_AI_DISABLE_EMBEDDINGS", "").lower() in ("1", "true", "yes"):
             self.status = "désactivé (CV_AI_DISABLE_EMBEDDINGS)"
+            self._pret.set()
             return
         self.status = "chargement"
         threading.Thread(target=self._load, daemon=True).start()
@@ -97,6 +99,13 @@ class SemanticScorer:
         except Exception as exc:  # paquet absent, pas de réseau au 1er lancement…
             self.status = f"indisponible ({type(exc).__name__})"
             log.warning("Modèle sémantique indisponible, repli TF-IDF : %s", exc)
+        finally:
+            self._pret.set()
+
+    def attendre(self, secondes: float) -> None:
+        """Attend la fin du chargement : tous les CV sont notés avec le même moteur."""
+        if self.status == "chargement":
+            self._pret.wait(secondes)
 
     @property
     def engine(self):
@@ -107,6 +116,7 @@ class SemanticScorer:
     def match(self, attentes: List[str], chunks: List[str]):
         """Pour chaque attente du poste : meilleure similarité avec un bloc du CV.
         Retourne (score global 0-1, [(attente, score 0-1, extrait du CV)], nom du moteur)."""
+        self.attendre(float(os.getenv("CV_AI_ATTENTE_MODELE", "120")))
         engine = self.engine
         if not attentes or not chunks:
             return 0.0, [], engine.name
