@@ -1,0 +1,58 @@
+<div class="aia" *ngIf="a">
+  <!-- Pas encore analysé -->
+  <div class="aia-na" *ngIf="!a.analysee">
+    <span class="aia-na-ico">🤖</span>
+    <div>
+      <div class="aia-na-title">Pas encore analysé par l'IA</div>
+      <div class="ui-muted">
+        {{ a.texteBrut || messageNonAnalyse }}
+      </div>
+    </div>
+  </div>
+
+  <ng-container *ngIf="a.analysee">
+    <div class="aia-head">
+      <app-score-ring [score]="a.score" [size]="64"></app-score-ring>
+      <div class="aia-head-txt">
+        <span class="reco" [ngClass]="a.recommandation" *ngIf="a.recommandation">
+          {{ labels[a.recommandation] }}
+        </span>
+        <p class="synthese" *ngIf="a.synthese">{{ a.synthese }}</p>
+      </div>
+    </div>
+
+    <!-- Détail du score -->
+    <div class="dims" *ngIf="a.dimensions.length">
+      <div class="dim" *ngFor="let d of a.dimensions">
+        <div class="dim-top"><span>{{ d.libelle }}</span><b>{{ d.points }}/{{ d.max }}</b></div>
+        <div class="dim-bar"><div class="dim-fill" [ngClass]="barTone(d.pct)" [style.width.%]="d.pct"></div></div>
+      </div>
+    </div>
+
+    <div class="aia-grid" [class.compact]="compact">
+      <div class="aia-block" *ngIf="a.pointsForts.length">
+        <h4>✅ Points forts</h4>
+        <ul><li *ngFor="let p of a.pointsForts">{{ p }}</li></ul>
+      </div>
+      <div class="aia-block" *ngIf="a.aVerifier.length">
+        <h4>🔎 Points à vérifier</h4>
+        <ul><li *ngFor="let p of a.aVerifier">{{ p }}</li></ul>
+      </div>
+    </div>
+
+    <div class="aia-block" *ngIf="a.competences.length || a.manquantes.length">
+      <h4>🧩 Compétences</h4>
+      <div class="ui-row">
+        <span class="ui-chip ui-chip-ok" *ngFor="let c of a.competences">{{ c }}</span>
+        <span class="ui-chip ui-chip-missing" *ngFor="let c of a.manquantes" title="Attendue pour ce poste, non trouvée">
+          ✕ {{ c }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Ancien format : justification en texte libre -->
+    <p class="synthese" *ngIf="!a.dimensions.length && !a.synthese && a.texteBrut">{{ a.texteBrut }}</p>
+
+    <div class="moteur" *ngIf="a.moteur">Moteur : {{ a.moteur }}</div>
+  </ng-container>
+</div>

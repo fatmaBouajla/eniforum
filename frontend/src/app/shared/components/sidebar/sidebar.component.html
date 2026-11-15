@@ -1,0 +1,44 @@
+<aside class="sidebar" [class.collapsed]="ui.collapsed" [class.mobile-open]="ui.mobileNavOpen"
+       aria-label="Navigation principale">
+  <!-- Marque -->
+  <div class="sb-brand">
+    <span class="sb-logo">EF</span>
+    <span class="sb-brand-text">Eni<b>Forum</b></span>
+  </div>
+
+  <!-- Profil -->
+  <div class="sb-profile">
+    <div class="sb-avatar">{{ initials }}</div>
+    <div class="sb-info">
+      <div class="sb-name">{{ user?.nom }}</div>
+      <div class="sb-role">{{ roleLabel }}</div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="sb-nav">
+    <a class="sb-item"
+       *ngFor="let item of navItems"
+       [routerLink]="item.route"
+       [class.active]="isActive(item.route)"
+       [attr.aria-current]="isActive(item.route) ? 'page' : null"
+       [title]="ui.collapsed ? item.label : ''"
+       (click)="ui.closeMobileNav()">
+      <span class="sb-ico" aria-hidden="true">{{ item.icon }}</span>
+      <span class="sb-label">{{ item.label }}</span>
+      <span class="sb-badge" *ngIf="item.badge && item.badge > 0">{{ item.badge }}</span>
+    </a>
+  </nav>
+
+  <!-- Bas -->
+  <div class="sb-bottom">
+    <button class="sb-item logout-btn" (click)="logout()" [title]="ui.collapsed ? 'Déconnexion' : ''">
+      <span class="sb-ico" aria-hidden="true">⎋</span>
+      <span class="sb-label">Déconnexion</span>
+    </button>
+    <button class="collapse-btn" (click)="ui.toggleCollapsed()"
+            [attr.aria-label]="ui.collapsed ? 'Déplier le menu' : 'Réduire le menu'">
+      <span>{{ ui.collapsed ? '»' : '«' }}</span>
+    </button>
+  </div>
+</aside>

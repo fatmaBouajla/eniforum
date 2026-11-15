@@ -1,0 +1,272 @@
+<app-layout title="Module IA" subtitle="Classement des candidatures par pertinence, avec justification et comparaison">
+
+  <!-- Bandeau + action principale -->
+  <section class="ia-hero">
+    <div class="ia-hero-txt">
+      <div class="ia-hero-title">🤖 Matching IA des CV</div>
+      <p>
+        Chaque CV est comparé à la fiche du poste visé (comité et rôle) : compétences clés,
+        proximité du profil, expérience associative, formation et motivation.
+      </p>
+    </div>
+    <button class="ui-btn ui-btn-ai" (click)="analyserNonAnalysees()" [disabled]="!!progression || loading">
+      <ng-container *ngIf="!progression">⚡ Analyser les CV non analysés</ng-container>
+      <ng-container *ngIf="progression">⏳ Analyse {{ progression.fait }}/{{ progression.total }}…</ng-container>
+    </button>
+  </section>
+
+  <div class="progress" *ngIf="progression">
+    <div class="progress-fill" [style.width.%]="progression.total ? progression.fait / progression.total * 100 : 0"></div>
+  </div>
+
+  <div class="page-alert error" *ngIf="erreur" role="alert">
+    ⚠️ {{ erreur }}
+    <button class="ui-btn ui-btn-sm ui-btn-outline push-right" (click)="erreur = ''">Fermer</button>
+  </div>
+  <div class="page-alert" *ngIf="info" role="status">
+    ℹ️ {{ info }}
+    <button class="ui-btn ui-btn-sm ui-btn-outline push-right" (click)="info = ''">OK</button>
+  </div>
+
+  <!-- Indicateurs -->
+  <section class="kpis" *ngIf="!loading && lignes.length">
+    <div class="kpi ui-card"><span class="kpi-val">{{ stats.total }}</span><span class="kpi-lbl">Candidatures</span></div>
+    <div class="kpi ui-card"><span class="kpi-val">{{ stats.analysees }}</span><span class="kpi-lbl">Analysées par l'IA</span></div>
+    <div class="kpi ui-card"><span class="kpi-val">{{ stats.moyenne ?? '–' }}</span><span class="kpi-lbl">Score moyen</span></div>
+    <div class="kpi ui-card kpi-good"><span class="kpi-val">{{ stats.prioriser }}</span><span class="kpi-lbl">À prioriser (en attente)</span></div>
+  </section>
+
+  <!-- Filtres -->
+  <section class="filters ui-card" *ngIf="lignes.length">
+    <input class="ui-input grow" type="search" placeholder="Rechercher un candidat (nom, email)…"
+           [(ngModel)]="recherche" aria-label="Rechercher un candidat">
+    <select class="ui-select" [(ngModel)]="filtreComite" aria-label="Comité">
+      <option value="">Tous les comités</option>
+      <option *ngFor="let c of comites" [value]="c">{{ c }}</option>
+    </select>
+    <select class="ui-select" [(ngModel)]="filtrePoste" aria-label="Poste">
+      <option value="">Tous les postes</option>
+      <option *ngFor="let p of postes" [value]="p">{{ p }}</option>
+    </select>
+    <select class="ui-select" [(ngModel)]="filtreStatut" aria-label="Statut">
+      <option value="">Tous les statuts</option>
+      <option value="EN_ATTENTE">En attente</option>
+      <option value="ACCEPTE">Acceptées</option>
+      <option value="REFUSE">Refusées</option>
+    </select>
+    <select class="ui-select" [(ngModel)]="filtreReco" aria-label="Recommandation">
+      <option value="">Toutes les recommandations</option>
+      <option value="PRIORISER">{{ recoLabels.PRIORISER }}</option>
+      <option value="ENTRETIEN">{{ recoLabels.ENTRETIEN }}</option>
+      <option value="RESERVE">{{ recoLabels.RESERVE }}</option>
+    </select>
+    <button class="ui-btn ui-btn-ghost ui-btn-sm" (click)="reinitialiserFiltres()">Réinitialiser</button>
+  </section>
+
+  <!-- Chargement -->
+  <div class="ranking" *ngIf="loading">
+    <div class="ui-skeleton sk-row" *ngFor="let i of [1,2,3,4]"></div>
+  </div>
+
+  <!-- Vide -->
+  <div class="ui-card ui-empty" *ngIf="!loading && !erreur && lignes.length === 0">
+    <div class="ui-empty-ico">📭</div>
+    <div class="ui-empty-title">Aucune candidature pour le moment</div>
+    <p>Les CV déposés via les formulaires publics apparaîtront ici, déjà analysés.</p>
+  </div>
+  <div class="ui-card ui-empty" *ngIf="!loading && lignes.length > 0 && classement.length === 0">
+    <div class="ui-empty-ico">🔍</div>
+    <div class="ui-empty-title">Aucune candidature ne correspond aux filtres</div>
+    <button class="ui-btn ui-btn-outline ui-btn-sm" (click)="reinitialiserFiltres()">Réinitialiser les filtres</button>
+  </div>
+
+  <!-- Classement -->
+  <section class="ranking" *ngIf="!loading && classement.length">
+    <article class="rank ui-card" *ngFor="let l of classement; let i = index; trackBy: trackById"
+             [class.open]="ouverts.has(l.c.id)" [class.selected]="estSelectionne(l)">
+      <div class="rank-main">
+        <label class="cmp-check" [title]="estSelectionne(l) ? 'Retirer de la comparaison' : 'Ajouter à la comparaison'">
+          <input type="checkbox" [checked]="estSelectionne(l)" (change)="basculerSelection(l)"
+                 [disabled]="!estSelectionne(l) && selection.length >= maxComparaison"
+                 [attr.aria-label]="'Comparer ' + l.c.candidatNom">
+        </label>
+
+        <div class="rank-pos" [class.top]="i < 3 && l.a.analysee">#{{ i + 1 }}</div>
+        <div class="avatar">{{ initiale(l) }}</div>
+
+        <div class="rank-id">
+          <div class="rank-nom">{{ l.c.candidatNom }}</div>
+          <div class="rank-meta">
+            {{ l.poste }}<ng-container *ngIf="l.comite"> · Comité {{ l.comite }}</ng-container>
+            <ng-container *ngIf="l.niveau"> · {{ l.niveau }}</ng-container>
+          </div>
+          <div class="rank-chips" *ngIf="l.a.competences.length">
+            <span class="ui-chip" *ngFor="let s of l.a.competences.slice(0, 4)">{{ s }}</span>
+            <span class="ui-chip" *ngIf="l.a.competences.length > 4">+{{ l.a.competences.length - 4 }}</span>
+          </div>
+        </div>
+
+        <div class="rank-reco">
+          <span class="reco" [ngClass]="l.a.recommandation || 'NA'">{{ recoLabel(l.a.recommandation) }}</span>
+          <app-statut-badge [statut]="l.c.statut"></app-statut-badge>
+        </div>
+
+        <app-score-ring [score]="l.a.score" [size]="58"></app-score-ring>
+
+        <div class="rank-actions">
+          <button class="ui-btn ui-btn-outline ui-btn-sm" (click)="basculer(l)" [attr.aria-expanded]="ouverts.has(l.c.id)">
+            {{ ouverts.has(l.c.id) ? 'Masquer' : 'Détails' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Détail -->
+      <div class="rank-detail" *ngIf="ouverts.has(l.c.id)">
+        <app-analyse-ia [candidature]="l.c"></app-analyse-ia>
+        <div class="detail-actions">
+          <button class="ui-btn ui-btn-ghost ui-btn-sm" (click)="telecharger(l)">📄 Télécharger le CV</button>
+          <button class="ui-btn ui-btn-outline ui-btn-sm" (click)="analyser(l)" [disabled]="analyseEnCours.has(l.c.id)">
+            {{ analyseEnCours.has(l.c.id) ? '⏳ Analyse…' : '🔄 Relancer l’analyse' }}
+          </button>
+          <ng-container *ngIf="l.c.statut === 'EN_ATTENTE'">
+            <button class="ui-btn ui-btn-danger ui-btn-sm push-right" (click)="aRefuser = l">Refuser</button>
+            <button class="ui-btn ui-btn-success ui-btn-sm" (click)="aAccepter = l">Accepter</button>
+          </ng-container>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- Barre de comparaison -->
+  <div class="cmp-bar" *ngIf="selection.length">
+    <span><b>{{ selection.length }}</b> / {{ maxComparaison }} candidat(s) sélectionné(s)</span>
+    <button class="ui-btn ui-btn-outline ui-btn-sm" (click)="selection = []">Vider</button>
+    <button class="ui-btn ui-btn-primary ui-btn-sm" (click)="showComparaison = true" [disabled]="selection.length < 2">
+      Comparer
+    </button>
+  </div>
+
+  <!-- Tableau comparatif -->
+  <div class="ui-overlay" *ngIf="showComparaison" (click)="showComparaison = false">
+    <div class="ui-modal cmp-modal" (click)="$event.stopPropagation()" role="dialog" aria-label="Tableau comparatif">
+      <div class="ui-modal-hd">
+        <h3>Tableau comparatif des candidatures</h3>
+        <button class="ui-close" (click)="showComparaison = false" aria-label="Fermer">✕</button>
+      </div>
+      <div class="ui-modal-bd cmp-scroll">
+        <table class="cmp-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th *ngFor="let l of aComparer">
+                <div class="cmp-head">
+                  <div class="avatar sm">{{ initiale(l) }}</div>
+                  <div>
+                    <div class="rank-nom">{{ l.c.candidatNom }}</div>
+                    <div class="rank-meta">{{ l.poste }}<ng-container *ngIf="l.comite"> · {{ l.comite }}</ng-container></div>
+                  </div>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Score IA</th>
+              <td *ngFor="let l of aComparer"><app-score-ring [score]="l.a.score" [size]="50"></app-score-ring></td>
+            </tr>
+            <tr>
+              <th>Recommandation</th>
+              <td *ngFor="let l of aComparer"><span class="reco" [ngClass]="l.a.recommandation || 'NA'">{{ recoLabel(l.a.recommandation) }}</span></td>
+            </tr>
+            <tr *ngFor="let dim of dimensionsComparees">
+              <th>{{ dim }}</th>
+              <td *ngFor="let l of aComparer" [class.best]="estMeilleur(l, dim)">
+                <ng-container *ngIf="dimension(l, dim) as d; else vide">
+                  <div class="cmp-dim"><b>{{ d.points }}</b>/{{ d.max }}</div>
+                  <div class="mini-bar"><div [style.width.%]="d.pct"></div></div>
+                </ng-container>
+              </td>
+            </tr>
+            <tr>
+              <th>Compétences trouvées</th>
+              <td *ngFor="let l of aComparer">
+                <div class="ui-row"><span class="ui-chip ui-chip-ok" *ngFor="let s of l.a.competences.slice(0, 8)">{{ s }}</span></div>
+                <span class="ui-muted" *ngIf="!l.a.competences.length">–</span>
+              </td>
+            </tr>
+            <tr>
+              <th>Compétences manquantes</th>
+              <td *ngFor="let l of aComparer">
+                <div class="ui-row"><span class="ui-chip ui-chip-missing" *ngFor="let s of l.a.manquantes">{{ s }}</span></div>
+                <span class="ui-muted" *ngIf="!l.a.manquantes.length">Aucune</span>
+              </td>
+            </tr>
+            <tr>
+              <th>Points forts</th>
+              <td *ngFor="let l of aComparer">
+                <ul class="cmp-list"><li *ngFor="let p of l.a.pointsForts.slice(0, 3)">{{ p }}</li></ul>
+                <span class="ui-muted" *ngIf="!l.a.pointsForts.length">–</span>
+              </td>
+            </tr>
+            <tr>
+              <th>Points à vérifier</th>
+              <td *ngFor="let l of aComparer">
+                <ul class="cmp-list"><li *ngFor="let p of l.a.aVerifier.slice(0, 3)">{{ p }}</li></ul>
+                <span class="ui-muted" *ngIf="!l.a.aVerifier.length">–</span>
+              </td>
+            </tr>
+            <tr>
+              <th>Statut</th>
+              <td *ngFor="let l of aComparer">
+                <app-statut-badge [statut]="l.c.statut"></app-statut-badge>
+                <div class="ui-row cmp-actions" *ngIf="l.c.statut === 'EN_ATTENTE'">
+                  <button class="ui-btn ui-btn-success ui-btn-sm" (click)="aAccepter = l">Accepter</button>
+                  <button class="ui-btn ui-btn-danger ui-btn-sm" (click)="aRefuser = l">Refuser</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #vide><span class="ui-muted">–</span></ng-template>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation acceptation -->
+  <div class="ui-overlay top" *ngIf="aAccepter" (click)="fermerDecision()">
+    <div class="ui-modal" (click)="$event.stopPropagation()" role="dialog" aria-label="Confirmer l'acceptation">
+      <div class="ui-modal-hd"><h3>Accepter {{ aAccepter.c.candidatNom }} ?</h3>
+        <button class="ui-close" (click)="fermerDecision()" aria-label="Fermer">✕</button></div>
+      <div class="ui-modal-bd">
+        <p>Un compte <b>{{ aAccepter.poste }}</b> sera créé<ng-container *ngIf="aAccepter.comite"> dans le comité <b>{{ aAccepter.comite }}</b></ng-container>,
+          et les identifiants seront envoyés à <b>{{ aAccepter.c.candidatEmail }}</b>.</p>
+      </div>
+      <div class="ui-modal-ft">
+        <button class="ui-btn ui-btn-outline" (click)="fermerDecision()">Annuler</button>
+        <button class="ui-btn ui-btn-success" (click)="confirmerAcceptation()" [disabled]="decisionEnCours">
+          {{ decisionEnCours ? 'En cours…' : 'Confirmer l’acceptation' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Refus avec motif -->
+  <div class="ui-overlay top" *ngIf="aRefuser" (click)="fermerDecision()">
+    <div class="ui-modal" (click)="$event.stopPropagation()" role="dialog" aria-label="Refuser la candidature">
+      <div class="ui-modal-hd"><h3>Refuser {{ aRefuser.c.candidatNom }}</h3>
+        <button class="ui-close" (click)="fermerDecision()" aria-label="Fermer">✕</button></div>
+      <div class="ui-modal-bd">
+        <label class="lbl" for="motif">Motif du refus (obligatoire)</label>
+        <textarea id="motif" class="ui-textarea" rows="4" [(ngModel)]="motifRefus"
+                  placeholder="Ex. : profil intéressant mais peu d'expérience en design graphique…"></textarea>
+      </div>
+      <div class="ui-modal-ft">
+        <button class="ui-btn ui-btn-outline" (click)="fermerDecision()">Annuler</button>
+        <button class="ui-btn ui-btn-danger" (click)="confirmerRefus()" [disabled]="!motifRefus.trim() || decisionEnCours">
+          {{ decisionEnCours ? 'En cours…' : 'Confirmer le refus' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+</app-layout>
