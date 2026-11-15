@@ -17,9 +17,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         var user = utilisateurRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé : " + email));
+        // Compte désactivé = connexion refusée
         return new User(
                 user.getEmail(),
                 user.getMotDePasse(),
+                user.isActif(), true, true, true,
                 List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
         );
     }

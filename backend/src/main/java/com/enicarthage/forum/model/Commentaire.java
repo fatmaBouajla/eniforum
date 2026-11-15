@@ -27,5 +27,7 @@ public class Commentaire {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tache_id")
     @JsonIgnoreProperties({"commentaires", "hibernateLazyInitializer"})
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private Tache tache;
 }

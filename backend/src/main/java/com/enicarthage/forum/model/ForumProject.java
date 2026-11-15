@@ -32,5 +32,7 @@ public class ForumProject {
 
     @OneToMany(mappedBy = "forumProject", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"forumProject", "membres", "chef", "hibernateLazyInitializer"})
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private List<Comite> comites;
 }

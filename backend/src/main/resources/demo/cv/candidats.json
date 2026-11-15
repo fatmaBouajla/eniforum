@@ -1,0 +1,138 @@
+[
+ {
+  "id": "cv01",
+  "nom": "Amira Ben Amor",
+  "email": "amira.amor@exemple.tn",
+  "telephone": "+216 20 728 182",
+  "comite_cible": "Sponsoring",
+  "niveau": "fort",
+  "annee": 3,
+  "competences": [
+   "PowerPoint",
+   "Prospection d'entreprises",
+   "Prise de parole",
+   "Excel",
+   "Anglais professionnel",
+   "Partenariats",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Bénévole au Forum ENICarthage : accueil des entreprises partenaires",
+   "Stage commercial chez un opérateur télécom : relation client et vente",
+   "Responsable relations entreprises de Enactus ENICarthage : négociation des packs partenaires"
+  ]
+ },
+ {
+  "id": "cv08",
+  "nom": "Aziz Masmoudi",
+  "email": "aziz.masmoudi@exemple.tn",
+  "telephone": "+216 79 623 885",
+  "comite_cible": "Design",
+  "niveau": "moyen",
+  "annee": 3,
+  "competences": [
+   "InDesign",
+   "Créativité",
+   "Illustrator",
+   "Java",
+   "Matlab"
+  ],
+  "experiences": [
+   "Membre design de Club Théâtre : affiches, flyers et charte graphique",
+   "Mini-projet : application de gestion de bibliothèque en Java"
+  ]
+ },
+ {
+  "id": "cv12",
+  "nom": "Fares Sassi",
+  "email": "fares.sassi@exemple.tn",
+  "telephone": "+216 95 234 712",
+  "comite_cible": "Logistique",
+  "niveau": "fort",
+  "annee": 4,
+  "competences": [
+   "Gestion du budget",
+   "Gestion de stock",
+   "Organisation",
+   "Excel",
+   "Gestion de crise",
+   "Planification",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Organisation d'un gala de 300 personnes : fournisseurs et inventaire",
+   "Bénévole au Croissant-Rouge : gestion des stocks et distribution",
+   "Responsable logistique de GDSC ENICarthage : salles, matériel et restauration"
+  ]
+ },
+ {
+  "id": "cv17",
+  "nom": "Lina Toumi",
+  "email": "lina.toumi@exemple.tn",
+  "telephone": "+216 40 777 964",
+  "comite_cible": "Projet",
+  "niveau": "fort",
+  "annee": 3,
+  "competences": [
+   "Diagramme de Gantt",
+   "Gestion de projet",
+   "Scrum",
+   "Notion",
+   "Planification",
+   "Jira",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Chef de projet de IEEE ENICarthage : rétroplanning et suivi des tâches de 4 équipes",
+   "Coordination d'un hackathon : planning et suivi des échéances",
+   "Stage PMO : tableaux de bord et reporting hebdomadaire"
+  ]
+ },
+ {
+  "id": "cv24",
+  "nom": "Ons Chebbi",
+  "email": "ons.chebbi@exemple.tn",
+  "telephone": "+216 35 196 802",
+  "comite_cible": "Programme",
+  "niveau": "moyen",
+  "annee": 3,
+  "competences": [
+   "Contact des intervenants",
+   "Organisation de conférences",
+   "Modération de tables rondes",
+   "Python",
+   "Java"
+  ],
+  "experiences": [
+   "Membre programme de GDSC ENICarthage : conférences, workshops et speakers",
+   "Projet académique : simulation numérique sous Matlab"
+  ]
+ },
+ {
+  "id": "cv26",
+  "nom": "Salma Nasri",
+  "email": "salma.nasri@exemple.tn",
+  "telephone": "+216 57 844 887",
+  "comite_cible": "Média",
+  "niveau": "fort",
+  "annee": 4,
+  "competences": [
+   "Canva",
+   "Montage vidéo",
+   "Photographie",
+   "Création de contenu",
+   "Premiere Pro",
+   "Réseaux sociaux",
+   "Travail en équipe",
+   "Leadership"
+  ],
+  "experiences": [
+   "Création de contenu et stories pour une page de 10 000 abonnés",
+   "Community manager de Club Robotique : Instagram, Facebook et LinkedIn",
+   "Photographe officiel du Forum ENICarthage"
+  ]
+ }
+]

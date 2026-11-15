@@ -53,6 +53,27 @@ public class TacheService {
         return tacheAuthorizationHelper.peutAccederTache(u, t);
     }
 
+    /** Création avec contrôle : un chef ne crée que pour son comité, et l'assigné doit en faire partie. */
+    @Transactional
+    public Tache creer(TacheDTO dto, String email) {
+        Utilisateur auteur = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
+        Comite comite = comiteRepository.findById(dto.getComiteId())
+                .orElseThrow(() -> new ResourceNotFoundException("Comite non trouve"));
+        if (auteur.getRole() == RoleEnum.CHEF_COMITE
+                && (comite.getChef() == null || !comite.getChef().getId().equals(auteur.getId()))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vous ne pouvez créer des tâches que pour votre comité");
+        }
+        if (dto.getMembreId() != null) {
+            boolean dansComite = comite.getMembres().stream().anyMatch(m -> m.getId().equals(dto.getMembreId()))
+                    || (comite.getChef() != null && comite.getChef().getId().equals(dto.getMembreId()));
+            if (!dansComite) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La personne assignée doit faire partie du comité");
+            }
+        }
+        return creer(dto);
+    }
+
     public Tache creer(TacheDTO dto) {
         Comite comite = comiteRepository.findById(dto.getComiteId())
                 .orElseThrow(() -> new ResourceNotFoundException("Comite non trouve"));

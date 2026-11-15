@@ -62,8 +62,6 @@ public class ComiteService {
             Utilisateur chef = utilisateurRepository.findById(data.getChef().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Chef introuvable"));
             comite.setChef(chef);
-        } else {
-            comite.setChef(null);
         }
 
         return comiteRepository.save(comite);

@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
@@ -50,7 +51,8 @@ public class CandidatureCVController {
 
     @GetMapping("/{id}/telecharger-cv")
     @PreAuthorize("hasAnyRole('ADMIN','COMITE_PILOTAGE','CHEF_COMITE')")
-    public ResponseEntity<Resource> telechargerCv(@PathVariable Long id) {
+    public ResponseEntity<Resource> telechargerCv(@PathVariable Long id, Authentication auth) {
+        candidatureCVService.findByIdPour(id, auth.getName()); // contrôle d'accès du chef
         Resource resource = candidatureCVService.fichierCvCommeResource(id);
         String filename = candidatureCVService.nomFichierOriginal(id);
         return ResponseEntity.ok()
@@ -61,26 +63,26 @@ public class CandidatureCVController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','COMITE_PILOTAGE','CHEF_COMITE')")
-    public List<CandidatureCVDto> getAll() {
-        return candidatureCVService.findAll().stream().map(this::toDto).toList();
+    public List<CandidatureCVDto> getAll(Authentication auth) {
+        return candidatureCVService.findAllPour(auth.getName()).stream().map(this::toDto).toList();
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','COMITE_PILOTAGE','CHEF_COMITE')")
-    public CandidatureCVDto getById(@PathVariable Long id) {
-        return toDto(candidatureCVService.findById(id));
+    public CandidatureCVDto getById(@PathVariable Long id, Authentication auth) {
+        return toDto(candidatureCVService.findByIdPour(id, auth.getName()));
     }
 
     @PutMapping("/{id}/accepter")
     @PreAuthorize("hasAnyRole('ADMIN','COMITE_PILOTAGE','CHEF_COMITE')")
-    public CandidatureCVDto accepter(@PathVariable Long id) {
-        return toDto(candidatureCVService.accepter(id));
+    public CandidatureCVDto accepter(@PathVariable Long id, Authentication auth) {
+        return toDto(candidatureCVService.accepter(id, auth.getName()));
     }
 
     @PutMapping("/{id}/refuser")
     @PreAuthorize("hasAnyRole('ADMIN','COMITE_PILOTAGE','CHEF_COMITE')")
-    public CandidatureCVDto refuser(@PathVariable Long id, @RequestParam String commentaire) {
-        return toDto(candidatureCVService.refuser(id, commentaire));
+    public CandidatureCVDto refuser(@PathVariable Long id, @RequestParam String commentaire, Authentication auth) {
+        return toDto(candidatureCVService.refuser(id, commentaire, auth.getName()));
     }
 
     // ← Conversion entité → DTO sans relations circulaires
@@ -101,6 +103,7 @@ public class CandidatureCVController {
                         : (c.getCandidat() != null ? c.getCandidat().getEmail() : null))
                 .dateDepot(c.getDateDepot())
                 .dateAnalyseIA(c.getDateAnalyseIA())
+                .motDePasseProvisoire(c.getMotDePasseProvisoire())
                 .build();
     }
 }

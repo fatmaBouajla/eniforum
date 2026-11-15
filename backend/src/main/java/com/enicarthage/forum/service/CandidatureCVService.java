@@ -7,6 +7,7 @@ import com.enicarthage.forum.model.*;
 import com.enicarthage.forum.repository.CandidatureCVRepository;
 import com.enicarthage.forum.repository.ComiteRepository;
 import com.enicarthage.forum.repository.UtilisateurRepository;
+import com.enicarthage.forum.util.Textes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.Resource;
@@ -79,20 +80,18 @@ public class CandidatureCVService {
             log.info("Score IA pour {} : {}", candidature.getPosteVise(), score);
         } else {
             appliquerScoreFallback(candidature,
-                    "Service d'analyse IA indisponible ou désactivé — score estimé localement.");
+                    "Service d'analyse IA indisponible : relancez l'analyse plus tard.");
         }
         candidature.setDateAnalyseIA(LocalDateTime.now());
         candidatureCVRepository.save(candidature);
     }
 
+    // IA indisponible : pas de score inventé, la candidature reste « non analysée »
     private void appliquerScoreFallback(CandidatureCV candidature, String message) {
-        String cvText = (candidature.getPosteVise() != null ? candidature.getPosteVise() : "")
-                + " " + (candidature.getDossierComplet() != null ? candidature.getDossierComplet() : "");
-        double h = Math.max(0, Math.min(100, 45 + (cvText.hashCode() % 41)));
-        candidature.setScoreIA(Math.round(h * 100.0) / 100.0);
+        candidature.setScoreIA(null);
         candidature.setJustificationIA(message);
         candidature.setCompetencesExtraites(null);
-        log.info("Score fallback pour {} : {}", candidature.getPosteVise(), h);
+        log.warn("Analyse IA impossible pour la candidature {} : {}", candidature.getId(), message);
     }
 
     public CandidatureCV reAnalyser(Long id) {
@@ -129,13 +128,18 @@ public class CandidatureCVService {
         return i >= 0 ? p.substring(i + 1) : p;
     }
 
-    public CandidatureCV accepter(Long id) {
+    public CandidatureCV accepter(Long id, String actorEmail) {
         CandidatureCV c = candidatureCVRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Candidature non trouvee"));
+        verifierAccesChef(c, actorEmail);
+        if (c.getStatut() != StatutCandidature.EN_ATTENTE) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cette candidature a déjà été traitée");
+        }
         c.setStatut(StatutCandidature.ACCEPTE);
         CandidatureCV saved = candidatureCVRepository.save(c);
 
         if (c.getCandidatEmail() != null) {
+            boolean compteExistant = utilisateurRepository.existsByEmail(c.getCandidatEmail());
             String motDePasse = genererMotDePasse();
             String comiteNom = extractComite(c.getDossierComplet());
             String poste = c.getPosteVise() != null ? c.getPosteVise().toUpperCase() : "";
@@ -152,12 +156,15 @@ public class CandidatureCVService {
                 ajouterAuComite(utilisateur, comiteNom);
             }
 
-            mailService.envoyerCredentiels(
-                    c.getCandidatEmail(),
-                    c.getCandidatNom() != null ? c.getCandidatNom() : "Candidat",
-                    comiteNom,
-                    motDePasse
-            );
+            if (!compteExistant) {
+                boolean envoye = mailService.envoyerCredentiels(
+                        c.getCandidatEmail(),
+                        c.getCandidatNom() != null ? c.getCandidatNom() : "Candidat",
+                        comiteNom,
+                        motDePasse);
+                // Email impossible : on renvoie le mot de passe une seule fois à l'écran
+                if (!envoye) saved.setMotDePasseProvisoire(motDePasse);
+            }
         }
         return saved;
     }
@@ -182,7 +189,7 @@ public class CandidatureCVService {
 
     private void assignerChefComite(Utilisateur chef, String comiteNom) {
         comiteRepository.findAll().stream()
-            .filter(c -> c.getNom().equalsIgnoreCase(comiteNom))
+            .filter(c -> Textes.memeComite(c.getNom(), comiteNom))
             .findFirst()
             .ifPresent(comite -> {
                 comite.setChef(chef);
@@ -193,7 +200,7 @@ public class CandidatureCVService {
 
     private void ajouterAuComite(Utilisateur membre, String comiteNom) {
         comiteRepository.findAll().stream()
-            .filter(c -> c.getNom().equalsIgnoreCase(comiteNom))
+            .filter(c -> Textes.memeComite(c.getNom(), comiteNom))
             .findFirst()
             .ifPresent(comite -> {
                 if (!comite.getMembres().contains(membre)) {
@@ -207,12 +214,12 @@ public class CandidatureCVService {
     private String genererMotDePasse() {
         String chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#";
         StringBuilder sb = new StringBuilder();
-        java.util.Random rnd = new java.util.Random();
+        java.security.SecureRandom rnd = new java.security.SecureRandom();
         for (int i = 0; i < 10; i++) sb.append(chars.charAt(rnd.nextInt(chars.length())));
         return sb.toString();
     }
 
-    private String extractComite(String dossierComplet) {
+    String extractComite(String dossierComplet) {
         if (dossierComplet == null) return "";
         for (String part : dossierComplet.split("\\|")) {
             if (part.trim().startsWith("Comité:")) {
@@ -252,12 +259,50 @@ public class CandidatureCVService {
         return saved;
     }
 
-    public CandidatureCV refuser(Long id, String commentaire) {
+    public CandidatureCV refuser(Long id, String commentaire, String actorEmail) {
         CandidatureCV c = candidatureCVRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Candidature non trouvee"));
+        verifierAccesChef(c, actorEmail);
+        if (c.getStatut() != StatutCandidature.EN_ATTENTE) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cette candidature a déjà été traitée");
+        }
         c.setStatut(StatutCandidature.REFUSE);
         c.setCommentaire(commentaire);
-        return candidatureCVRepository.save(c);
+        CandidatureCV saved = candidatureCVRepository.save(c);
+        mailService.envoyerRefus(c.getCandidatEmail(), c.getCandidatNom(), commentaire);
+        return saved;
+    }
+
+    /** Candidatures visibles : toutes, sauf pour un chef (membres de son comité). */
+    public List<CandidatureCV> findAllPour(String email) {
+        Utilisateur u = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
+        List<CandidatureCV> toutes = candidatureCVRepository.findAll();
+        if (u.getRole() != RoleEnum.CHEF_COMITE) return toutes;
+        return toutes.stream().filter(c -> estPourComiteDuChef(c, u)).toList();
+    }
+
+    public CandidatureCV findByIdPour(Long id, String email) {
+        CandidatureCV c = findById(id);
+        verifierAccesChef(c, email);
+        return c;
+    }
+
+    // Un chef ne gère que les candidatures « membre » de son propre comité
+    private void verifierAccesChef(CandidatureCV c, String email) {
+        if (email == null) return;
+        Utilisateur u = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
+        if (u.getRole() == RoleEnum.CHEF_COMITE && !estPourComiteDuChef(c, u)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Candidature hors de votre comité");
+        }
+    }
+
+    private boolean estPourComiteDuChef(CandidatureCV c, Utilisateur chef) {
+        boolean membre = c.getPosteVise() == null || !c.getPosteVise().toUpperCase().contains("CHEF");
+        return membre && comiteRepository.findByChefId(chef.getId())
+                .map(comite -> Textes.memeComite(comite.getNom(), extractComite(c.getDossierComplet())))
+                .orElse(false);
     }
 
     public List<CandidatureCV> findAll() {
@@ -270,7 +315,12 @@ public class CandidatureCVService {
     }
 
     private String saveFile(MultipartFile fichier) {
-        String path = UPLOAD_DIR + System.currentTimeMillis() + "_" + fichier.getOriginalFilename();
+        verifierPdf(fichier);
+        // Nom nettoyé : impossible d'écrire hors du dossier des CV
+        String original = fichier.getOriginalFilename() != null ? fichier.getOriginalFilename() : "cv.pdf";
+        String nom = Paths.get(original).getFileName().toString().replaceAll("[^A-Za-z0-9._-]", "_");
+        if (!nom.toLowerCase().endsWith(".pdf")) nom = nom + ".pdf";
+        String path = UPLOAD_DIR + System.currentTimeMillis() + "_" + nom;
         try {
             Files.createDirectories(Paths.get(UPLOAD_DIR));
             Files.copy(fichier.getInputStream(), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
@@ -279,5 +329,20 @@ public class CandidatureCVService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Echec enregistrement CV");
         }
         return path;
+    }
+
+    // Le CV doit être un vrai PDF (signature « %PDF »)
+    private void verifierPdf(MultipartFile fichier) {
+        if (fichier == null || fichier.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le CV est obligatoire");
+        }
+        try (var in = fichier.getInputStream()) {
+            byte[] tete = in.readNBytes(4);
+            if (!new String(tete, java.nio.charset.StandardCharsets.US_ASCII).equals("%PDF")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le CV doit être un fichier PDF");
+            }
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CV illisible");
+        }
     }
 }

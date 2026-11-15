@@ -35,11 +35,21 @@ public class AuditAspect {
 
         AuditLog auditLog = AuditLog.builder()
                 .action(jp.getSignature().getName())
-                .details("Resultat : " + result.toString())
+                .details(resume(jp, result))
                 .dateAction(LocalDateTime.now())
                 .utilisateur(user)
                 .build();
         auditLogRepository.save(auditLog);
         log.info("Audit : {} par {}", jp.getSignature().getName(), user);
+    }
+
+    // Résumé court (l'objet complet est trop long et contient des relations)
+    private String resume(JoinPoint jp, Object result) {
+        Object[] args = jp.getArgs();
+        String id = args.length > 0 ? String.valueOf(args[0]) : "?";
+        String detail = "id=" + id;
+        if (result instanceof com.enicarthage.forum.model.CandidatureCV c) detail += ", statut=" + c.getStatut();
+        if (result instanceof com.enicarthage.forum.model.Tache t) detail += ", statut=" + t.getStatut();
+        return detail.length() > 250 ? detail.substring(0, 250) : detail;
     }
 }

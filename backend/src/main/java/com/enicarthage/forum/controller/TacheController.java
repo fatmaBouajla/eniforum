@@ -39,8 +39,8 @@ public class TacheController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','CHEF_COMITE','COORDINATRICE')")
-    public TacheResponseDTO creer(@RequestBody TacheDTO dto) {
-        return tacheService.toDTO(tacheService.creer(dto));
+    public TacheResponseDTO creer(@RequestBody TacheDTO dto, Authentication auth) {
+        return tacheService.toDTO(tacheService.creer(dto, auth.getName()));
     }
 
     @PutMapping("/{id}")
@@ -53,17 +53,12 @@ public class TacheController {
     }
 
     @PutMapping("/{id}/statut")
-    public ResponseEntity<?> changerStatut(
+    public ResponseEntity<Void> changerStatut(
             @PathVariable Long id,
             @RequestParam StatutTache statut,
             Authentication auth) {
-        try {
-            tacheService.changerStatut(id, statut, auth.getName());
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body(e.getMessage() + " | " + e.getClass().getName());
-        }
+        tacheService.changerStatut(id, statut, auth.getName());
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")

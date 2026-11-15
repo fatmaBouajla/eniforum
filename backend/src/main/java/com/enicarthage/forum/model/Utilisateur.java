@@ -1,5 +1,6 @@
 package com.enicarthage.forum.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +14,10 @@ public class Utilisateur {
     private String nom;
     @Column(unique = true, nullable = false)
     private String email;
+    // Accepté en entrée, jamais renvoyé au navigateur
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String motDePasse;
+    @Builder.Default
     private boolean actif = true;
     @Enumerated(EnumType.STRING)
     private RoleEnum role;

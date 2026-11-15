@@ -26,8 +26,8 @@ class TacheServiceTest {
 
     @BeforeEach
     void init() {
-        doNothing().when(forumEditionGuard).assertForumOuvert(anyLong());
-        doNothing().when(forumEditionGuard).assertTacheOuverte(anyLong());
+        lenient().doNothing().when(forumEditionGuard).assertForumOuvert(anyLong());
+        lenient().doNothing().when(forumEditionGuard).assertTacheOuverte(anyLong());
     }
 
     @Test
@@ -52,16 +52,15 @@ class TacheServiceTest {
     @Test
     void testerDetectionRetard() {
         Utilisateur membre = Utilisateur.builder().email("u@test.com").build();
-        Tache t = Tache.builder().titre("Tache expirée")
+        Tache t = Tache.builder().id(7L).titre("Tache expirée")
                 .dateFin(LocalDate.now().minusDays(2))
                 .statut(StatutTache.EN_COURS).membre(membre).build();
 
         when(tacheRepository.findByDateFinBeforeAndStatutNot(any(), any())).thenReturn(List.of(t));
-        when(tacheRepository.save(any())).thenReturn(t);
-
         List<Tache> retards = tacheService.detecterRetards();
         assertEquals(1, retards.size());
-        verify(tacheRepository, times(1)).save(any());
+        // Le statut passe en retard par une mise à jour directe
+        verify(tacheRepository, times(1)).updateStatut(7L, StatutTache.EN_RETARD);
     }
 
     @Test
@@ -73,7 +72,6 @@ class TacheServiceTest {
         when(tacheRepository.findById(1L)).thenReturn(Optional.of(tache));
         when(utilisateurRepository.findByEmail("m@test.com")).thenReturn(Optional.of(u));
         when(tacheAuthorizationHelper.peutAccederTache(u, tache)).thenReturn(true);
-        when(tacheRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Tache result = tacheService.changerStatut(1L, StatutTache.EN_COURS, "m@test.com");
         assertEquals(StatutTache.EN_COURS, result.getStatut());

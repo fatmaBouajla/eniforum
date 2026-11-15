@@ -44,6 +44,12 @@ public class ComiteController {
         return comiteService.creer(comite);
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Comite modifier(@PathVariable Long id, @RequestBody Comite comite) {
+        return comiteService.modifier(id, comite);
+    }
+
     @PostMapping("/{id}/membres")
     @PreAuthorize("hasAnyRole('ADMIN','CHEF_COMITE')")
     public Comite ajouterMembre(

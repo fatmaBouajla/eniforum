@@ -24,6 +24,12 @@ public class UtilisateurService {
     }
 
     public Utilisateur creer(Utilisateur u) {
+        if (utilisateurRepository.existsByEmail(u.getEmail())) {
+            throw new IllegalArgumentException("Cet email est déjà utilisé");
+        }
+        if (u.getMotDePasse() == null || u.getMotDePasse().length() < 8) {
+            throw new IllegalArgumentException("Mot de passe : 8 caractères minimum");
+        }
         u.setMotDePasse(passwordEncoder.encode(u.getMotDePasse()));
         return utilisateurRepository.save(u);
     }
@@ -52,6 +58,19 @@ public class UtilisateurService {
         log.info("Role {} assigne a {}", role, u.getEmail());
         return utilisateurRepository.save(u);
     }
+    /** L'utilisateur connecté change son propre mot de passe. */
+    public void changerMotDePasse(String email, String ancien, String nouveau) {
+        Utilisateur u = findByEmail(email);
+        if (ancien == null || !passwordEncoder.matches(ancien, u.getMotDePasse())) {
+            throw new IllegalArgumentException("Mot de passe actuel incorrect");
+        }
+        if (nouveau == null || nouveau.length() < 8) {
+            throw new IllegalArgumentException("Nouveau mot de passe : 8 caractères minimum");
+        }
+        u.setMotDePasse(passwordEncoder.encode(nouveau));
+        utilisateurRepository.save(u);
+    }
+
     public Utilisateur findByEmail(String email) {
         return utilisateurRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouve : " + email));

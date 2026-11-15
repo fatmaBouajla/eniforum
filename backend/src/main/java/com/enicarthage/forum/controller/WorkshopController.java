@@ -3,6 +3,7 @@ package com.enicarthage.forum.controller;
 import com.enicarthage.forum.model.Workshop;
 import com.enicarthage.forum.service.WorkshopService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +46,19 @@ public class WorkshopController {
     @PreAuthorize("hasAnyRole('ADMIN','COORDINATRICE','CHEF_COMITE','COMITE_PILOTAGE')")
     public Workshop proposer(@RequestBody Workshop workshop, Authentication auth) {
         return workshopService.proposer(workshop, auth.getName());
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','COORDINATRICE','CHEF_COMITE')")
+    public Workshop modifier(@PathVariable Long id, @RequestBody Workshop workshop, Authentication auth) {
+        return workshopService.modifier(id, workshop, auth.getName());
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','COORDINATRICE','CHEF_COMITE')")
+    public ResponseEntity<Void> supprimer(@PathVariable Long id, Authentication auth) {
+        workshopService.supprimer(id, auth.getName());
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/valider")

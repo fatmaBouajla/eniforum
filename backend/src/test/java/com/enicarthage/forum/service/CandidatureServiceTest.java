@@ -22,6 +22,7 @@ class CandidatureServiceTest {
     @Mock CandidatureCVRepository candidatureCVRepository;
     @Mock ForumProjectService forumProjectService;
     @Mock CvAiClient cvAiClient;
+    @Mock MailService mailService;
     @InjectMocks CandidatureCVService candidatureCVService;
 
     @Test
@@ -32,8 +33,8 @@ class CandidatureServiceTest {
         when(cvAiClient.analyze(any(), any(), any())).thenReturn(Optional.empty());
 
         candidatureCVService.analyserAvecIA(c);
-        assertNotNull(c.getScoreIA());
-        assertTrue(c.getScoreIA() >= 0 && c.getScoreIA() <= 100);
+        // IA indisponible : aucun score inventé, juste un message
+        assertNull(c.getScoreIA());
         assertNotNull(c.getJustificationIA());
         Files.deleteIfExists(tmp);
     }
@@ -59,7 +60,7 @@ class CandidatureServiceTest {
         when(candidatureCVRepository.findById(1L)).thenReturn(Optional.of(c));
         when(candidatureCVRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        CandidatureCV result = candidatureCVService.accepter(1L);
+        CandidatureCV result = candidatureCVService.accepter(1L, null);
         assertEquals(StatutCandidature.ACCEPTE, result.getStatut());
     }
 
@@ -69,7 +70,7 @@ class CandidatureServiceTest {
         when(candidatureCVRepository.findById(1L)).thenReturn(Optional.of(c));
         when(candidatureCVRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        CandidatureCV result = candidatureCVService.refuser(1L, "Profil insuffisant");
+        CandidatureCV result = candidatureCVService.refuser(1L, "Profil insuffisant", null);
         assertEquals(StatutCandidature.REFUSE, result.getStatut());
         assertEquals("Profil insuffisant", result.getCommentaire());
     }

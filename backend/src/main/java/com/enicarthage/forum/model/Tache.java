@@ -46,5 +46,7 @@ public class Tache {
     @OneToMany(mappedBy = "tache", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"tache", "hibernateLazyInitializer"})
     @Builder.Default
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private List<Commentaire> commentaires = new ArrayList<>();
 }

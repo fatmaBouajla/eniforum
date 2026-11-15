@@ -23,6 +23,13 @@ public class UtilisateurController {
         return ResponseEntity.ok(u);
     }
 
+    @PutMapping("/me/mot-de-passe")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> changerMotDePasse(Authentication auth, @RequestBody java.util.Map<String, String> body) {
+        utilisateurService.changerMotDePasse(auth.getName(), body.get("ancienMotDePasse"), body.get("nouveauMotDePasse"));
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public List<Utilisateur> getAll() {

@@ -22,7 +22,7 @@ class ComiteServiceTest {
 
     @BeforeEach
     void init() {
-        doNothing().when(forumEditionGuard).assertForumOuvert(anyLong());
+        lenient().doNothing().when(forumEditionGuard).assertForumOuvert(anyLong());
     }
 
     @Test

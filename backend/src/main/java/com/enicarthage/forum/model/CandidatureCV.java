@@ -28,7 +28,12 @@ public class CandidatureCV {
     @Enumerated(EnumType.STRING)
     private StatutCandidature statut;
 
+    @Column(columnDefinition = "TEXT")
     private String commentaire;
+
+    // Renvoyé une seule fois si l'email n'a pas pu partir (non stocké)
+    @Transient
+    private String motDePasseProvisoire;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dateDepot;

@@ -1,6 +1,7 @@
 package com.enicarthage.forum.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import java.time.LocalDateTime;
 
@@ -17,6 +18,9 @@ public class CandidatureCVDto {
     private String dossierComplet;
     private String candidatNom;
     private String candidatEmail;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String motDePasseProvisoire;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dateDepot;
