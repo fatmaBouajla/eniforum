@@ -1,0 +1,47 @@
+# Généré au démarrage du conteneur (envsubst) : ${BACKEND_URL} = adresse de l'API
+server {
+  listen 8080;
+  server_name _;
+  root /usr/share/nginx/html;
+  index index.html;
+  server_tokens off;
+  client_max_body_size 10m;          # dépôt de CV (même limite que le backend)
+
+  # En-têtes de sécurité
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header X-Frame-Options "SAMEORIGIN" always;
+  add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+  gzip on;
+  gzip_types text/css application/javascript application/json image/svg+xml;
+
+  # API -> Spring Boot. La résolution DNS se fait à chaque requête :
+  # le frontend démarre même si le backend n'est pas encore prêt.
+  resolver 127.0.0.11 valid=10s ipv6=off;
+  location /api/ {
+    set $backend "${BACKEND_URL}";
+    proxy_pass $backend;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_read_timeout 120s;          # l'analyse IA d'un CV peut prendre du temps
+  }
+
+  # Fichiers versionnés par Angular : cache long
+  location ~* \.(?:js|css|woff2?|png|jpg|jpeg|svg|ico)$ {
+    expires 30d;
+    add_header Cache-Control "public, immutable";
+    add_header X-Content-Type-Options "nosniff" always;
+    try_files $uri =404;
+  }
+
+  # Application monopage
+  location / {
+    try_files $uri $uri/ /index.html;
+    # (un add_header dans une location annule ceux du serveur : on les répète)
+    add_header Cache-Control "no-cache";
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+  }
+}

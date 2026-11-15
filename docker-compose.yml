@@ -1,0 +1,86 @@
+# =====================================================================
+#  EniForum — lancement complet en une commande, à partir des images Docker Hub
+#
+#     docker compose up -d
+#
+#  Application : http://localhost:4200
+#  Compte administrateur créé au premier lancement : voir ADMIN_EMAIL / ADMIN_PASSWORD
+#  Personnalisation : fichier .env (voir .env.example)
+# =====================================================================
+name: eniforum
+
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: forum_enicarthage
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-eniforum}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  ai:
+    image: ${DOCKERHUB_USER:-fatmabouajla}/eniforum-ai:${ENIFORUM_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "${AI_PORT:-8000}:8000"        # documentation interactive : http://localhost:8000/docs
+
+  backend:
+    image: ${DOCKERHUB_USER:-fatmabouajla}/eniforum-backend:${ENIFORUM_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/forum_enicarthage?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD:-eniforum}
+      CV_AI_BASE_URL: http://ai:8000
+      JWT_SECRET: ${JWT_SECRET:-ZW5pZm9ydW0tY2xlLWRlLWRldmVsb3BwZW1lbnQtYS1jaGFuZ2VyLWVuLXByb2R1Y3Rpb24h}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:4200}
+    ports:
+      - "${API_PORT:-8081}:8081"
+    volumes:
+      - cv-uploads:/app/uploads
+
+  frontend:
+    image: ${DOCKERHUB_USER:-fatmabouajla}/eniforum-frontend:${ENIFORUM_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      BACKEND_URL: http://backend:8081
+    ports:
+      - "${APP_PORT:-4200}:8080"
+
+  # Crée le premier compte administrateur (une seule fois ; ignoré s'il existe déjà)
+  init-admin:
+    image: curlimages/curl:8.11.1
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: "no"
+    environment:
+      ADMIN_NAME: ${ADMIN_NAME:-Administrateur}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@eniforum.tn}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin@2026}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >
+        curl -s -o /dev/null -w "Création du compte admin : HTTP %{http_code}\n"
+        -X POST http://backend:8081/api/auth/register
+        -H "Content-Type: application/json"
+        -d "{\"nom\":\"$$ADMIN_NAME\",\"email\":\"$$ADMIN_EMAIL\",\"motDePasse\":\"$$ADMIN_PASSWORD\",\"role\":\"ADMIN\"}"
+        || true
+
+volumes:
+  mysql-data:
+  cv-uploads:

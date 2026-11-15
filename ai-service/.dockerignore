@@ -1,0 +1,7 @@
+*
+!requirements.txt
+!main.py
+!download_model.py
+!matcher/
+!data/
+**/__pycache__

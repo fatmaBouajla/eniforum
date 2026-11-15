@@ -1,0 +1,12 @@
+# Le contexte de build de chaque image est son propre dossier ; ceci protège un build lancé depuis la racine.
+.git
+.github
+docs
+**/node_modules
+**/target
+**/.angular
+**/uploads
+**/.venv
+**/__pycache__
+.env
+**/secrets.properties

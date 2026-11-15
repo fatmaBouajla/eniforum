@@ -1,0 +1,4 @@
+# Seuls pom.xml et src/ sont nécessaires au build
+*
+!pom.xml
+!src/
