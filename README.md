@@ -129,6 +129,11 @@ cp .env.example .env          # facultatif
 docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
 ```
 
+> Connexion lente ? Construisez les images une par une (moins de téléchargements simultanés) :
+> `docker compose -f docker-compose.yml -f docker-compose.build.yml build backend`, puis `frontend`, puis `ai`,
+> et enfin `docker compose up -d`. Si un téléchargement est coupé (erreur *hash mismatch* de pip),
+> relancez simplement la commande : les fichiers déjà téléchargés sont réutilisés.
+
 Construire une seule image :
 
 ```bash

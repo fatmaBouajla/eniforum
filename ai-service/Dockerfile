@@ -9,14 +9,18 @@ ARG MODEL_NAME=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
 # ---------- 1. Dépendances + modèle ----------
 FROM python:${PYTHON_VERSION}-slim AS build
 ARG MODEL_NAME
-ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1 \
+# Téléchargements robustes : nouvelles tentatives + cache pip conservé entre deux builds
+# (une connexion coupée en plein téléchargement ne fait plus tout recommencer).
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=10 \
     VIRTUAL_ENV=/opt/venv PATH="/opt/venv/bin:$PATH" \
     HF_HOME=/opt/hf
 RUN python -m venv /opt/venv
 # PyTorch CPU : ~4x plus léger que la version GPU
-RUN pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements.txt
 # Téléchargement du modèle au build (et non au premier démarrage)
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('${MODEL_NAME}')" \
  && find /opt/venv -type d -name "__pycache__" -prune -exec rm -rf {} + \
