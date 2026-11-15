@@ -1,0 +1,20 @@
+stateDiagram-v2
+    direction LR
+    state "Déposée" as Deposee
+    state "Analysée par l'IA" as Analysee
+    state "Non analysée" as NonAnalysee
+    state "ACCEPTÉE" as Acceptee
+    state "REFUSÉE" as Refusee
+    [*] --> Deposee : dépôt du CV
+    Deposee --> Analysee : analyse réussie
+    Deposee --> NonAnalysee : service IA indisponible
+    NonAnalysee --> Analysee : relance
+    Analysee --> Acceptee : validation
+    Analysee --> Refusee : refus motivé
+    Acceptee --> [*] : compte créé + email
+    Refusee --> [*] : email au candidat
+    note right of Analysee
+        statut EN_ATTENTE
+        tant qu'aucune décision
+        n'est prise
+    end note

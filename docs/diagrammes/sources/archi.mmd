@@ -1,0 +1,42 @@
+flowchart TB
+    U(["🌐 Navigateur<br/>utilisateurs et candidats"])
+
+    subgraph FE["Frontend — Angular 17 (servi par Nginx)"]
+        direction LR
+        F1["Modules par rôle<br/>admin · pilotage · coordinatrice<br/>chef · membre · public"] --> F3["Composants partagés<br/>layout · module IA · analyse IA"] --> F2["Services HTTP<br/>intercepteurs JWT / erreurs"]
+    end
+
+    subgraph BE["Backend — Spring Boot 3.2 · Java 17"]
+        direction LR
+        B2["Spring Security<br/>filtre JWT + rôles"] --> B1["Contrôleurs REST<br/>/api/**"] --> B3["Services métier<br/>projets · comités · tâches<br/>workshops · candidatures<br/>notifications · stats"] --> B4["Repositories<br/>JPA / Hibernate"]
+        B5["Planificateur<br/>détection des retards"] --> B3
+        B3 --> B6["CvAiClient<br/>WebClient"]
+    end
+
+    subgraph AI["Service IA — Python 3.11 · FastAPI"]
+        direction LR
+        A1["POST /analyze"] --> A2["Extraction PDF<br/>+ signaux du CV"] --> A3["Compétences<br/>catalogue FR/EN"] --> A4["Similarité sémantique<br/>sentence-transformers"] --> A5["Score pondéré<br/>+ justification"]
+    end
+
+    DB[("MySQL 8")]
+    FS[/"Stockage des CV<br/>volume uploads/"/]
+    M["✉ SMTP Gmail"]
+
+    U -->|HTTPS| F1
+    F2 -->|"REST JSON + Bearer JWT"| B2
+    B4 -->|JDBC| DB
+    B3 --> FS
+    B3 -->|"identifiants, décisions"| M
+    B6 -->|"multipart : PDF, poste, dossier"| A1
+
+    classDef fe fill:#FEF2F2,stroke:#F87171,color:#7F1D1D
+    classDef be fill:#F0FDF4,stroke:#4ADE80,color:#14532D
+    classDef ai fill:#F5F3FF,stroke:#A78BFA,color:#3B0764
+    classDef ext fill:#FFFBEB,stroke:#F59E0B,color:#78350F
+    class F1,F2,F3 fe
+    class B1,B2,B3,B4,B5,B6 be
+    class A1,A2,A3,A4,A5 ai
+    class DB,FS,M ext
+    style FE fill:#FFF7F7,stroke:#FCA5A5
+    style BE fill:#F7FEF9,stroke:#86EFAC
+    style AI fill:#FAF8FF,stroke:#C4B5FD

@@ -1,0 +1,29 @@
+flowchart TB
+    DEV(["👩‍💻 Développeuse<br/>git push / tag v*"]) --> GH["GitHub<br/>dépôt eniforum"]
+    GH --> CI["GitHub Actions<br/>1. tests IA (pytest)<br/>2. build multi-arch<br/>amd64 + arm64"]
+    CI -->|docker push| HUB[("Docker Hub<br/>eniforum-frontend<br/>eniforum-backend<br/>eniforum-ai")]
+
+    subgraph HOST["Machine hôte — Docker Engine · docker compose up -d"]
+        direction TB
+        subgraph NET["Réseau Docker « eniforum_default »"]
+            direction LR
+            FE["frontend<br/>nginx-unprivileged<br/>:8080 (non-root)"] -->|"/api → :8081"| BE["backend<br/>JRE 17 Alpine<br/>:8081 (non-root)"]
+            BE -->|":3306"| DB["mysql<br/>mysql:8.0"]
+            BE -->|"POST /analyze :8000"| AI["ai<br/>Python 3.11 slim<br/>modèle inclus (non-root)"]
+            INIT["init-admin<br/>curl (une fois)"] -.->|"POST /api/auth/register"| BE
+        end
+        V1[("volume<br/>mysql-data")]
+        V2[("volume<br/>cv-uploads")]
+        DB --- V1
+        BE --- V2
+    end
+
+    HUB -->|docker compose pull| HOST
+    USER(["🌐 Utilisateur"]) -->|"localhost:4200"| FE
+
+    classDef c fill:#EFF6FF,stroke:#3B82F6,color:#1E3A8A
+    classDef v fill:#FFFBEB,stroke:#F59E0B,color:#78350F
+    class FE,BE,DB,AI,INIT c
+    class V1,V2 v
+    style HOST fill:#F8FAFC,stroke:#94A3B8
+    style NET fill:#F1F5F9,stroke:#CBD5E1,stroke-dasharray:4

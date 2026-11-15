@@ -1,0 +1,32 @@
+flowchart TB
+    IN["CV (PDF) + poste visé + dossier du formulaire"] --> X["1 · Extraction du texte (pypdf)"]
+    X --> Q{"Texte lisible ?"}
+    Q -- non --> P1["Score basé sur le formulaire<br/>plafonné à 45 + alerte « CV illisible »"]
+    Q -- oui --> CVQ{"Ressemble à un CV ?<br/>rubriques, email, téléphone, longueur"}
+    CVQ -- non --> P2["Plafond à 30 + alerte<br/>« document non conforme »"]
+    CVQ -- oui --> R["2 · Résolution du poste<br/>rôle (membre / chef / coordinatrice) × comité"]
+    P2 --> R
+    R --> FP[("Fiche de poste<br/>postes.json")]
+    FP --> S1["3a · Compétences clés<br/>catalogue FR/EN, synonymes<br/>preuve dans le CV = 1 · déclarée = 0,6"]
+    FP --> S2["3b · Adéquation sémantique<br/>embeddings multilingues<br/>CV découpé en blocs × attentes du poste"]
+    R --> S3["3c · Expérience<br/>associatif · responsabilités · stages"]
+    R --> S4["3d · Formation & langues<br/>niveau d'études, langues"]
+    R --> S5["3e · Motivation<br/>longueur + pertinence + lien au comité"]
+    S1 & S2 & S3 & S4 & S5 --> W["4 · Pondération selon le rôle → score /100"]
+    P1 --> W
+    W --> REC{"Recommandation"}
+    REC -- "≥ 70" --> A["À prioriser"]
+    REC -- "50 – 69" --> B["Entretien"]
+    REC -- "< 50" --> C["Moins adapté"]
+    A & B & C --> OUT["5 · Justification structurée<br/>points forts · compétences manquantes · points à vérifier"]
+
+    classDef step fill:#EEF2FF,stroke:#6366F1,color:#1E1B4B
+    classDef warn fill:#FEF3C7,stroke:#F59E0B,color:#78350F
+    classDef ok fill:#D1FAE5,stroke:#10B981,color:#064E3B
+    classDef mid fill:#FEF3C7,stroke:#F59E0B,color:#78350F
+    classDef ko fill:#FEE2E2,stroke:#EF4444,color:#7F1D1D
+    class X,R,S1,S2,S3,S4,S5,W,OUT step
+    class P1,P2 warn
+    class A ok
+    class B mid
+    class C ko

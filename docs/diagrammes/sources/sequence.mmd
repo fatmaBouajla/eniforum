@@ -1,0 +1,36 @@
+sequenceDiagram
+    autonumber
+    actor C as Candidat
+    participant F as Frontend Angular
+    participant B as Backend Spring Boot
+    participant FS as Stockage CV
+    participant IA as Service IA (FastAPI)
+    participant DB as MySQL
+    actor P as Comité de pilotage
+    participant M as Serveur mail
+
+    C->>F: Remplit le formulaire + CV (PDF)
+    F->>B: POST /api/candidatures (multipart)
+    B->>FS: Enregistre le PDF
+    B->>IA: POST /analyze (PDF, poste visé, dossier)
+    activate IA
+    IA->>IA: Extraction du texte, compétences,<br/>similarité sémantique, pondération
+    IA-->>B: score, justification, compétences
+    deactivate IA
+    alt Service IA indisponible
+        B->>B: Statut « non analysé » (relance possible)
+    end
+    B->>DB: Sauvegarde CandidatureCV (EN_ATTENTE)
+    B-->>F: 200 OK
+    F-->>C: Confirmation du dépôt
+
+    P->>F: Ouvre le Module IA
+    F->>B: GET /api/candidatures (JWT)
+    B->>DB: Lecture des candidatures
+    B-->>F: Liste + scores
+    F-->>P: Classement, détail, tableau comparatif
+    P->>F: Accepter (avec confirmation)
+    F->>B: PUT /api/candidatures/{id}/accepter
+    B->>DB: Statut ACCEPTE + création du compte
+    B->>M: Email avec identifiants
+    B-->>F: Candidature mise à jour
