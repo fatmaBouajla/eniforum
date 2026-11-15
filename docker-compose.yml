@@ -4,11 +4,11 @@
 #     docker compose up -d
 #
 #  Application : http://localhost:4200
-#  Compte administrateur créé au premier lancement : voir ADMIN_EMAIL / ADMIN_PASSWORD
+#  Administrateur créé au démarrage du backend : admin@eniforum.tn / Admin@2026
+#  Comptes de démonstration (DEMO_DATA=true) : mot de passe Demo@2026, voir README
 #  Personnalisation : fichier .env (voir .env.example)
 # =====================================================================
 name: eniforum
-
 
 services:
   mysql:
@@ -46,6 +46,10 @@ services:
       MAIL_USERNAME: ${MAIL_USERNAME:-}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:4200}
+      ADMIN_NAME: ${ADMIN_NAME:-Administrateur}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@eniforum.tn}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin@2026}
+      DEMO_DATA: ${DEMO_DATA:-true}       # false = base vide (seuls l'admin, l'édition et les comités sont créés)
     ports:
       - "${API_PORT:-8081}:8081"
     volumes:
@@ -60,26 +64,6 @@ services:
       BACKEND_URL: http://backend:8081
     ports:
       - "${APP_PORT:-4200}:8080"
-
-  # Crée le premier compte administrateur (une seule fois ; ignoré s'il existe déjà)
-  init-admin:
-    image: curlimages/curl:8.11.1
-    depends_on:
-      backend:
-        condition: service_healthy
-    restart: "no"
-    environment:
-      ADMIN_NAME: ${ADMIN_NAME:-Administrateur}
-      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@eniforum.tn}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin@2026}
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - >
-        curl -s -o /dev/null -w "Création du compte admin : HTTP %{http_code}\n"
-        -X POST http://backend:8081/api/auth/register
-        -H "Content-Type: application/json"
-        -d "{\"nom\":\"$$ADMIN_NAME\",\"email\":\"$$ADMIN_EMAIL\",\"motDePasse\":\"$$ADMIN_PASSWORD\",\"role\":\"ADMIN\"}"
-        || true
 
 volumes:
   mysql-data:

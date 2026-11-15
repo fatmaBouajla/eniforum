@@ -7,10 +7,9 @@ flowchart TB
         direction TB
         subgraph NET["Réseau Docker « eniforum_default »"]
             direction LR
-            FE["frontend<br/>nginx-unprivileged<br/>:8080 (non-root)"] -->|"/api → :8081"| BE["backend<br/>JRE 17 Alpine<br/>:8081 (non-root)"]
+            FE["frontend<br/>nginx-unprivileged<br/>:8080 (non-root)"] -->|"/api → :8081"| BE["backend<br/>JRE 17 Alpine<br/>:8081 (non-root)<br/>crée l'admin au démarrage"]
             BE -->|":3306"| DB["mysql<br/>mysql:8.0"]
             BE -->|"POST /analyze :8000"| AI["ai<br/>Python 3.11 slim<br/>modèle inclus (non-root)"]
-            INIT["init-admin<br/>curl (une fois)"] -.->|"POST /api/auth/register"| BE
         end
         V1[("volume<br/>mysql-data")]
         V2[("volume<br/>cv-uploads")]
@@ -23,7 +22,7 @@ flowchart TB
 
     classDef c fill:#EFF6FF,stroke:#3B82F6,color:#1E3A8A
     classDef v fill:#FFFBEB,stroke:#F59E0B,color:#78350F
-    class FE,BE,DB,AI,INIT c
+    class FE,BE,DB,AI c
     class V1,V2 v
     style HOST fill:#F8FAFC,stroke:#94A3B8
     style NET fill:#F1F5F9,stroke:#CBD5E1,stroke-dasharray:4

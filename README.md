@@ -82,7 +82,8 @@ curl -fsSLO https://raw.githubusercontent.com/fatmaBouajla/eniforum/main/docker-
 docker compose up -d
 ```
 
-Docker télécharge les images (≈ 2 Go la première fois), crée la base de données et un compte administrateur.
+Docker télécharge les images (≈ 2 Go la première fois), crée la base de données, le compte administrateur, l'édition du Forum, les 6 comités
+et quelques données de démonstration.
 Comptez 1 à 2 minutes avant que tout soit prêt (`docker compose ps` doit afficher `healthy`).
 
 ### 3. Se connecter
@@ -93,6 +94,19 @@ Comptez 1 à 2 minutes avant que tout soit prêt (`docker compose ps` doit affic
 | Email | `admin@eniforum.tn` |
 | Mot de passe | `Admin@2026` |
 | Documentation de l'API IA | http://localhost:8000/docs |
+
+**Comptes de démonstration** (mot de passe `Demo@2026`) — désactivables avec `DEMO_DATA=false` :
+
+| Rôle | Email |
+|---|---|
+| Comité de pilotage | `pilotage@eniforum.tn` |
+| Coordinatrice | `coordinatrice@eniforum.tn` |
+| Chef du comité Design | `chef.design@eniforum.tn` |
+| Chef du comité Sponsoring | `chef.sponsoring@eniforum.tn` |
+| Membre (Design) | `membre@eniforum.tn` |
+| Membre (Sponsoring) | `membre2@eniforum.tn` |
+
+Six candidatures avec de vrais CV PDF sont aussi déposées et analysées par l'IA au démarrage.
 
 > ⚠️ Changez ces identifiants pour toute utilisation réelle (voir [variables](#-variables-denvironnement-et-ports)).
 
@@ -175,6 +189,7 @@ docker run -d --name backend --network eniforum \
   -e DB_PASSWORD=eniforum \
   -e CV_AI_BASE_URL=http://ai:8000 \
   -e JWT_SECRET="$(openssl rand -base64 48)" \
+  -e ADMIN_PASSWORD=Admin@2026 \
   -v eniforum-cv:/app/uploads \
   fatmabouajla/eniforum-backend:latest
 
@@ -183,12 +198,9 @@ docker run -d --name frontend --network eniforum \
   -p 4200:8080 \
   -e BACKEND_URL=http://backend:8081 \
   fatmabouajla/eniforum-frontend:latest
-
-# 5. Premier compte administrateur (une fois le backend démarré)
-curl -X POST http://localhost:8081/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"nom":"Administrateur","email":"admin@eniforum.tn","motDePasse":"Admin@2026","role":"ADMIN"}'
 ```
+
+Le backend crée lui-même le compte administrateur (`ADMIN_EMAIL` / `ADMIN_PASSWORD`) au démarrage.
 
 Ouvrez http://localhost:4200. Pour tout arrêter :
 `docker rm -f frontend backend ai mysql && docker network rm eniforum`.
@@ -209,7 +221,8 @@ Ouvrez http://localhost:4200. Pour tout arrêter :
 | `APP_PORT` / `API_PORT` / `AI_PORT` | `4200` / `8081` / `8000` | Ports ouverts sur votre machine |
 | `DB_PASSWORD` | `eniforum` | Mot de passe root MySQL |
 | `JWT_SECRET` | clé de démo | Clé de signature des sessions (`openssl rand -base64 48`) — **à changer** |
-| `ADMIN_NAME` / `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `Administrateur` / `admin@eniforum.tn` / `Admin@2026` | Premier compte admin |
+| `ADMIN_NAME` / `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `Administrateur` / `admin@eniforum.tn` / `Admin@2026` | Compte admin créé (ou promu) au démarrage |
+| `DEMO_DATA` | `true` | Comptes, tâches, workshops et candidatures de démonstration |
 | `MAIL_USERNAME` / `MAIL_PASSWORD` | *(vide)* | Gmail + [mot de passe d'application](https://myaccount.google.com/apppasswords) ; vide = emails désactivés |
 | `FRONTEND_URL` | `http://localhost:4200` | Adresse utilisée dans les liens des emails |
 
@@ -220,6 +233,7 @@ Ouvrez http://localhost:4200. Pour tout arrêter :
 | backend | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | MySQL local, `root`, vide |
 | backend | `CV_AI_BASE_URL` | `http://ai:8000` |
 | backend | `JWT_SECRET`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `FRONTEND_URL` | voir ci-dessus |
+| backend | `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`, `DEMO_DATA` | `admin@eniforum.tn`, `Admin@2026`, `Administrateur`, `false` |
 | backend | `JAVA_OPTS` | `-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError` |
 | frontend | `BACKEND_URL` | `http://backend:8081` |
 | ai | `CV_AI_DISABLE_EMBEDDINGS` | *(vide)* ; `1` = mode léger TF-IDF |
@@ -292,7 +306,21 @@ npm install
 npm start                                              # http://localhost:4200
 ```
 
-Tests du service IA : `cd ai-service && python -m pytest tests -q`
+**Sans MySQL** : `mvn spring-boot:run -Dspring-boot.run.profiles=h2` démarre le backend sur une base
+en mémoire, avec les données de démonstration.
+
+### Tests
+
+```bash
+# depuis la racine du dépôt
+(cd backend && mvn test)                        # tests unitaires du backend
+(cd ai-service && python -m pytest tests -q)    # tests du service IA
+(cd ai-service && python tests/evaluer.py)      # évaluation du matching sur 10 CV de référence
+python tests/smoke_api.py                       # parcours complet de l'API (backend lancé avec la démo)
+```
+
+Le rapport d'évaluation de l'IA est dans [`ai-service/tests/donnees/rapport_evaluation.md`](ai-service/tests/donnees/rapport_evaluation.md).
+Les journaux du backend sont écrits dans la console et dans `logs/forum.log`.
 
 ---
 
@@ -337,8 +365,11 @@ eniforum/
 - Les conteneurs applicatifs tournent avec un utilisateur **non-root**.
 - Aucun secret n'est inclus dans les images : tout passe par des variables d'environnement.
 - Ne versionnez jamais `.env`, `secrets.properties` ni le dossier `uploads/` (données personnelles).
-- **Limite connue :** l'endpoint `POST /api/auth/register` est public et accepte n'importe quel rôle.
-  Pour un déploiement réel, il faut le réserver aux administrateurs.
+- Mots de passe hachés (BCrypt), jamais renvoyés par l'API ; sessions par jeton JWT.
+- L'inscription publique crée toujours un compte **membre** : les autres rôles sont attribués par
+  l'administrateur ou par l'acceptation d'une candidature.
+- Chaque rôle ne voit que son périmètre (un chef de comité ne gère que son propre comité).
+- Les CV déposés sont contrôlés (PDF réel, taille limitée) et leur nom de fichier est nettoyé.
 
 ## 👩‍💻 Auteurs
 Projet réalisé à l'ENICarthage par Fatma Bouajla, Mayssa Abdouli et Rawen Zgarni.
