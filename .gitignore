@@ -1,0 +1,33 @@
+# Secrets
+.env
+**/secrets.properties
+
+# Données personnelles (CV déposés) et logs
+**/uploads/
+**/logs/
+
+# Java / Maven
+backend/target/
+*.class
+.classpath
+.project
+.settings/
+.factorypath
+.idea/
+*.iml
+
+# Angular / Node
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# Python
+**/.venv/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+
+# Divers
+.vscode/
+.DS_Store
+Thumbs.db
