@@ -1,4 +1,5 @@
-# Seuls pom.xml et src/ sont nécessaires au build
+# Seuls pom.xml, src/ et entrypoint.sh sont nécessaires au build
 *
 !pom.xml
 !src/
+!entrypoint.sh

@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
 import java.time.LocalDate;
@@ -50,7 +51,7 @@ public class DemoDataLoader implements CommandLineRunner {
     private boolean actif;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void run(String... args) throws Exception {
         if (!actif || utilisateurRepository.existsByEmail("pilotage@eniforum.tn")) return;
 
@@ -89,7 +90,12 @@ public class DemoDataLoader implements CommandLineRunner {
                 sponso, chefSponso, StatutWorkshop.PROPOSE, 40);
 
         // Candidatures avec de vrais PDF (CV fictifs)
-        List<Long> aAnalyser = candidatures();
+        List<Long> aAnalyser = List.of();
+        try {
+            aAnalyser = candidatures();
+        } catch (IOException e) {
+            log.warn("Candidatures de démonstration ignorées (dossier des CV non accessible) : {}", e.getMessage());
+        }
         tacheService.detecterRetards();
         log.info("Données de démonstration chargées (mot de passe : {})", MOT_DE_PASSE_DEMO);
 

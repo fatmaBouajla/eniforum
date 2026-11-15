@@ -21,7 +21,7 @@ LABEL org.opencontainers.image.title="eniforum-backend" \
       org.opencontainers.image.description="API REST Spring Boot de la plateforme EniForum" \
       org.opencontainers.image.source="https://github.com/fatmaBouajla/eniforum"
 
-RUN groupadd --system app && useradd --system --gid app --home-dir /app app
+RUN groupadd --system --gid 10001 app && useradd --system --uid 10001 --gid app --home-dir /app app
 WORKDIR /app
 
 # Couches du moins au plus souvent modifié (meilleur cache)
@@ -32,7 +32,7 @@ COPY --from=build /build/extracted/application/ ./
 
 # CV déposés et logs : seuls dossiers inscriptibles
 RUN mkdir -p uploads/cv logs && chown -R app:app uploads logs
-USER app
+COPY --chmod=755 entrypoint.sh /usr/local/bin/entrypoint.sh
 
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError" \
     CV_AI_BASE_URL="http://ai:8000"
@@ -42,4 +42,5 @@ VOLUME ["/app/uploads"]
 HEALTHCHECK --interval=15s --timeout=3s --start-period=60s --retries=5 \
   CMD bash -c ':> /dev/tcp/127.0.0.1/8081' || exit 1
 
-ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS org.springframework.boot.loader.launch.JarLauncher"]
+# Démarre en root uniquement pour corriger les droits du volume, puis tourne sous « app »
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
