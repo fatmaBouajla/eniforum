@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1.7
 # =====================================================================
 #  EniForum — API Spring Boot
-#  Image finale : JRE 17 Alpine, utilisateur non-root, jar découpé en couches
+#  Image finale : JRE 17, utilisateur non-root, jar découpé en couches
 # =====================================================================
 
 # ---------- 1. Build (Maven) ----------
-FROM maven:3.9.9-eclipse-temurin-17-alpine AS build
+FROM --platform=$BUILDPLATFORM maven:3.9.9-eclipse-temurin-17-alpine AS build
 WORKDIR /build
 # Dépendances d'abord : couche réutilisée tant que pom.xml ne change pas
 COPY pom.xml .
@@ -16,12 +16,12 @@ RUN --mount=type=cache,target=/root/.m2 mvn -B -q -DskipTests package \
  && java -Djarmode=layertools -jar app.jar extract --destination extracted
 
 # ---------- 2. Exécution ----------
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 LABEL org.opencontainers.image.title="eniforum-backend" \
       org.opencontainers.image.description="API REST Spring Boot de la plateforme EniForum" \
       org.opencontainers.image.source="https://github.com/fatmaBouajla/eniforum"
 
-RUN addgroup -S app && adduser -S -G app -h /app app
+RUN groupadd --system app && useradd --system --gid app --home-dir /app app
 WORKDIR /app
 
 # Couches du moins au plus souvent modifié (meilleur cache)
@@ -40,6 +40,6 @@ EXPOSE 8081
 VOLUME ["/app/uploads"]
 
 HEALTHCHECK --interval=15s --timeout=3s --start-period=60s --retries=5 \
-  CMD nc -z localhost 8081 || exit 1
+  CMD bash -c ':> /dev/tcp/127.0.0.1/8081' || exit 1
 
 ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS org.springframework.boot.loader.launch.JarLauncher"]
