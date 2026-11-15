@@ -56,8 +56,12 @@ export class TopbarComponent implements OnInit {
     return this.auth.currentUser?.nom?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ?? 'U';
   }
 
+  // Icône par type de notification
   typeIcon(type: string): string {
-    const map: Record<string, string> = { RETARD: '⏰', ASSIGNATION: '📌', VALIDATION: '✅', ALERTE: '⚠', INFO: 'ℹ' };
-    return map[type] ?? 'ℹ';
+    const map: Record<string, string> = {
+      TACHE_ASSIGNEE: 'list-todo', TACHE_EN_RETARD: 'clock', WORKSHOP_VALIDE: 'circle-check',
+      WORKSHOP_REFUSE: 'circle-x', CANDIDATURE_MISE_A_JOUR: 'file-text',
+    };
+    return map[type] ?? 'bell';
   }
 }

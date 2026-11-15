@@ -1,66 +1,64 @@
-<!-- src/app/features/pilotage/dashboard/pilotage-dashboard.component.html -->
-<app-layout title="Supervision Globale" subtitle="Comité Pilotage — Vue d'ensemble du Forum">
+<app-layout title="Tableau de bord" subtitle="Supervision de l’organisation et des recrutements">
+  <div class="alert alert-error" *ngIf="erreur"><lucide-icon name="circle-alert" [size]="18"></lucide-icon>{{ erreur }}</div>
+  <div class="grid grid-4" *ngIf="loading"><div class="skeleton" style="height:96px" *ngFor="let i of [1,2,3,4]"></div></div>
 
-  <div class="page-alert error" *ngIf="erreur" role="alert">⚠️ {{ erreur }}</div>
-
-  <!-- KPIs -->
-  <div class="kpi-grid" *ngIf="kpis">
-    <app-stat-card icon="📊" [value]="kpis.avancementGlobal + '%'" label="Avancement global" sub="Toutes tâches confondues" color="blue"></app-stat-card>
-    <app-stat-card icon="⏰" [value]="kpis.tachesEnRetard"  label="Tâches en retard"  sub="Action requise"  color="red"></app-stat-card>
-    <app-stat-card icon="📄" [value]="kpis.totalCandidatures" label="Candidatures CV" sub="En attente d'analyse" color="amber"></app-stat-card>
-    <app-stat-card icon="🎓" [value]="kpis.workshopsValides" label="Workshops validés" sub="Sur {{ kpis.totalWorkshops }} proposés" color="green"></app-stat-card>
-  </div>
-
-  <div class="two-col">
-    <!-- Chart avancement stacked -->
-    <div class="card">
-      <div class="card-hd">Avancement par comité</div>
-      <div class="card-sub">Tâches terminées vs restantes</div>
-      <div style="height:260px;position:relative;">
-        <canvas id="chartAv"></canvas>
-      </div>
+  <ng-container *ngIf="!loading && kpis">
+    <div class="grid grid-4">
+      <app-stat-card icon="trending-up" label="Avancement global" [value]="kpis.avancementGlobal + ' %'" sub="Tâches terminées"></app-stat-card>
+      <app-stat-card icon="clock" tone="red" label="Tâches en retard" [value]="kpis.tachesEnRetard" sub="À relancer"></app-stat-card>
+      <app-stat-card icon="file-text" tone="amber" label="Candidatures à traiter" [value]="enAttente" [sub]="kpis.totalCandidatures + ' au total'"></app-stat-card>
+      <app-stat-card icon="presentation" tone="green" label="Workshops validés" [value]="kpis.workshopsValides + ' / ' + kpis.totalWorkshops"></app-stat-card>
     </div>
 
-    <!-- Tâches en retard -->
-    <div class="card">
-      <div class="card-hd alert-hd">⏰ Alertes — Tâches en retard</div>
-      <div class="card-sub">Dernières tâches critiques</div>
-      <div class="empty-block" *ngIf="tachesRetard.length === 0">Aucune tâche en retard 🎉</div>
-      <div class="retard-item" *ngFor="let t of tachesRetard">
-        <div class="retard-dot"></div>
-        <div class="retard-body">
-          <div class="retard-titre">{{ t.titre }}</div>
-          <div class="retard-meta">{{ t.comiteNom }} · Échéance : {{ t.dateFin | date:'dd/MM/yyyy' }}</div>
+    <div class="cols mt">
+      <div class="card">
+        <div class="card-head">
+          <div><div class="card-title">Avancement des comités</div><div class="card-sub">Tâches terminées et restantes</div></div>
+          <span class="spacer"></span>
+          <a class="btn btn-ghost btn-sm" routerLink="/pilotage/avancement">Détail <lucide-icon name="arrow-right" [size]="15"></lucide-icon></a>
         </div>
-        <app-statut-badge statut="EN_RETARD"></app-statut-badge>
+        <div class="card-body chart"><canvas #cComites></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div><div class="card-title">Tâches en retard</div><div class="card-sub">Échéance dépassée</div></div>
+          <span class="spacer"></span>
+          <span class="badge badge-red" *ngIf="kpis.tachesEnRetard">{{ kpis.tachesEnRetard }}</span>
+        </div>
+        <div class="list" *ngIf="retards.length">
+          <div class="list-item" *ngFor="let t of retards">
+            <span class="dot red"></span>
+            <div class="grow">
+              <div class="strong truncate">{{ t.titre }}</div>
+              <div class="muted small">{{ t.comiteNom }} · {{ t.membreNom || 'Non assignée' }} · échue le {{ t.dateFin | date:'d MMM' }}</div>
+            </div>
+          </div>
+        </div>
+        <app-empty *ngIf="!retards.length" icon="circle-check" title="Aucun retard" text="Toutes les tâches sont dans les temps."></app-empty>
       </div>
     </div>
-  </div>
 
-  <!-- Table avancement détaillé -->
-  <div class="card" style="margin-top:20px;">
-    <div class="card-hd">Tableau de supervision</div>
-    <table class="data-table">
-      <thead>
-        <tr><th>Comité</th><th>Total tâches</th><th>Terminées</th><th>Avancement</th><th>État</th></tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let a of avancements">
-          <td><strong>{{ a.comiteNom }}</strong></td>
-          <td>{{ a.total }}</td>
-          <td>{{ a.terminees }}</td>
-          <td>
-            <div class="prog-row">
-              <div class="prog-bar"><div class="prog-fill" [style.width.%]="a.avancement" [class.low]="a.avancement<50" [class.mid]="a.avancement>=50&&a.avancement<80" [class.high]="a.avancement>=80"></div></div>
-              <span class="prog-val">{{ a.avancement }}%</span>
-            </div>
-          </td>
-          <td>
-            <app-statut-badge [statut]="a.avancement >= 80 ? 'VALIDE' : a.avancement >= 50 ? 'EN_COURS' : 'EN_RETARD'"></app-statut-badge>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
+    <div class="card mt">
+      <div class="card-head">
+        <div><div class="card-title">Candidatures à traiter</div><div class="card-sub">Classées par score IA</div></div>
+        <span class="spacer"></span>
+        <a class="btn btn-ai btn-sm" routerLink="/pilotage/ia"><lucide-icon name="sparkles" [size]="15"></lucide-icon> Ouvrir le module IA</a>
+      </div>
+      <div class="list" *ngIf="aTraiter.length">
+        <div class="list-item" *ngFor="let x of aTraiter">
+          <span class="avatar">{{ initiale(x.c.candidatNom) }}</span>
+          <div class="grow">
+            <div class="strong">{{ x.c.candidatNom }}</div>
+            <div class="muted small">{{ poste(x.c.posteVise) }}<ng-container *ngIf="x.comite"> · Comité {{ x.comite }}</ng-container></div>
+          </div>
+          <span class="badge" [ngClass]="x.a.recommandation === 'PRIORISER' ? 'badge-green' : x.a.recommandation === 'ENTRETIEN' ? 'badge-amber' : x.a.recommandation ? 'badge-red' : ''">
+            {{ x.a.recommandation ? reco[x.a.recommandation] : 'Non analysée' }}
+          </span>
+          <app-score-ring [score]="x.a.score" [size]="44"></app-score-ring>
+        </div>
+      </div>
+      <app-empty *ngIf="!aTraiter.length" icon="inbox" title="Aucune candidature en attente" text="Les nouvelles candidatures apparaîtront ici."></app-empty>
+    </div>
+  </ng-container>
 </app-layout>

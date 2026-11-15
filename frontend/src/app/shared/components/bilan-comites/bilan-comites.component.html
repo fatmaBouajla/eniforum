@@ -1,0 +1,45 @@
+<div class="alert alert-error" *ngIf="erreur"><lucide-icon name="circle-alert" [size]="18"></lucide-icon>{{ erreur }}</div>
+  <div class="grid grid-2" *ngIf="loading"><div class="skeleton" style="height:220px" *ngFor="let i of [1,2,3,4]"></div></div>
+
+  <div class="legend" *ngIf="!loading && bilans.length">
+    <span *ngFor="let s of statuts"><i [ngClass]="s.classe"></i>{{ s.libelle }}</span>
+  </div>
+
+  <div class="grid grid-2" *ngIf="!loading">
+    <div class="card bilan" *ngFor="let b of bilans">
+      <div class="head">
+        <span class="ico"><lucide-icon [name]="icone(b.comite.nom)" [size]="20"></lucide-icon></span>
+        <div class="grow">
+          <h3>{{ b.comite.nom }}</h3>
+          <span class="muted small">{{ b.comite.chef?.nom ? 'Chef : ' + b.comite.chef?.nom : 'Sans chef' }} · {{ b.comite.membres?.length || 0 }} membre(s)</span>
+        </div>
+        <div class="pct">{{ b.pourcent }}<small>%</small></div>
+      </div>
+
+      <div class="stack-bar" *ngIf="b.taches.length">
+        <div *ngFor="let s of statuts" [ngClass]="s.classe" [style.width.%]="largeur(b, s.cle)" [title]="s.libelle + ' : ' + b.parStatut[s.cle]"></div>
+      </div>
+      <div class="counts">
+        <span *ngFor="let s of statuts"><b>{{ b.parStatut[s.cle] }}</b> {{ s.libelle | lowercase }}</span>
+      </div>
+
+      <div class="block" *ngIf="b.retards.length">
+        <div class="lbl red"><lucide-icon name="clock" [size]="14"></lucide-icon> En retard</div>
+        <div class="t" *ngFor="let t of b.retards"><span class="truncate">{{ t.titre }}</span><span class="muted small nowrap">{{ t.dateFin | date:'d MMM' }}</span></div>
+      </div>
+      <div class="block" *ngIf="b.prochaines.length">
+        <div class="lbl"><lucide-icon name="calendar-clock" [size]="14"></lucide-icon> Prochaines échéances</div>
+        <div class="t" *ngFor="let t of b.prochaines"><span class="truncate">{{ t.titre }}</span><span class="muted small nowrap">{{ t.dateFin | date:'d MMM' }}</span></div>
+      </div>
+      <p class="muted small" *ngIf="!b.taches.length">Aucune tâche créée pour ce comité.</p>
+      <div class="block" *ngIf="avecMembres">
+        <div class="lbl"><lucide-icon name="users" [size]="14"></lucide-icon> Équipe</div>
+        <div class="team">
+          <span class="chip" *ngIf="b.comite.chef"><lucide-icon name="crown" [size]="12"></lucide-icon> {{ b.comite.chef.nom }}</span>
+          <span class="chip" *ngFor="let m of b.comite.membres">{{ m.nom }}</span>
+          <span class="muted small" *ngIf="!b.comite.chef && !b.comite.membres?.length">Aucun membre</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" *ngIf="!loading && !bilans.length"><app-empty icon="layers" title="Aucun comité"></app-empty></div>

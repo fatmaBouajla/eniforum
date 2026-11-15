@@ -17,7 +17,7 @@ export class LoginComponent {
   constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
     this.form = this.fb.group({
       email:      ['', [Validators.required, Validators.email]],
-      motDePasse: ['', [Validators.required, Validators.minLength(6)]],
+      motDePasse: ['', Validators.required],
     });
     if (this.auth.getToken()) this.auth.redirectByRole();
   }
@@ -27,7 +27,11 @@ export class LoginComponent {
     this.loading = true; this.error = '';
     this.auth.login(this.form.value).subscribe({
       next: () => this.auth.redirectByRole(),
-      error: (e) => { this.error = e.message; this.loading = false; },
+      error: (e: Error) => {
+        // Message précis pour un compte désactivé, générique sinon
+        this.error = e.message.includes('désactivé') ? e.message : 'Email ou mot de passe incorrect.';
+        this.loading = false;
+      },
     });
   }
 

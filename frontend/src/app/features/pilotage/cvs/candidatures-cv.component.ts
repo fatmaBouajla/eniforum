@@ -1,165 +1,93 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { CandidatureCVService } from '../../../core/services/api.services';
-import { environment } from '../../../../environments/environment';
-import { lireAnalyse } from '../../../core/utils/analyse-ia';
+import { CandidatureCV } from '../../../core/models';
+import { ToastService } from '../../../core/services/toast.service';
+import { libellePoste, lireAnalyse, lireDossier } from '../../../core/utils/analyse-ia';
 
+interface Ligne { c: CandidatureCV; comite: string; poste: string; score: number | null; dossier: Record<string, string>; }
+
+/** Liste des candidatures déposées, avec fiche détaillée et décision. */
 @Component({
   selector: 'app-candidatures-cv',
   templateUrl: './candidatures-cv.component.html',
   styleUrls: ['./candidatures-cv.component.scss'],
 })
 export class CandidaturesCVComponent implements OnInit {
-  candidatures: any[] = [];
-  loading = false;
-  detailLoading = false;
-  detailError = '';
-  filter = 'TOUS';
-  selected: any | null = null;
-  selectedDossierParsed: {label: string, value: string}[] = [];
-  showDetail = false;
-  showRefuserModal = false;
-  refuserId: number | null = null;
-  commentaireForm: FormGroup;
-  analysing: number | null = null;
-  filters = ['TOUS', 'EN_ATTENTE', 'ACCEPTE', 'REFUSE'];
+  lignes: Ligne[] = [];
+  loading = true;
   erreur = '';
-  aAccepter: any | null = null;
+  filtre = 'EN_ATTENTE';
+  recherche = '';
+  ouverte: Ligne | null = null;
+  analyse = false;
+  decision: { c: CandidatureCV; mode: 'accepter' | 'refuser' } | null = null;
+  readonly filtres = [
+    { cle: 'EN_ATTENTE', libelle: 'En attente' }, { cle: 'ACCEPTE', libelle: 'Acceptées' },
+    { cle: 'REFUSE', libelle: 'Refusées' }, { cle: '', libelle: 'Toutes' },
+  ];
+  // Champs du formulaire affichés dans la fiche
+  readonly champs = ['Tel', 'Niveau', 'Comité', 'Motivation', 'Expérience', 'Compétences'];
 
-  constructor(
-    private cvService: CandidatureCVService,
-    private fb: FormBuilder,
-    private http: HttpClient
-  ) {
-    this.commentaireForm = this.fb.group({ commentaire: ['', Validators.required] });
-  }
+  constructor(private cvs: CandidatureCVService, private toast: ToastService) {}
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void { this.charger(); }
 
-  load(): void {
-    this.loading = true;
-    this.cvService.getAll().subscribe({
-      next: c => { this.candidatures = c; this.loading = false; },
-      error: (e: Error) => {
-        this.candidatures = [];
-        this.erreur = `Impossible de charger les candidatures (${e.message}).`;
+  charger(): void {
+    this.cvs.getAll().subscribe({
+      next: l => {
+        this.lignes = l.map(c => this.versLigne(c)).sort((a, b) => (b.c.dateDepot ?? '').localeCompare(a.c.dateDepot ?? ''));
         this.loading = false;
       },
+      error: (e: Error) => { this.erreur = e.message; this.loading = false; },
     });
   }
 
-  get filtered(): any[] {
-    return this.filter === 'TOUS'
-      ? this.candidatures
-      : this.candidatures.filter(c => c.statut === this.filter);
+  private versLigne(c: CandidatureCV): Ligne {
+    const dossier = lireDossier(c.dossierComplet);
+    return { c, dossier, comite: dossier['Comité'] ?? '—', poste: libellePoste(c.posteVise), score: lireAnalyse(c).score };
   }
 
-  statutCount(f: string): number {
-    return f === 'TOUS'
-      ? this.candidatures.length
-      : this.candidatures.filter(c => c.statut === f).length;
+  get visibles(): Ligne[] {
+    const q = this.recherche.trim().toLowerCase();
+    return this.lignes.filter(l => (!this.filtre || l.c.statut === this.filtre) &&
+      (!q || l.c.candidatNom.toLowerCase().includes(q) || (l.c.candidatEmail ?? '').toLowerCase().includes(q) || l.comite.toLowerCase().includes(q)));
   }
 
-  parseDossier(dossierComplet: string | undefined): {label: string, value: string}[] {
-    if (!dossierComplet) return [];
-    return dossierComplet.split('|').map(part => {
-      const [label, ...rest] = part.trim().split(':');
-      return { label: label?.trim(), value: rest.join(':').trim() };
-    }).filter(item => item.label && item.value && item.value !== '-');
-  }
+  nombre(statut: string): number { return statut ? this.lignes.filter(l => l.c.statut === statut).length : this.lignes.length; }
 
-  analyserIA(c: any): void {
-    this.analysing = c.id;
-    this.cvService.analyserIA(c.id).subscribe({
-      next: updated => {
-        const idx = this.candidatures.findIndex(x => x.id === updated.id);
-        if (idx >= 0) this.candidatures[idx] = updated;
-        if (this.selected?.id === updated.id) this.selected = { ...updated };
-        this.analysing = null;
-      },
-      error: (e: Error) => { this.analysing = null; this.erreur = `Analyse IA impossible : ${e.message}`; },
+  relancerAnalyse(l: Ligne): void {
+    this.analyse = true;
+    this.cvs.analyserIA(l.c.id).subscribe({
+      next: c => { this.analyse = false; this.remplacer(c); this.toast.success('Analyse IA mise à jour'); },
+      error: (e: Error) => { this.analyse = false; this.toast.error(e.message); },
     });
   }
 
-  accepter(c: any): void {
-    this.aAccepter = null;
-    if (!c) return;
-    this.cvService.accepter(c.id).subscribe({
-      next: () => {
-        c.statut = 'ACCEPTE';
-        if (this.selected?.id === c.id) this.selected.statut = 'ACCEPTE';
-        this.showDetail = false;
-        this.load();
-      },
-      error: (e: Error) => { this.erreur = `Acceptation impossible : ${e.message}`; },
-    });
-  }
-
-  openRefuser(id: number): void {
-    this.refuserId = id;
-    this.commentaireForm.reset();
-    this.showRefuserModal = true;
-  }
-
-  doRefuser(): void {
-    if (this.commentaireForm.invalid) return;
-    this.cvService.refuser(this.refuserId!, this.commentaireForm.value.commentaire).subscribe({
-      next: () => { this.setRefuse(); this.load(); },
-      error: (e: Error) => { this.showRefuserModal = false; this.erreur = `Refus impossible : ${e.message}`; },
-    });
-  }
-
-  private setRefuse(): void {
-    const c = this.candidatures.find(x => x.id === this.refuserId);
-    if (c) c.statut = 'REFUSE';
-    this.showRefuserModal = false;
-    this.showDetail = false;
-  }
-
-  openDetail(c: any): void {
-    this.detailLoading = true;
-    this.detailError = '';
-    this.showDetail = true;
-    this.cvService.getById(c.id).subscribe({
-      next: detail => {
-        this.selected = detail;
-        this.selectedDossierParsed = this.parseDossier(detail.dossierComplet);
-        this.detailLoading = false;
-      },
-      error: () => {
-        this.detailError = 'Impossible de charger les détails de la candidature.';
-        this.detailLoading = false;
-      }
-    });
-  }
-
-  // ← MÉTHODE MANQUANTE
-  telechargerCv(c: any, ev: Event): void {
-    ev.preventDefault();
-    this.cvService.telechargerCv(c.id).subscribe({
+  telecharger(l: Ligne): void {
+    this.cvs.telechargerCv(l.c.id).subscribe({
       next: blob => {
-        const name = (c.fichierCV || 'cv').split(/[/\\]/).pop() || 'cv.pdf';
-        const url = window.URL.createObjectURL(blob);
+        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = name.includes('.') ? name : `${name}.pdf`;
+        a.download = `CV_${l.c.candidatNom.replace(/\s+/g, '_')}.pdf`;
         a.click();
-        window.URL.revokeObjectURL(url);
+        URL.revokeObjectURL(url);
       },
+      error: (e: Error) => this.toast.error(e.message),
     });
   }
 
-  /** Score réel de l'IA, ou null si l'analyse n'a pas tourné (score de repli ignoré). */
-  scoreAffiche(c: any): number | null {
-    return lireAnalyse(c).score;
+  finDecision(c: CandidatureCV | null): void {
+    this.decision = null;
+    if (c) this.remplacer(c);
   }
 
-  scoreColor(s: number): string {
-    if (s >= 85) return 'score-high';
-    if (s >= 70) return 'score-mid';
-    return 'score-low';
+  private remplacer(c: CandidatureCV): void {
+    const i = this.lignes.findIndex(l => l.c.id === c.id);
+    if (i < 0) return;
+    this.lignes[i] = this.versLigne({ ...this.lignes[i].c, ...c });
+    if (this.ouverte?.c.id === c.id) this.ouverte = this.lignes[i];
   }
 
-  get f() { return this.commentaireForm.controls; }
+  initiale(n: string): string { return (n || '?').charAt(0).toUpperCase(); }
 }

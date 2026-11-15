@@ -1,115 +1,103 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { ForumProject } from '../../../core/models';
+import { ForumProject, StatutProjet } from '../../../core/models';
+import { ToastService } from '../../../core/services/toast.service';
+import { joursAvant } from '../../../core/utils/graphiques';
 
+// La date de l'événement ne peut pas précéder le début de l'organisation
+function datesCoherentes(g: AbstractControl): ValidationErrors | null {
+  const d = g.get('dateDebut')?.value, e = g.get('dateEvenement')?.value;
+  return d && e && e < d ? { dates: true } : null;
+}
+
+/** Éditions du Forum : création, modification, démarrage et clôture. */
 @Component({
   selector: 'app-forum-project',
   templateUrl: './forum-project.component.html',
   styleUrls: ['./forum-project.component.scss'],
 })
 export class ForumProjectComponent implements OnInit {
-  projects: ForumProject[] = [];
-  loading = false;
-  saving = false;
-  errorMsg = '';
-  showModal = false;
-  editMode = false;
-  editId: number | null = null;
-  /** Statut existant en édition (le backend le conserve ; ne pas forcer PLANIFICATION). */
-  private statutEdition: ForumProject['statut'] = 'PLANIFICATION';
-  confirmCloture = false;
-  clotureId: number | null = null;
+  editions: ForumProject[] = [];
+  loading = true;
+  erreur = '';
+  modalOuvert = false;
+  edition: ForumProject | null = null;
+  enregistrement = false;
+  erreurForm = '';
+  aCloturer: ForumProject | null = null;
   form: FormGroup;
-
   private api = `${environment.apiUrl}/forum-projects`;
 
-  constructor(private fb: FormBuilder, private http: HttpClient) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private toast: ToastService) {
     this.form = this.fb.group({
-      nom:           ['', Validators.required],
-      edition:       ['', Validators.required],
-      dateDebut:     ['', Validators.required],
+      nom: ['', Validators.required],
+      edition: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]],
+      dateDebut: ['', Validators.required],
       dateEvenement: ['', Validators.required],
-      lieu:          ['', Validators.required],
-      description:   [''],
-    });
+      lieu: ['', Validators.required],
+      description: [''],
+      statut: ['PLANIFICATION'],
+    }, { validators: datesCoherentes });
   }
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void { this.charger(); }
 
-  load(): void {
-    this.loading = true;
+  charger(): void {
     this.http.get<ForumProject[]>(this.api).subscribe({
-      next: p => { this.projects = p; this.loading = false; },
-      error: () => {
-        this.projects = [
-          { id:1, nom:"Forum d'Entreprise ENICarthage 2025", edition:'2025', dateDebut:'2025-01-15', dateEvenement:'2025-04-20', lieu:'ENICarthage, Ariana', description:'Forum annuel', statut:'EN_COURS' },
-        ];
-        this.loading = false;
-      },
+      next: e => { this.editions = e.sort((a, b) => b.edition.localeCompare(a.edition)); this.loading = false; },
+      error: (e: Error) => { this.erreur = e.message; this.loading = false; },
     });
   }
 
-  openCreate(): void {
-    this.editMode = false; this.editId = null; this.errorMsg = '';
-    this.form.reset();
-    this.showModal = true;
-  }
+  get actives(): ForumProject[] { return this.editions.filter(e => e.statut !== 'CLOTURE'); }
+  get cloturees(): ForumProject[] { return this.editions.filter(e => e.statut === 'CLOTURE'); }
 
-  openEdit(p: ForumProject): void {
-    this.editMode = true; this.editId = p.id; this.errorMsg = '';
-    this.statutEdition = p.statut;
-    this.form.patchValue({
-      nom: p.nom, edition: p.edition,
-      dateDebut: p.dateDebut, dateEvenement: p.dateEvenement,
-      lieu: p.lieu, description: p.description
+  ouvrir(e: ForumProject | null): void {
+    this.edition = e;
+    this.erreurForm = '';
+    const annee = new Date().getFullYear() + 1;
+    this.form.reset(e ? { ...e } : {
+      nom: `Forum d'Entreprise ENICarthage ${annee}`, edition: String(annee),
+      lieu: 'ENICarthage', statut: 'PLANIFICATION', dateDebut: '', dateEvenement: '', description: '',
     });
-    this.showModal = true;
+    this.modalOuvert = true;
   }
 
-  save(): void {
+  enregistrer(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.saving = true; this.errorMsg = '';
-
-    const val = this.form.value;
-    // IMPORTANT: le backend attend statut à la création → PLANIFICATION par défaut
-    const body = {
-      nom:           val.nom,
-      edition:       val.edition,
-      dateDebut:     val.dateDebut,     // format YYYY-MM-DD (input date)
-      dateEvenement: val.dateEvenement, // format YYYY-MM-DD
-      lieu:          val.lieu,
-      description:   val.description || '',
-      statut:        this.editMode ? this.statutEdition : 'PLANIFICATION',
-    };
-
-    const req = this.editMode && this.editId
-      ? this.http.put<ForumProject>(`${this.api}/${this.editId}`, body)
-      : this.http.post<ForumProject>(this.api, body);
-
+    this.enregistrement = true;
+    const req = this.edition
+      ? this.http.put(`${this.api}/${this.edition.id}`, this.form.value)
+      : this.http.post(this.api, this.form.value);
     req.subscribe({
-      next: () => { this.showModal = false; this.saving = false; this.load(); },
-      error: e => {
-        this.errorMsg = e.error?.message || `Erreur ${e.status} — vérifiez que le backend est lancé`;
-        this.saving = false;
-      }
+      next: () => {
+        this.enregistrement = false; this.modalOuvert = false;
+        this.toast.success(this.edition ? 'Édition modifiée' : 'Édition créée');
+        this.charger();
+      },
+      error: (e: Error) => { this.enregistrement = false; this.erreurForm = e.message; },
     });
   }
 
-  askCloturer(id: number): void { this.clotureId = id; this.confirmCloture = true; }
-
-  doCloturer(): void {
-    // Backend utilise PATCH /{id}/archiver (pas /cloturer)
-    this.http.patch<ForumProject>(`${this.api}/${this.clotureId}/archiver`, {}).subscribe({
-      next: () => { this.confirmCloture = false; this.load(); },
-      error: () => { this.confirmCloture = false; this.load(); }
+  changerStatut(e: ForumProject, statut: StatutProjet): void {
+    this.http.put(`${this.api}/${e.id}`, { ...e, statut }).subscribe({
+      next: () => { this.toast.success('Édition lancée'); this.charger(); },
+      error: (err: Error) => this.toast.error(err.message),
     });
   }
 
-  statutColor(s: string): string {
-    return { PLANIFICATION:'planif', EN_COURS:'encours', CLOTURE:'cloture' }[s] ?? '';
+  cloturer(): void {
+    const e = this.aCloturer;
+    this.aCloturer = null;
+    if (!e) return;
+    this.http.patch(`${this.api}/${e.id}/archiver`, {}).subscribe({
+      next: () => { this.toast.success('Édition clôturée et archivée'); this.charger(); },
+      error: (err: Error) => this.toast.error(err.message),
+    });
   }
 
+  jours(e: ForumProject): number | null { return joursAvant(e.dateEvenement); }
   get f() { return this.form.controls; }
 }

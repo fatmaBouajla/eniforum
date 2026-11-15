@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { TacheService, NotificationService } from '../../../core/services/api.services';
-import { Tache, Notification } from '../../../core/models';
+import { NotificationService, TacheService } from '../../../core/services/api.services';
+import { Notification, Tache } from '../../../core/models';
 import { AuthService } from '../../../core/services/auth.service';
 
+/** Tableau de bord du membre : ses priorités du moment. */
 @Component({
   selector: 'app-membre-dashboard',
   templateUrl: './membre-dashboard.component.html',
@@ -11,33 +12,26 @@ import { AuthService } from '../../../core/services/auth.service';
 export class MembreDashboardComponent implements OnInit {
   taches: Tache[] = [];
   notifications: Notification[] = [];
-
+  loading = true;
   erreur = '';
 
-  constructor(
-    private tacheService: TacheService,
-    private notifService: NotificationService,
-    public auth: AuthService
-  ) {}
+  constructor(private tachesSrv: TacheService, private notifs: NotificationService, public auth: AuthService) {}
 
   ngOnInit(): void {
-    this.tacheService.getMesTaches().subscribe({
-      next: t => this.taches = t,
-      error: () => { this.taches = []; this.erreur = 'Impossible de joindre le serveur : les données ne peuvent pas être affichées. Vérifiez que le backend est démarré.'; }
+    this.tachesSrv.getMesTaches().subscribe({
+      next: t => { this.taches = t; this.loading = false; },
+      error: (e: Error) => { this.erreur = e.message; this.loading = false; },
     });
-    this.notifService.getNonLues().subscribe({
-      next: n => this.notifications = n.slice(0, 4),
-      error: () => { this.notifications = []; }
-    });
+    this.notifs.getNonLues().subscribe({ next: n => this.notifications = n.slice(0, 4), error: () => {} });
   }
 
-  get userName(): string { return this.auth.currentUser?.nom?.split(' ')[0] || 'Utilisateur'; }
-  get tachesEnCours():  Tache[] { return this.taches.filter(t => t.statut === 'EN_COURS'); }
-  get tachesUrgentes(): Tache[] { return this.taches.filter(t => t.priorite === 'URGENTE' && t.statut !== 'TERMINEE'); }
-  get tachesTerminees():number   { return this.taches.filter(t => t.statut === 'TERMINEE').length; }
-  get tachesEnRetard(): number   { return this.taches.filter(t => t.statut === 'EN_RETARD').length; }
-
-  typeIcon(type: string): string {
-    return { RETARD:'⏰', ASSIGNATION:'📌', VALIDATION:'✅', ALERTE:'⚠️', INFO:'ℹ️' }[type] ?? 'ℹ️';
+  get prenom(): string { return this.auth.currentUser?.nom?.split(' ')[0] ?? ''; }
+  nb(s: string): number { return this.taches.filter(t => t.statut === s).length; }
+  get avancement(): number { return this.taches.length ? Math.round(this.nb('TERMINEE') / this.taches.length * 100) : 0; }
+  // Priorités : retards, urgences, puis échéances proches
+  get priorites(): Tache[] {
+    const rang = (t: Tache) => t.statut === 'EN_RETARD' ? 0 : t.priorite === 'URGENTE' ? 1 : 2;
+    return this.taches.filter(t => t.statut !== 'TERMINEE')
+      .sort((a, b) => rang(a) - rang(b) || a.dateFin.localeCompare(b.dateFin)).slice(0, 4);
   }
 }

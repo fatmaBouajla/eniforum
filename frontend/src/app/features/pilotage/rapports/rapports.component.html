@@ -1,0 +1,78 @@
+<app-layout title="Rapports" subtitle="Rapport d’avancement à imprimer ou exporter">
+  <div class="alert alert-error" *ngIf="erreur"><lucide-icon name="circle-alert" [size]="18"></lucide-icon>{{ erreur }}</div>
+
+  <div class="toolbar no-print">
+    <button class="btn btn-primary" (click)="imprimer()" [disabled]="loading"><lucide-icon name="printer" [size]="16"></lucide-icon> Imprimer / PDF</button>
+    <span class="spacer"></span>
+    <span class="muted small">Exports Excel :</span>
+    <button class="btn btn-secondary btn-sm" (click)="exporterComites()" [disabled]="loading"><lucide-icon name="file-spreadsheet" [size]="15"></lucide-icon> Comités</button>
+    <button class="btn btn-secondary btn-sm" (click)="exporterTaches()" [disabled]="loading"><lucide-icon name="file-spreadsheet" [size]="15"></lucide-icon> Tâches</button>
+    <button class="btn btn-secondary btn-sm" (click)="exporterCandidatures()" [disabled]="loading"><lucide-icon name="file-spreadsheet" [size]="15"></lucide-icon> Candidatures</button>
+  </div>
+
+  <div class="skeleton" style="height:420px" *ngIf="loading"></div>
+
+  <article class="card rapport" *ngIf="!loading && kpis">
+    <header class="r-head">
+      <img src="assets/logo-forum.png" alt="">
+      <div class="grow">
+        <h2>Rapport d’avancement</h2>
+        <div class="muted">{{ edition?.nom || 'Forum Entreprises ENICarthage' }} · généré le {{ date | date:'d MMMM y à HH:mm' }}</div>
+      </div>
+      <img src="assets/logo-enicarthage.png" alt="" class="eni">
+    </header>
+
+    <section>
+      <h3>Synthèse</h3>
+      <div class="grid grid-4">
+        <div class="kpi"><span>{{ kpis.avancementGlobal }} %</span>Avancement global</div>
+        <div class="kpi"><span>{{ kpis.tachesTerminees }} / {{ kpis.totalTaches }}</span>Tâches terminées</div>
+        <div class="kpi red"><span>{{ kpis.tachesEnRetard }}</span>Tâches en retard</div>
+        <div class="kpi"><span>{{ kpis.workshopsValides }} / {{ kpis.totalWorkshops }}</span>Workshops validés</div>
+      </div>
+    </section>
+
+    <section>
+      <h3>Avancement par comité</h3>
+      <table class="table">
+        <thead><tr><th>Comité</th><th>Tâches</th><th>Terminées</th><th style="width:40%">Avancement</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let a of avancements">
+            <td class="strong">{{ a.comiteNom }}</td><td>{{ a.total }}</td><td>{{ a.terminees }}</td>
+            <td><div class="row"><div class="progress bar"><div [style.width.%]="a.avancement"></div></div><b class="small">{{ a.avancement }} %</b></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h3>Tâches en retard ({{ retards.length }})</h3>
+      <table class="table" *ngIf="retards.length">
+        <thead><tr><th>Tâche</th><th>Comité</th><th>Assignée à</th><th>Échéance</th></tr></thead>
+        <tbody><tr *ngFor="let t of retards"><td>{{ t.titre }}</td><td>{{ t.comiteNom }}</td><td>{{ t.membreNom || '—' }}</td><td>{{ t.dateFin | date:'d MMM y' }}</td></tr></tbody>
+      </table>
+      <p class="muted" *ngIf="!retards.length">Aucune tâche en retard.</p>
+    </section>
+
+    <section class="grid grid-2">
+      <div>
+        <h3>Recrutement</h3>
+        <dl class="kv">
+          <dt>Candidatures reçues</dt><dd class="strong">{{ cvs.length }}</dd>
+          <dt>En attente</dt><dd>{{ nbCv('EN_ATTENTE') }}</dd>
+          <dt>Acceptées</dt><dd>{{ nbCv('ACCEPTE') }}</dd>
+          <dt>Refusées</dt><dd>{{ nbCv('REFUSE') }}</dd>
+        </dl>
+      </div>
+      <div>
+        <h3>Workshops et conférences</h3>
+        <dl class="kv">
+          <dt>Proposés</dt><dd class="strong">{{ workshops.length }}</dd>
+          <dt>Validés</dt><dd>{{ nbWs('VALIDE') }}</dd>
+          <dt>En attente</dt><dd>{{ nbWs('PROPOSE') }}</dd>
+          <dt>Refusés</dt><dd>{{ nbWs('REFUSE') }}</dd>
+        </dl>
+      </div>
+    </section>
+  </article>
+</app-layout>

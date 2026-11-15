@@ -1,67 +1,69 @@
-<app-layout title="Dashboard Admin" subtitle="Forum ENICarthage 2025 — Vue globale">
+<app-layout title="Tableau de bord" subtitle="Vue d’ensemble de l’édition en cours">
+  <div class="alert alert-error" *ngIf="erreur"><lucide-icon name="circle-alert" [size]="18"></lucide-icon>{{ erreur }}</div>
 
-  <div class="page-alert error" *ngIf="erreur" role="alert">⚠️ {{ erreur }}</div>
+  <ng-container *ngIf="loading">
+    <div class="skeleton" style="height:120px"></div>
+    <div class="grid grid-4 mt"><div class="skeleton" style="height:96px" *ngFor="let i of [1,2,3,4]"></div></div>
+  </ng-container>
 
-  <!-- KPI Cards -->
-  <div class="kpi-grid" *ngIf="kpis">
-    <app-stat-card icon="👥" [value]="kpis.totalUtilisateurs" label="Utilisateurs" sub="Actifs sur la plateforme" color="blue"></app-stat-card>
-    <app-stat-card icon="✅" [value]="kpis.tachesTerminees + '/' + kpis.totalTaches" label="Tâches terminées" [sub]="tachesPercent + '% d\'avancement'" color="green"></app-stat-card>
-    <app-stat-card icon="⏰" [value]="kpis.tachesEnRetard" label="Tâches en retard" sub="Nécessitent une attention" color="red"></app-stat-card>
-    <app-stat-card icon="🎓" [value]="kpis.workshopsValides + '/' + kpis.totalWorkshops" label="Workshops validés" sub="Événements confirmés" color="amber"></app-stat-card>
-  </div>
+  <ng-container *ngIf="!loading && kpis">
+    <!-- Édition en cours -->
+    <section class="edition card">
+      <div class="ed-main">
+        <span class="badge badge-blue">Édition {{ edition?.edition || '—' }}</span>
+        <h2>{{ edition?.nom || 'Aucune édition en cours' }}</h2>
+        <div class="ed-meta" *ngIf="edition">
+          <span><lucide-icon name="calendar" [size]="15"></lucide-icon> {{ edition.dateEvenement | date:'d MMMM y' }}</span>
+          <span><lucide-icon name="map-pin" [size]="15"></lucide-icon> {{ edition.lieu }}</span>
+        </div>
+      </div>
+      <div class="countdown" *ngIf="jours !== null && jours >= 0">
+        <span class="cd-val">J-{{ jours }}</span><span class="cd-lbl">avant le Forum</span>
+      </div>
+      <a class="btn btn-secondary" routerLink="/admin/forum-project"><lucide-icon name="pencil" [size]="15"></lucide-icon> Gérer l’édition</a>
+    </section>
 
-  <!-- Charts Rowww -->
-  <div class="charts-row">
-    <div class="card chart-card">
-      <div class="card-hd">Avancement par comité</div>
-      <div class="card-sub">Progression des 6 comités actifs</div>
-      <div class="chart-wrap" style="height: 240px;">
-        <canvas id="chartComites"></canvas>
+    <!-- Chiffres clés -->
+    <div class="grid grid-4 mt">
+      <app-stat-card icon="users" label="Utilisateurs" [value]="kpis.totalUtilisateurs" sub="Comptes sur la plateforme"></app-stat-card>
+      <app-stat-card icon="circle-check" tone="green" label="Tâches terminées" [value]="kpis.tachesTerminees + ' / ' + kpis.totalTaches" [sub]="pourcentTaches + ' % de l’ensemble'"></app-stat-card>
+      <app-stat-card icon="clock" tone="red" label="Tâches en retard" [value]="kpis.tachesEnRetard" sub="À relancer en priorité"></app-stat-card>
+      <app-stat-card icon="file-text" tone="violet" label="Candidatures" [value]="kpis.totalCandidatures" [sub]="kpis.candidaturesAcceptees + ' acceptée(s)'"></app-stat-card>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="charts mt">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">Avancement par comité</div><div class="card-sub">Part des tâches terminées</div></div></div>
+        <div class="card-body chart"><canvas #cAvancement></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">Répartition des tâches</div><div class="card-sub">{{ kpis.totalTaches }} tâche(s) au total</div></div></div>
+        <div class="card-body chart"><canvas #cTaches></canvas></div>
       </div>
     </div>
-    <div class="card chart-card">
-      <div class="card-hd">Répartition des tâches</div>
-      <div class="card-sub">Par statut — 200 tâches total</div>
-      <div class="chart-wrap" style="height: 240px;">
-        <canvas id="chartTaches"></canvas>
+
+    <!-- Comités -->
+    <div class="card mt">
+      <div class="card-head">
+        <div><div class="card-title">Comités</div><div class="card-sub">{{ avancements.length }} comité(s) dans l’édition</div></div>
+        <span class="spacer"></span>
+        <a class="btn btn-ghost btn-sm" routerLink="/admin/comites">Gérer les comités <lucide-icon name="arrow-right" [size]="15"></lucide-icon></a>
       </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Comité</th><th>Tâches</th><th>Terminées</th><th style="width:35%">Avancement</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let a of avancements">
+              <td><span class="cell-user"><span class="c-ico"><lucide-icon [name]="icone(a.comiteNom)" [size]="16"></lucide-icon></span><span class="name">{{ a.comiteNom }}</span></span></td>
+              <td>{{ a.total }}</td>
+              <td>{{ a.terminees }}</td>
+              <td><div class="row"><div class="progress grow-bar"><div [ngClass]="ton(a.avancement)" [style.width.%]="a.avancement"></div></div><span class="strong small">{{ a.avancement }} %</span></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <app-empty *ngIf="!avancements.length" icon="layers" title="Aucun comité" text="Créez les comités de l’édition pour suivre leur avancement."></app-empty>
     </div>
-  </div>
-
-  <!-- Comités Table -->
-  <div class="card" style="margin-top: 24px;">
-    <div class="card-hd">Tableau de bord des comités</div>
-    <div class="card-sub">Avancement détaillé par comité</div>
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Comité</th>
-          <th>Tâches totales</th>
-          <th>Terminées</th>
-          <th>Avancement</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let a of avancements">
-          <td><strong>{{ a.comiteNom }}</strong></td>
-          <td>{{ a.total }}</td>
-          <td>{{ a.terminees }}</td>
-          <td>
-            <div class="progress-wrap">
-              <div class="progress-bar">
-                <div class="progress-fill"
-                     [style.width.%]="a.avancement"
-                     [class.low]="a.avancement < 50"
-                     [class.mid]="a.avancement >= 50 && a.avancement < 80"
-                     [class.high]="a.avancement >= 80">
-                </div>
-              </div>
-              <span class="progress-val">{{ a.avancement }}%</span>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
+  </ng-container>
 </app-layout>

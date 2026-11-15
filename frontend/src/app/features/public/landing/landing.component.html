@@ -1,0 +1,117 @@
+<div class="landing">
+  <!-- En-tête -->
+  <header class="nav">
+    <div class="wrap nav-in">
+      <a class="logos" routerLink="/">
+        <img src="assets/logo-enicarthage.png" alt="ENICarthage">
+        <span class="sep"></span>
+        <img src="assets/logo-forum.png" alt="Forum Entreprises ENICarthage">
+      </a>
+      <nav class="links">
+        <a href="#comites">Comités</a>
+        <a href="#recrutement">Recrutement</a>
+        <a href="#plateforme">Plateforme</a>
+      </nav>
+      <a class="btn btn-primary" *ngIf="!auth.getToken()" routerLink="/auth/login">
+        <lucide-icon name="lock" [size]="16"></lucide-icon> Se connecter
+      </a>
+      <button class="btn btn-primary" *ngIf="auth.getToken()" (click)="auth.redirectByRole()">
+        Mon espace <lucide-icon name="arrow-right" [size]="16"></lucide-icon>
+      </button>
+    </div>
+  </header>
+
+  <!-- Accroche -->
+  <section class="hero">
+    <div class="wrap hero-in">
+      <div class="hero-txt">
+        <span class="eyebrow"><lucide-icon name="sparkles" [size]="14"></lucide-icon> Plateforme officielle du Forum</span>
+        <h1>Organisez le <span class="grad">Forum Entreprises</span> de l’ENICarthage</h1>
+        <p>Une seule plateforme pour les comités, les tâches, les workshops et le recrutement des bénévoles, avec une IA qui aide à lire les candidatures.</p>
+        <div class="cta">
+          <a class="btn btn-primary btn-lg" routerLink="/auth/inscription-membre">
+            <lucide-icon name="user-plus" [size]="18"></lucide-icon> Devenir membre
+          </a>
+          <a class="btn btn-secondary btn-lg" routerLink="/auth/candidature-chef">
+            <lucide-icon name="crown" [size]="18"></lucide-icon> Candidater chef de comité
+          </a>
+        </div>
+      </div>
+      <div class="hero-card card">
+        <img src="assets/logo-forum.png" alt="" class="hero-logo">
+        <ul>
+          <li><lucide-icon name="layers" [size]="18"></lucide-icon> 6 comités pour organiser l’événement</li>
+          <li><lucide-icon name="list-todo" [size]="18"></lucide-icon> Suivi des tâches et alertes de retard</li>
+          <li><lucide-icon name="presentation" [size]="18"></lucide-icon> Workshops et conférences planifiés</li>
+          <li><lucide-icon name="sparkles" [size]="18"></lucide-icon> Candidatures analysées par IA</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comités -->
+  <section class="section" id="comites">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Les comités du Forum</h2>
+        <p>Chaque comité a sa mission. Choisissez celui qui vous correspond.</p>
+      </div>
+      <div class="grid grid-3">
+        <a class="card card-link comite" *ngFor="let c of comites" routerLink="/auth/inscription-membre" [queryParams]="{ comite: c.nom }">
+          <span class="c-ico"><lucide-icon [name]="icone(c.nom)" [size]="22"></lucide-icon></span>
+          <h3>{{ c.nom }}</h3>
+          <p>{{ c.desc }}</p>
+          <span class="c-link">Rejoindre <lucide-icon name="arrow-right" [size]="15"></lucide-icon></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recrutement -->
+  <section class="section alt" id="recrutement">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Comment se passe le recrutement ?</h2>
+        <p>Un processus clair, rapide et équitable.</p>
+      </div>
+      <div class="grid grid-3">
+        <div class="step" *ngFor="let e of etapes; let i = index">
+          <div class="step-num">{{ i + 1 }}</div>
+          <span class="s-ico"><lucide-icon [name]="e.icon" [size]="20"></lucide-icon></span>
+          <h3>{{ e.titre }}</h3>
+          <p>{{ e.texte }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Plateforme -->
+  <section class="section" id="plateforme">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Un espace adapté à chaque rôle</h2>
+        <p>Chacun voit ce dont il a besoin, rien de plus.</p>
+      </div>
+      <div class="roles">
+        <div class="role card" *ngFor="let r of roles">
+          <lucide-icon [name]="r.icon" [size]="20"></lucide-icon>
+          <div><h4>{{ r.titre }}</h4><p>{{ r.texte }}</p></div>
+        </div>
+      </div>
+      <div class="final card">
+        <div>
+          <h3>Prêt(e) à rejoindre l’aventure ?</h3>
+          <p>Les candidatures sont ouvertes pour la prochaine édition.</p>
+        </div>
+        <a class="btn btn-primary btn-lg" routerLink="/auth/inscription-membre">Je candidate <lucide-icon name="arrow-right" [size]="18"></lucide-icon></a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="wrap foot-in">
+      <span>© {{ annee }} Forum Entreprises ENICarthage — École Nationale d’Ingénieurs de Carthage</span>
+      <a routerLink="/auth/login">Espace organisateurs</a>
+    </div>
+  </footer>
+</div>

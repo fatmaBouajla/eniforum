@@ -1,44 +1,50 @@
-<!-- src/app/features/coordinatrice/dashboard/coord-dashboard.component.html -->
-<app-layout title="Espace Coordinatrice" subtitle="Supervision transverse du Forum ENICarthage">
+<app-layout title="Tableau de bord" subtitle="Coordination générale du Forum">
+  <div class="alert alert-error" *ngIf="erreur"><lucide-icon name="circle-alert" [size]="18"></lucide-icon>{{ erreur }}</div>
+  <div class="grid grid-4" *ngIf="loading"><div class="skeleton" style="height:96px" *ngFor="let i of [1,2,3,4]"></div></div>
 
-  <!-- Alertes critiques -->
-  <div class="alertes-block" *ngIf="alertes.length > 0">
-    <div class="alerte-item" *ngFor="let a of alertes" [ngClass]="a.type">
-      <span>{{ a.type === 'danger' ? '🚨' : '⚠️' }}</span>
-      <span>{{ a.msg }}</span>
+  <ng-container *ngIf="!loading && kpis">
+    <div class="grid grid-4">
+      <app-stat-card icon="trending-up" label="Avancement global" [value]="kpis.avancementGlobal + ' %'"></app-stat-card>
+      <app-stat-card icon="list-todo" label="Tâches en cours" [value]="kpis.tachesEnCours" [sub]="kpis.tachesAFaire + ' à faire'"></app-stat-card>
+      <app-stat-card icon="clock" tone="red" label="Tâches en retard" [value]="kpis.tachesEnRetard"></app-stat-card>
+      <app-stat-card icon="presentation" tone="amber" label="Workshops à valider" [value]="aValider" [sub]="kpis.workshopsValides + ' validé(s)'"></app-stat-card>
     </div>
-  </div>
 
-  <!-- KPIs -->
-  <div class="kpi-grid" *ngIf="kpis">
-    <app-stat-card icon="📊" [value]="kpis.avancementGlobal+'%'" label="Avancement global" sub="Toutes tâches" color="blue"></app-stat-card>
-    <app-stat-card icon="✅" [value]="kpis.tachesTerminees"       label="Tâches terminées" sub="Sur {{ kpis.totalTaches }}" color="green"></app-stat-card>
-    <app-stat-card icon="⏰" [value]="kpis.tachesEnRetard"        label="En retard"         sub="Action urgente" color="red"></app-stat-card>
-    <app-stat-card icon="🎓" [value]="kpis.totalWorkshops"        label="Workshops"          sub="{{ kpis.workshopsValides }} validés" color="amber"></app-stat-card>
-  </div>
+    <div class="cols mt">
+      <div class="card">
+        <div class="card-head">
+          <div><div class="card-title">Alertes</div><div class="card-sub">Calculées à partir des tâches et des workshops</div></div>
+          <span class="spacer"></span><span class="badge badge-red" *ngIf="alertes.length">{{ alertes.length }}</span>
+        </div>
+        <div class="list" *ngIf="alertes.length">
+          <a class="list-item alerte" *ngFor="let a of alertes" [routerLink]="a.lien" [ngClass]="a.niveau">
+            <span class="a-ico"><lucide-icon [name]="a.icone" [size]="16"></lucide-icon></span>
+            <span class="grow">{{ a.texte }}</span>
+            <lucide-icon name="chevron-right" [size]="16" class="muted"></lucide-icon>
+          </a>
+        </div>
+        <app-empty *ngIf="!alertes.length" icon="circle-check" title="Aucune alerte" text="Tout est sous contrôle."></app-empty>
+      </div>
 
-  <!-- Raccourcis -->
-  <div class="shortcuts-grid">
-    <a routerLink="/coordinatrice/taches" class="shortcut-card blue">
-      <span class="sc-icon">✅</span>
-      <span class="sc-label">Gérer les tâches</span>
-      <span class="sc-arrow">→</span>
-    </a>
-    <a routerLink="/coordinatrice/workshops" class="shortcut-card amber">
-      <span class="sc-icon">🎓</span>
-      <span class="sc-label">Valider workshops</span>
-      <span class="sc-arrow">→</span>
-    </a>
-    <a routerLink="/coordinatrice/comites" class="shortcut-card green">
-      <span class="sc-icon">📋</span>
-      <span class="sc-label">Voir les comités</span>
-      <span class="sc-arrow">→</span>
-    </a>
-    <a routerLink="/coordinatrice/planning" class="shortcut-card purple">
-      <span class="sc-icon">📅</span>
-      <span class="sc-label">Planning global</span>
-      <span class="sc-arrow">→</span>
-    </a>
-  </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">Répartition des tâches</div><div class="card-sub">{{ kpis.totalTaches }} tâche(s)</div></div></div>
+        <div class="card-body chart"><canvas #cTaches></canvas></div>
+      </div>
+    </div>
 
+    <div class="card mt">
+      <div class="card-head">
+        <div><div class="card-title">Prochains workshops</div><div class="card-sub">Validés et à venir</div></div>
+        <span class="spacer"></span>
+        <a class="btn btn-ghost btn-sm" routerLink="/coordinatrice/planning">Planning complet <lucide-icon name="arrow-right" [size]="15"></lucide-icon></a>
+      </div>
+      <div class="list" *ngIf="aVenir.length">
+        <div class="list-item" *ngFor="let w of aVenir">
+          <div class="date"><b>{{ w.dateHeure | date:'d' }}</b><span>{{ w.dateHeure | date:'MMM' }}</span></div>
+          <div class="grow"><div class="strong">{{ w.titre }}</div><div class="muted small">{{ w.dateHeure | date:'HH:mm' }} · {{ w.intervenant || 'Intervenant à confirmer' }}</div></div>
+        </div>
+      </div>
+      <app-empty *ngIf="!aVenir.length" icon="calendar-days" title="Aucun workshop planifié" text="Les workshops validés apparaîtront ici."></app-empty>
+    </div>
+  </ng-container>
 </app-layout>

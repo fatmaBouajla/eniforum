@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { TacheService, ComiteService } from '../../../core/services/api.services';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { CandidatureCVService, ComiteService, TacheService, WorkshopService } from '../../../core/services/api.services';
 import { AuthService } from '../../../core/services/auth.service';
-import { Tache, Comite } from '../../../core/models';
+import { Comite, Tache, Workshop } from '../../../core/models';
+import { iconeComite } from '../../../shared/icons';
 
+/** Tableau de bord du chef de comité. */
 @Component({
   selector: 'app-chef-dashboard',
   templateUrl: './chef-dashboard.component.html',
@@ -11,60 +15,40 @@ import { Tache, Comite } from '../../../core/models';
 export class ChefDashboardComponent implements OnInit {
   comite: Comite | null = null;
   taches: Tache[] = [];
+  workshops: Workshop[] = [];
+  demandes = 0;
   loading = true;
-  comiteLoading = true;
+  sansComite = false;
 
   constructor(
-    private tacheService: TacheService,
-    private comiteService: ComiteService,
-    public auth: AuthService
+    private comites: ComiteService, private tachesSrv: TacheService, private ws: WorkshopService,
+    private cvs: CandidatureCVService, public auth: AuthService,
   ) {}
 
   ngOnInit(): void {
-    // Charger le comité dont cet utilisateur est chef (dynamique, pas hardcodé)
-    this.comiteService.getMonComite().subscribe({
+    this.comites.getMonComite().subscribe({
       next: c => {
         this.comite = c;
-        this.comiteLoading = false;
-        // Backend : GET /taches filtre déjà les tâches du comité du chef connecté
-        this.tacheService.getAll().subscribe({
-          next: t => { this.taches = t; this.loading = false; },
-          error: () => { this.taches = []; this.loading = false; },
+        forkJoin({
+          taches: this.tachesSrv.getAll().pipe(catchError(() => of([] as Tache[]))),
+          ws: this.ws.getAll().pipe(catchError(() => of([] as Workshop[]))),
+          cvs: this.cvs.getAll().pipe(catchError(() => of([]))),
+        }).subscribe(r => {
+          this.taches = r.taches;
+          this.workshops = r.ws.filter(w => new Date(w.dateHeure) >= new Date()).slice(0, 3);
+          this.demandes = r.cvs.filter(c => c.statut === 'EN_ATTENTE').length;
+          this.loading = false;
         });
       },
-      error: () => {
-        this.comiteLoading = false;
-        this.loading = false;
-        // Pas encore assigné à un comité
-        this.comite = null;
-      }
+      error: () => { this.sansComite = true; this.loading = false; },
     });
   }
 
-  get dernieresToughes(): Tache[] { return this.taches.slice(0, 4); }
-  get aFaire():    number { return this.taches.filter(t => t.statut === 'A_FAIRE').length; }
-  get enCours():   number { return this.taches.filter(t => t.statut === 'EN_COURS').length; }
-  get terminees(): number { return this.taches.filter(t => t.statut === 'TERMINEE').length; }
-  get enRetard():  number { return this.taches.filter(t => t.statut === 'EN_RETARD').length; }
-
-  get avancement(): number {
-    if (!this.taches.length) return 0;
-    return Math.round((this.terminees / this.taches.length) * 100);
+  nb(s: string): number { return this.taches.filter(t => t.statut === s).length; }
+  get avancement(): number { return this.taches.length ? Math.round(this.nb('TERMINEE') / this.taches.length * 100) : 0; }
+  get aSuivre(): Tache[] {
+    return this.taches.filter(t => t.statut !== 'TERMINEE').sort((a, b) => a.dateFin.localeCompare(b.dateFin)).slice(0, 5);
   }
-
-  comiteIcon(nom: string): string {
-    const map: Record<string, string> = {
-      Design:'🎨', Sponsoring:'🤝', Logistique:'🏗',
-      Programme:'📅', Media:'📸', Projet:'⚙'
-    };
-    return map[nom] ?? '📋';
-  }
-
-  dotClass(statut: string): string {
-    return statut.toLowerCase().replace('_', '-');
-  }
-
-  get userName(): string {
-    return this.auth.currentUser?.nom?.split(' ')[0] || 'Chef';
-  }
+  get prenom(): string { return this.auth.currentUser?.nom?.split(' ')[0] ?? ''; }
+  icone(n: string): string { return iconeComite(n); }
 }

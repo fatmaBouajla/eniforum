@@ -1,0 +1,12 @@
+.ws { display: flex; gap: 16px; padding: 16px 18px; align-items: flex-start; border-left: 4px solid var(--border-2); }
+.ws.PROPOSE { border-left-color: #E3A008; } .ws.VALIDE { border-left-color: var(--green); } .ws.REFUSE { border-left-color: #E05A5A; }
+.date { width: 58px; flex-shrink: 0; border-radius: 12px; padding: 8px 0; background: var(--brand-100); color: var(--brand); display: flex; flex-direction: column; align-items: center; line-height: 1.15; }
+.date b { font-size: 20px; } .date span { font-size: 11px; font-weight: 700; text-transform: uppercase; } .date small { font-size: 11px; color: var(--text-2); margin-top: 2px; }
+.body { flex: 1; min-width: 0; }
+.body h3 { font-size: 15.5px; }
+.body p { color: var(--text-2); font-size: 13px; margin-top: 4px; }
+.meta { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; font-size: 12.5px; color: var(--text-2); font-weight: 600; }
+.meta span { display: inline-flex; align-items: center; gap: 5px; }
+.motif { margin-top: 8px; font-size: 12.5px; padding: 8px 10px; border-radius: 8px; background: var(--danger-bg); color: #8E1B1B; }
+.acts { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+@media (max-width: 700px) { .ws { flex-wrap: wrap; } .acts { width: 100%; justify-content: flex-end; } }

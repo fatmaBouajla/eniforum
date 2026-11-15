@@ -5,7 +5,16 @@ import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
+  {
+    path: '',
+    pathMatch: 'full',
+    loadChildren: () => import('./features/public/public.module').then(m => m.PublicModule)
+  },
+  {
+    path: 'profil',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/compte/compte.module').then(m => m.CompteModule)
+  },
   {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.module').then(m => m.AuthModule)
@@ -40,11 +49,11 @@ const routes: Routes = [
     data: { roles: ['MEMBRE'] },
     loadChildren: () => import('./features/membre/membre.module').then(m => m.MembreModule)
   },
-  { path: '**', redirectTo: 'auth/login' }
+  { path: '**', redirectTo: '' }
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, { scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' })],
   exports: [RouterModule]
 })
 export class AppRoutingModule {}

@@ -1,0 +1,62 @@
+.landing { background: var(--surface); min-height: 100vh; }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+.nav { position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+.nav-in { display: flex; align-items: center; gap: 24px; height: 72px; }
+.logos { display: flex; align-items: center; gap: 12px; }
+.logos img { height: 46px; width: auto; }
+.sep { width: 1px; height: 30px; background: var(--border); }
+.links { flex: 1; display: flex; gap: 22px; justify-content: center; }
+.links a { color: var(--text-2); font-weight: 600; font-size: 14px; }
+.links a:hover { color: var(--brand); text-decoration: none; }
+
+.hero { background: radial-gradient(900px 400px at 85% 0%, rgba(36,156,216,.14), transparent 60%),
+  radial-gradient(700px 360px at 0% 100%, rgba(43,182,115,.10), transparent 60%), var(--bg); }
+.hero-in { display: grid; grid-template-columns: 1.25fr 1fr; gap: 48px; align-items: center; padding-top: 72px; padding-bottom: 80px; }
+.eyebrow { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; background: var(--brand-100); color: var(--brand); font-size: 12.5px; font-weight: 700; }
+.hero h1 { font-size: clamp(32px, 4.4vw, 50px); margin: 18px 0 16px; letter-spacing: -.02em; }
+.grad { background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p { font-size: 17px; color: var(--text-2); max-width: 560px; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+.hero-card { padding: 28px; box-shadow: var(--shadow); }
+.hero-logo { height: 140px; margin: 0 auto 18px; }
+.hero-card ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.hero-card li { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--surface-2); font-weight: 600; color: var(--text); }
+.hero-card li lucide-icon { color: var(--brand); }
+
+.section { padding: 76px 0; }
+.section.alt { background: var(--bg); }
+.sec-head { text-align: center; margin-bottom: 36px; }
+.sec-head h2 { font-size: 30px; }
+.sec-head p { color: var(--text-2); margin-top: 6px; font-size: 15px; }
+.comite { padding: 22px; color: inherit; text-decoration: none !important; display: flex; flex-direction: column; gap: 8px; }
+.c-ico, .s-ico { width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center; background: var(--brand-100); color: var(--brand); }
+.comite h3 { font-size: 17px; margin-top: 6px; }
+.comite p { color: var(--text-2); font-size: 13.5px; flex: 1; }
+.c-link { display: inline-flex; align-items: center; gap: 6px; color: var(--brand); font-weight: 700; font-size: 13.5px; }
+.step { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 26px 22px; }
+.step-num { position: absolute; top: 18px; right: 20px; font-size: 40px; font-weight: 800; color: #E6EEF7; }
+.s-ico { background: var(--green-100); color: var(--green); }
+.step h3 { font-size: 16.5px; margin: 14px 0 6px; }
+.step p { color: var(--text-2); font-size: 13.5px; }
+.roles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.role { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.role lucide-icon { color: var(--brand); }
+.role h4 { font-size: 14.5px; }
+.role p { font-size: 12.5px; color: var(--text-2); margin-top: 4px; }
+.final { margin-top: 36px; padding: 28px 32px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  background: var(--gradient); border: 0; color: #fff; }
+.final h3 { color: #fff; font-size: 21px; }
+.final p { color: rgba(255,255,255,.85); }
+.final .btn { background: #fff; color: var(--brand-700); }
+.foot { border-top: 1px solid var(--border); padding: 22px 0; font-size: 13px; color: var(--text-3); }
+.foot-in { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+@media (max-width: 1000px) { .roles { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 860px) {
+  .hero-in { grid-template-columns: 1fr; padding-top: 40px; padding-bottom: 48px; }
+  .links { display: none; }
+  .nav-in { justify-content: space-between; }
+  .logos img { height: 36px; }
+  .section { padding: 52px 0; }
+}
+@media (max-width: 520px) { .roles { grid-template-columns: 1fr; } .logos .sep, .logos img:first-child { display: none; } }

@@ -1,72 +1,57 @@
-<!-- src/app/features/membre/dashboard/membre-dashboard.component.html -->
-<app-layout [title]="'Bonjour, ' + userName + ' 👋'" subtitle="Votre espace membre du Forum ENICarthage">
+<app-layout title="Tableau de bord" subtitle="Vos tâches et nouveautés">
+  <div class="alert alert-error" *ngIf="erreur"><lucide-icon name="circle-alert" [size]="18"></lucide-icon>{{ erreur }}</div>
+  <div class="skeleton" style="height:130px" *ngIf="loading"></div>
 
-  <div class="page-alert error" *ngIf="erreur" role="alert">⚠️ {{ erreur }}</div>
-
-  <!-- Mini KPIs -->
-  <div class="mini-kpis">
-    <div class="mini-card blue">
-      <div class="mini-val">{{ tachesEnCours.length }}</div>
-      <div class="mini-lbl">En cours</div>
-    </div>
-    <div class="mini-card amber">
-      <div class="mini-val">{{ tachesUrgentes.length }}</div>
-      <div class="mini-lbl">Urgentes</div>
-    </div>
-    <div class="mini-card green">
-      <div class="mini-val">{{ tachesTerminees }}</div>
-      <div class="mini-lbl">Terminées</div>
-    </div>
-    <div class="mini-card red">
-      <div class="mini-val">{{ tachesEnRetard }}</div>
-      <div class="mini-lbl">En retard</div>
-    </div>
-  </div>
-
-  <div class="two-col">
-
-    <!-- Tâches urgentes -->
-    <div class="card">
-      <div class="card-hd">🔥 Tâches urgentes</div>
-      <div class="card-sub">Nécessitent votre attention immédiate</div>
-      <div class="tache-list">
-        <div class="tache-item" *ngFor="let t of tachesUrgentes" [class.retard]="t.statut === 'EN_RETARD'">
-          <div class="tache-left">
-            <div class="tache-badge" [class.urgente]="t.priorite === 'URGENTE'">🔥</div>
-            <div>
-              <div class="tache-titre">{{ t.titre }}</div>
-              <div class="tache-meta">
-                {{ t.comiteNom }} · Échéance {{ t.dateFin | date:'dd/MM/yyyy' }}
-              </div>
-            </div>
-          </div>
-          <app-statut-badge [statut]="t.statut"></app-statut-badge>
-        </div>
-        <div class="empty-list" *ngIf="tachesUrgentes.length === 0">
-          ✅ Aucune tâche urgente !
-        </div>
+  <ng-container *ngIf="!loading && !erreur">
+    <section class="card hello">
+      <div class="grow">
+        <h2>Bonjour {{ prenom }}</h2>
+        <p class="muted" *ngIf="taches.length">{{ nb('A_FAIRE') + nb('EN_COURS') + nb('EN_RETARD') }} tâche(s) à traiter · {{ nb('TERMINEE') }} terminée(s)</p>
+        <p class="muted" *ngIf="!taches.length">Aucune tâche ne vous est encore assignée.</p>
       </div>
-      <a routerLink="/membre/taches" class="card-link">Voir toutes mes tâches →</a>
-    </div>
-
-    <!-- Notifications récentes -->
-    <div class="card">
-      <div class="card-hd">🔔 Notifications récentes</div>
-      <div class="card-sub">Dernières activités vous concernant</div>
-      <div class="notif-list">
-        <div class="notif-item" *ngFor="let n of notifications" [class.unread]="!n.lu">
-          <div class="notif-icon">{{ typeIcon(n.type) }}</div>
-          <div class="notif-body">
-            <div class="notif-msg">{{ n.message }}</div>
-            <div class="notif-date">{{ n.dateEnvoi | date:'dd/MM HH:mm' }}</div>
-          </div>
-          <div class="notif-dot" *ngIf="!n.lu"></div>
-        </div>
-        <div class="empty-list" *ngIf="notifications.length === 0">Aucune notification.</div>
+      <div class="ring-wrap" *ngIf="taches.length">
+        <app-score-ring [score]="avancement" [size]="72"></app-score-ring>
+        <span class="muted small">avancement</span>
       </div>
-      <a routerLink="/membre/notifications" class="card-link">Voir toutes les notifications →</a>
+    </section>
+
+    <div class="grid grid-3 mt">
+      <app-stat-card icon="refresh-cw" label="En cours" [value]="nb('EN_COURS')"></app-stat-card>
+      <app-stat-card icon="clock" tone="red" label="En retard" [value]="nb('EN_RETARD')"></app-stat-card>
+      <app-stat-card icon="circle-check" tone="green" label="Terminées" [value]="nb('TERMINEE')"></app-stat-card>
     </div>
 
-  </div>
+    <div class="cols mt">
+      <div class="card">
+        <div class="card-head">
+          <div><div class="card-title">Mes priorités</div><div class="card-sub">Retards et urgences d’abord</div></div>
+          <span class="spacer"></span>
+          <a class="btn btn-ghost btn-sm" routerLink="/membre/taches">Mes tâches <lucide-icon name="arrow-right" [size]="15"></lucide-icon></a>
+        </div>
+        <div class="list" *ngIf="priorites.length">
+          <a class="list-item lien" *ngFor="let t of priorites" routerLink="/membre/taches">
+            <span class="dot" [ngClass]="t.statut === 'EN_RETARD' ? 'red' : t.priorite === 'URGENTE' ? 'amber' : ''"></span>
+            <div class="grow"><div class="strong truncate">{{ t.titre }}</div><div class="muted small">{{ t.comiteNom }} · échéance {{ t.dateFin | date:'d MMM' }}</div></div>
+            <app-statut-badge [statut]="t.statut"></app-statut-badge>
+          </a>
+        </div>
+        <app-empty *ngIf="!priorites.length" icon="circle-check" title="Tout est à jour" text="Aucune tâche en attente."></app-empty>
+      </div>
 
+      <div class="card">
+        <div class="card-head">
+          <div><div class="card-title">Notifications</div><div class="card-sub">Non lues</div></div>
+          <span class="spacer"></span>
+          <a class="btn btn-ghost btn-sm" routerLink="/membre/notifications">Tout voir</a>
+        </div>
+        <div class="list" *ngIf="notifications.length">
+          <div class="list-item" *ngFor="let n of notifications">
+            <span class="n-ico"><lucide-icon name="bell" [size]="15"></lucide-icon></span>
+            <div class="grow"><div class="small">{{ n.message }}</div><div class="muted small">{{ n.dateEnvoi | date:'d MMM à HH:mm' }}</div></div>
+          </div>
+        </div>
+        <app-empty *ngIf="!notifications.length" icon="bell" title="Aucune nouveauté"></app-empty>
+      </div>
+    </div>
+  </ng-container>
 </app-layout>

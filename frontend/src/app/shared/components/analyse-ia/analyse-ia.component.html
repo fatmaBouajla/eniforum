@@ -1,10 +1,10 @@
 <div class="aia" *ngIf="a">
   <!-- Pas encore analysé -->
   <div class="aia-na" *ngIf="!a.analysee">
-    <span class="aia-na-ico">🤖</span>
+    <span class="aia-na-ico"><lucide-icon name="sparkles" [size]="22"></lucide-icon></span>
     <div>
       <div class="aia-na-title">Pas encore analysé par l'IA</div>
-      <div class="ui-muted">
+      <div class="muted small">
         {{ a.texteBrut || messageNonAnalyse }}
       </div>
     </div>
@@ -14,7 +14,7 @@
     <div class="aia-head">
       <app-score-ring [score]="a.score" [size]="64"></app-score-ring>
       <div class="aia-head-txt">
-        <span class="reco" [ngClass]="a.recommandation" *ngIf="a.recommandation">
+        <span class="reco badge" [ngClass]="a.recommandation" *ngIf="a.recommandation">
           {{ labels[a.recommandation] }}
         </span>
         <p class="synthese" *ngIf="a.synthese">{{ a.synthese }}</p>
@@ -31,21 +31,21 @@
 
     <div class="aia-grid" [class.compact]="compact">
       <div class="aia-block" *ngIf="a.pointsForts.length">
-        <h4>✅ Points forts</h4>
+        <h4><lucide-icon name="circle-check" [size]="14"></lucide-icon> Points forts</h4>
         <ul><li *ngFor="let p of a.pointsForts">{{ p }}</li></ul>
       </div>
       <div class="aia-block" *ngIf="a.aVerifier.length">
-        <h4>🔎 Points à vérifier</h4>
+        <h4><lucide-icon name="search" [size]="14"></lucide-icon> Points à vérifier</h4>
         <ul><li *ngFor="let p of a.aVerifier">{{ p }}</li></ul>
       </div>
     </div>
 
     <div class="aia-block" *ngIf="a.competences.length || a.manquantes.length">
-      <h4>🧩 Compétences</h4>
-      <div class="ui-row">
-        <span class="ui-chip ui-chip-ok" *ngFor="let c of a.competences">{{ c }}</span>
-        <span class="ui-chip ui-chip-missing" *ngFor="let c of a.manquantes" title="Attendue pour ce poste, non trouvée">
-          ✕ {{ c }}
+      <h4><lucide-icon name="layers" [size]="14"></lucide-icon> Compétences</h4>
+      <div class="row">
+        <span class="chip chip-ok" *ngFor="let c of a.competences">{{ c }}</span>
+        <span class="chip chip-missing" *ngFor="let c of a.manquantes" title="Attendue pour ce poste, non trouvée">
+          <lucide-icon name="x" [size]="12"></lucide-icon>{{ c }}
         </span>
       </div>
     </div>

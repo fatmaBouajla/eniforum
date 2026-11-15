@@ -17,14 +17,14 @@ import { UiService } from '../../../core/services/ui.service';
   `,
   styles: [`
     .app-shell { display: flex; min-height: 100vh; background: var(--bg); }
-    .page-wrap { flex: 1; min-width: 0; margin-left: 250px; display: flex; flex-direction: column; transition: margin .25s ease; }
-    .page-wrap.collapsed { margin-left: 68px; }
-    .page-content { flex: 1; padding: 24px; max-width: 1400px; width: 100%; margin: 0 auto; }
+    .page-wrap { flex: 1; min-width: 0; margin-left: 252px; display: flex; flex-direction: column; transition: margin .25s ease; }
+    .page-wrap.collapsed { margin-left: 72px; }
+    .page-content { flex: 1; padding: 24px 28px 40px; max-width: 1360px; width: 100%; margin: 0 auto; }
     .nav-backdrop { display: none; }
     @media (max-width: 900px) {
       .page-wrap, .page-wrap.collapsed { margin-left: 0; }
       .page-content { padding: 16px; }
-      .nav-backdrop { display: block; position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 90; }
+      .nav-backdrop { display: block; position: fixed; inset: 0; background: rgba(10,25,47,.4); z-index: 90; }
     }
   `]
 })

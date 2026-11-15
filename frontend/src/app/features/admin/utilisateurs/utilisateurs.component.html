@@ -1,130 +1,91 @@
-<!-- src/app/features/admin/utilisateurs/utilisateurs.component.html -->
-<app-layout title="Utilisateurs" subtitle="Gestion des comptes et des rôles">
+<app-layout title="Utilisateurs" subtitle="Comptes, rôles et accès à la plateforme">
+  <div class="alert alert-error" *ngIf="erreur"><lucide-icon name="circle-alert" [size]="18"></lucide-icon>{{ erreur }}</div>
 
-  <div class="page-alert error" *ngIf="erreur" role="alert">⚠️ {{ erreur }}</div>
-
-  <!-- Toolbar -->
   <div class="toolbar">
-    <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" [(ngModel)]="search" placeholder="Rechercher un utilisateur...">
+    <div class="search input-icon">
+      <lucide-icon name="search" [size]="16"></lucide-icon>
+      <input class="input" type="search" placeholder="Rechercher par nom ou email" [(ngModel)]="recherche" aria-label="Rechercher">
     </div>
-    <select [(ngModel)]="filterRole" class="filter-select">
-      <option value="">Tous les rôles</option>
-      <option *ngFor="let r of roles" [value]="r.value">{{ r.label }}</option>
-    </select>
-    <button class="btn btn-primary" (click)="openCreate()">+ Ajouter un utilisateur</button>
+    <span class="spacer"></span>
+    <button class="btn btn-primary" (click)="ouvrir(null)"><lucide-icon name="user-plus" [size]="16"></lucide-icon> Nouvel utilisateur</button>
   </div>
 
-  <!-- Table -->
+  <div class="segmented" style="margin-bottom:16px">
+    <button class="seg-btn" [class.active]="!filtreRole" (click)="filtreRole = ''">Tous <span class="count">{{ nombre('') }}</span></button>
+    <button class="seg-btn" *ngFor="let r of roles" [class.active]="filtreRole === r.value" (click)="filtreRole = r.value">
+      {{ r.label }} <span class="count">{{ nombre(r.value) }}</span>
+    </button>
+  </div>
+
   <div class="card">
-    <div class="table-info">{{ filtered.length }} utilisateur(s)</div>
-    <div class="loading-row" *ngIf="loading">⏳ Chargement...</div>
-    <table class="data-table" *ngIf="!loading">
-      <thead>
-        <tr>
-          <th>Utilisateur</th><th>Email</th><th>Rôle</th><th>Statut</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let u of filtered">
-          <td>
-            <div class="user-cell">
-              <div class="user-avatar">{{ initials(u.nom) }}</div>
-              <span>{{ u.nom }}</span>
-            </div>
-          </td>
-          <td class="text-muted">{{ u.email }}</td>
-          <td><app-statut-badge [statut]="u.role"></app-statut-badge></td>
-          <td>
-            <span class="status-chip" [class.active]="u.actif" [class.inactive]="!u.actif">
-              {{ u.actif ? '✅ Actif' : '❌ Inactif' }}
-            </span>
-          </td>
-          <td>
-            <div class="actions">
-              <button class="action-btn edit"   (click)="openEdit(u)"          title="Modifier">✏</button>
-              <button class="action-btn toggle" (click)="toggleActif(u)"       title="{{ u.actif ? 'Désactiver' : 'Activer' }}">{{ u.actif ? '🔒' : '🔓' }}</button>
-              <button class="action-btn delete" (click)="confirmDeleteUser(u.id)" title="Supprimer">🗑</button>
-            </div>
-          </td>
-        </tr>
-        <tr *ngIf="filtered.length === 0">
-          <td colspan="5" class="empty-row">Aucun utilisateur trouvé</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- ========== MODAL CRÉER / MODIFIER ========== -->
-  <div class="modal-overlay" *ngIf="showModal" (click)="showModal = false">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal-hd">
-        <h3>{{ editMode ? 'Modifier' : 'Créer' }} un utilisateur</h3>
-        <button class="modal-close" (click)="showModal = false">✕</button>
-      </div>
-
-      <form [formGroup]="form" (ngSubmit)="save()">
-        <div class="modal-body">
-
-          <!-- Message d'erreur backend -->
-          <div class="alert-error" *ngIf="errorMsg">
-            <span>⚠</span> {{ errorMsg }}
-          </div>
-
-          <div class="field" [class.error]="f['nom'].touched && f['nom'].invalid">
-            <label>Nom complet *</label>
-            <input type="text" formControlName="nom" placeholder="Prénom Nom">
-            <span class="field-error" *ngIf="f['nom'].touched && f['nom'].errors?.['required']">Requis</span>
-          </div>
-
-          <div class="field" [class.error]="f['email'].touched && f['email'].invalid">
-            <label>Email *</label>
-            <input type="email" formControlName="email" placeholder="email@enicarthage.tn" [attr.autocomplete]="'off'">
-            <span class="field-error" *ngIf="f['email'].touched && f['email'].errors?.['email']">Email invalide</span>
-          </div>
-
-          <div class="field" [class.error]="f['motDePasse'].touched && f['motDePasse'].invalid">
-            <label>Mot de passe {{ editMode ? '(laisser vide pour conserver)' : '*' }}</label>
-            <input type="password" formControlName="motDePasse"
-                   [placeholder]="editMode ? 'Laisser vide pour ne pas modifier' : 'Min. 6 caractères'"
-                   [attr.autocomplete]="'new-password'">
-            <span class="field-error" *ngIf="!editMode && f['motDePasse'].touched && f['motDePasse'].errors?.['required']">Requis</span>
-          </div>
-
-          <div class="field">
-            <label>Rôle *</label>
-            <select formControlName="role">
-              <option *ngFor="let r of roles" [value]="r.value">{{ r.label }}</option>
-            </select>
-          </div>
-
-          <label class="checkbox-label">
-            <input type="checkbox" formControlName="actif"> Compte actif
-          </label>
-        </div>
-
-        <div class="modal-ft">
-          <button type="button" class="btn btn-outline" (click)="showModal = false" [disabled]="saving">Annuler</button>
-          <button type="submit" class="btn btn-primary" [disabled]="saving">
-            <span *ngIf="!saving">{{ editMode ? 'Sauvegarder' : 'Créer' }}</span>
-            <span *ngIf="saving" class="spinner"></span>
-          </button>
-        </div>
-      </form>
+    <div class="skeleton" style="height:260px;margin:16px" *ngIf="loading"></div>
+    <div class="table-wrap" *ngIf="!loading && filtres.length">
+      <table class="table">
+        <thead><tr><th>Utilisateur</th><th>Rôle</th><th>Statut</th><th class="actions">Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let u of filtres">
+            <td>
+              <div class="cell-user">
+                <span class="avatar">{{ initiales(u.nom) }}</span>
+                <span class="truncate"><span class="name">{{ u.nom }}</span><br><span class="sub">{{ u.email }}</span></span>
+              </div>
+            </td>
+            <td><app-statut-badge [statut]="u.role"></app-statut-badge></td>
+            <td>
+              <span class="badge" [ngClass]="u.actif ? 'badge-green' : ''">
+                <span class="dot" [class.green]="u.actif" [style.background]="u.actif ? null : '#9AA8BA'"></span>{{ u.actif ? 'Actif' : 'Désactivé' }}
+              </span>
+            </td>
+            <td class="actions">
+              <button class="icon-btn" title="Modifier" (click)="ouvrir(u)"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
+              <button class="icon-btn" [title]="u.actif ? 'Désactiver le compte' : 'Réactiver le compte'" (click)="basculerActif(u)">
+                <lucide-icon [name]="u.actif ? 'lock' : 'lock-open'" [size]="16"></lucide-icon>
+              </button>
+              <button class="icon-btn danger" title="Supprimer" (click)="aSupprimer = u"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+    <app-empty *ngIf="!loading && !filtres.length" icon="users" title="Aucun utilisateur trouvé" text="Modifiez la recherche ou le filtre de rôle."></app-empty>
   </div>
 
-  <!-- Confirm Delete -->
-  <app-confirm-modal
-    [open]="confirmDelete"
-    title="Supprimer l'utilisateur"
-    message="Cette action est irréversible."
-    confirmLabel="Supprimer"
-    icon="🗑"
-    [danger]="true"
-    (confirm)="doDelete()"
-    (cancel)="confirmDelete = false">
-  </app-confirm-modal>
+  <!-- Création / modification -->
+  <app-modal [open]="modalOuvert" [title]="edition ? 'Modifier l’utilisateur' : 'Nouvel utilisateur'" (close)="modalOuvert = false">
+    <form [formGroup]="form" class="form-grid" (ngSubmit)="enregistrer()" id="formUser">
+      <div class="field full">
+        <label for="u-nom">Nom complet <span class="req">*</span></label>
+        <input id="u-nom" class="input" formControlName="nom">
+        <span class="field-error" *ngIf="f['nom'].touched && f['nom'].invalid">Nom requis</span>
+      </div>
+      <div class="field full">
+        <label for="u-email">Email <span class="req">*</span></label>
+        <input id="u-email" class="input" type="email" formControlName="email">
+        <span class="field-error" *ngIf="f['email'].touched && f['email'].invalid">Email invalide</span>
+      </div>
+      <div class="field">
+        <label for="u-role">Rôle <span class="req">*</span></label>
+        <select id="u-role" class="select" formControlName="role">
+          <option *ngFor="let r of roles" [value]="r.value">{{ r.label }}</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="u-mdp">Mot de passe <span class="req" *ngIf="!edition">*</span></label>
+        <input id="u-mdp" class="input" type="password" formControlName="motDePasse" autocomplete="new-password"
+               [placeholder]="edition ? 'Laisser vide pour ne pas changer' : ''">
+        <span class="field-error" *ngIf="f['motDePasse'].touched && f['motDePasse'].invalid">8 caractères minimum</span>
+      </div>
+      <div class="alert alert-error full" *ngIf="erreurForm"><lucide-icon name="circle-alert" [size]="18"></lucide-icon>{{ erreurForm }}</div>
+    </form>
+    <div modal-footer>
+      <button class="btn btn-secondary" (click)="modalOuvert = false">Annuler</button>
+      <button class="btn btn-primary" type="submit" form="formUser" [disabled]="enregistrement">
+        {{ edition ? 'Enregistrer' : 'Créer le compte' }}
+      </button>
+    </div>
+  </app-modal>
 
+  <app-confirm-modal [open]="!!aSupprimer" title="Supprimer cet utilisateur ?" icon="trash-2" [danger]="true" confirmLabel="Supprimer"
+    [message]="'Le compte de ' + (aSupprimer?.nom || '') + ' sera définitivement supprimé. Pour garder son historique, désactivez plutôt le compte.'"
+    (confirm)="supprimer()" (cancel)="aSupprimer = null"></app-confirm-modal>
 </app-layout>

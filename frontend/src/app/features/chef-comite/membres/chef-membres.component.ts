@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { ComiteService, CandidatureCVService } from '../../../core/services/api.services';
-import { User } from '../../../core/models';
-import { environment } from '../../../../environments/environment';
+import { CandidatureCVService, ComiteService } from '../../../core/services/api.services';
+import { CandidatureCV, User } from '../../../core/models';
+import { ToastService } from '../../../core/services/toast.service';
+import { lireAnalyse, lireDossier } from '../../../core/utils/analyse-ia';
 
+/** Équipe du comité et demandes d'adhésion (candidatures « membre » du comité). */
 @Component({
   selector: 'app-chef-membres',
   templateUrl: './chef-membres.component.html',
@@ -11,121 +12,64 @@ import { environment } from '../../../../environments/environment';
 })
 export class ChefMembresComponent implements OnInit {
   membres: User[] = [];
-  demandesEnAttente: any[] = [];
+  demandes: CandidatureCV[] = [];
   comiteId: number | null = null;
-  comiteNom: string = '';
+  comiteNom = '';
   loading = true;
-  errorMsg = '';
-  detailLoading = false;
-  detailError = '';
-  selectedDemande: any | null = null;
+  erreur = '';
+  ouverte: CandidatureCV | null = null;
+  aRetirer: User | null = null;
+  decision: { c: CandidatureCV; mode: 'accepter' | 'refuser' } | null = null;
 
-  constructor(
-    private comiteService: ComiteService,
-    private cvService: CandidatureCVService,
-    private http: HttpClient
-  ) {}
+  constructor(private comites: ComiteService, private cvs: CandidatureCVService, private toast: ToastService) {}
 
-  ngOnInit(): void {
-    this.comiteService.getMonComite().subscribe({
+  ngOnInit(): void { this.charger(); }
+
+  charger(): void {
+    this.comites.getMonComite().subscribe({
       next: c => {
         this.comiteId = c.id;
-        this.comiteNom = c.nom ?? '';
-        this.membres = (c.membres as User[]) ?? [];
+        this.comiteNom = c.nom;
+        this.membres = c.membres ?? [];
         this.loading = false;
-        this.loadDemandes(c.nom);
+        // Le serveur ne renvoie au chef que les candidatures « membre » de son comité
+        this.cvs.getAll().subscribe(l => this.demandes = l.filter(x => x.statut === 'EN_ATTENTE')
+          .sort((a, b) => (lireAnalyse(b).score ?? -1) - (lireAnalyse(a).score ?? -1)));
       },
-      error: () => {
-        this.errorMsg = 'Impossible de charger votre comité.';
-        this.loading = false;
-      },
+      error: () => { this.erreur = 'Vous n’êtes chef d’aucun comité pour le moment.'; this.loading = false; },
     });
   }
 
-  loadDemandes(comiteNom: string): void {
-    this.http.get<any[]>(`${environment.apiUrl}/candidatures`).subscribe({
-      next: candidatures => {
-        this.demandesEnAttente = candidatures.filter(c =>
-          c.statut === 'EN_ATTENTE' &&
-          c.dossierComplet?.toLowerCase().includes((comiteNom || '').toLowerCase())
-        );
-      },
-      error: () => { this.demandesEnAttente = []; }
+  retirer(): void {
+    const m = this.aRetirer;
+    this.aRetirer = null;
+    if (!m || this.comiteId == null) return;
+    this.comites.retirerMembre(this.comiteId, m.id).subscribe({
+      next: c => { this.membres = c.membres ?? []; this.toast.success(`${m.nom} a été retiré(e) du comité`); },
+      error: (e: Error) => this.toast.error(e.message),
     });
   }
 
-  parseDossier(dossierComplet: string | any): {label: string, value: string}[] {
-    if (!dossierComplet || typeof dossierComplet !== 'string') return [];
-    return dossierComplet.split('|').map(part => {
-      const [label, ...rest] = part.trim().split(':');
-      return { label: label?.trim(), value: rest.join(':').trim() };
-    }).filter(item => item.label && item.value && item.value !== '-');
+  finDecision(c: CandidatureCV | null): void {
+    this.decision = null;
+    if (!c) return;
+    this.ouverte = null;
+    this.charger();
   }
 
-  selectDemande(d: any): void {
-    this.selectedDemande = null;
-    this.detailLoading = true;
-    this.detailError = '';
-    this.cvService.getById(d.id).subscribe({
-      next: detail => {
-        this.selectedDemande = detail;
-        this.detailLoading = false;
-      },
-      error: () => {
-        this.detailError = 'Impossible de charger les détails de la candidature.';
-        this.detailLoading = false;
-      }
-    });
-  }
-
-  closeDemande(): void {
-    this.selectedDemande = null;
-    this.detailError = '';
-  }
-
-  accepter(candidature: any): void {
-    this.http.put(`${environment.apiUrl}/candidatures/${candidature.id}/accepter`, {}).subscribe({
-      next: () => {
-        this.demandesEnAttente = this.demandesEnAttente.filter(d => d.id !== candidature.id);
-        if (this.selectedDemande?.id === candidature.id) this.selectedDemande = null;
-      }
-    });
-  }
-
-  refuser(candidature: any): void {
-    this.http.put(`${environment.apiUrl}/candidatures/${candidature.id}/refuser`, null, {
-      params: { commentaire: 'Refusé par le chef de comité' }
-    }).subscribe({
-      next: () => {
-        this.demandesEnAttente = this.demandesEnAttente.filter(d => d.id !== candidature.id);
-        if (this.selectedDemande?.id === candidature.id) this.selectedDemande = null;
-      }
-    });
-  }
-
-  retirer(id: number): void {
-    if (this.comiteId == null) return;
-    this.comiteService.retirerMembre(this.comiteId, id).subscribe({
-      next: c => { this.membres = (c.membres as User[]) ?? []; },
-    });
-  }
-
-  telechargerCV(id: number): void {
-    this.http.get(`${environment.apiUrl}/candidatures/${id}/telecharger-cv`,
-      { responseType: 'blob' }
-    ).subscribe({
+  telecharger(c: CandidatureCV): void {
+    this.cvs.telechargerCv(c.id).subscribe({
       next: blob => {
-        const url = window.URL.createObjectURL(blob);
+        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `CV_candidat_${id}.pdf`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-      }
+        a.href = url; a.download = `CV_${c.candidatNom.replace(/\s+/g, '_')}.pdf`; a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: (e: Error) => this.toast.error(e.message),
     });
   }
 
-  initials(nom: string): string {
-    return nom?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ?? '?';
-  }
+  score(c: CandidatureCV): number | null { return lireAnalyse(c).score; }
+  dossier(c: CandidatureCV): Record<string, string> { return lireDossier(c.dossierComplet); }
+  initiales(n: string): string { return (n || '?').split(' ').map(x => x[0]).join('').toUpperCase().slice(0, 2); }
 }

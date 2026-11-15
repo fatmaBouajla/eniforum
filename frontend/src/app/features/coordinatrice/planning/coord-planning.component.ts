@@ -1,53 +1,50 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { ForumProjectService, WorkshopService } from '../../../core/services/api.services';
+import { ForumProject, Workshop } from '../../../core/models';
 
+interface Jour { date: string; items: Workshop[]; }
+
+/** Planning des workshops validés, regroupés par jour. */
 @Component({
   selector: 'app-coord-planning',
   templateUrl: './coord-planning.component.html',
   styleUrls: ['./coord-planning.component.scss'],
 })
 export class CoordPlanningComponent implements OnInit {
-  workshops: any[] = [];
-  loading = false;
+  jours: Jour[] = [];
+  enAttente = 0;
+  edition: ForumProject | null = null;
+  passes = false;
+  loading = true;
+  erreur = '';
+  private tous: Workshop[] = [];
 
-  private api = `${environment.apiUrl}/workshops`;
+  constructor(private ws: WorkshopService, private forums: ForumProjectService) {}
 
-  constructor(private http: HttpClient) {}
-
-  ngOnInit(): void { this.load(); }
-
-  load(): void {
-    this.loading = true;
-    this.http.get<any[]>(this.api).subscribe({
-      next: all => {
-        // Planning = uniquement les workshops validés, triés par date
-        this.workshops = all
-          .filter(w => w.statut === 'VALIDE')
-          .sort((a, b) => new Date(a.dateHeure).getTime() - new Date(b.dateHeure).getTime());
+  ngOnInit(): void {
+    forkJoin({ ws: this.ws.getAll(), edition: this.forums.getCurrent().pipe(catchError(() => of(null))) }).subscribe({
+      next: r => {
+        this.edition = r.edition;
+        this.tous = r.ws.filter(w => w.statut === 'VALIDE').sort((a, b) => a.dateHeure.localeCompare(b.dateHeure));
+        this.enAttente = r.ws.filter(w => w.statut === 'PROPOSE').length;
+        this.grouper();
         this.loading = false;
       },
-      error: () => { this.workshops = []; this.loading = false; }
+      error: (e: Error) => { this.erreur = e.message; this.loading = false; },
     });
   }
 
-  get groupedByDate(): { date: string, items: any[] }[] {
-    const map = new Map<string, any[]>();
-    for (const w of this.workshops) {
-      const key = new Date(w.dateHeure).toLocaleDateString('fr-FR', {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-      });
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(w);
-    }
-    return Array.from(map.entries()).map(([date, items]) => ({ date, items }));
+  grouper(): void {
+    const aujourdhui = new Date().toISOString().slice(0, 10);
+    const map = new Map<string, Workshop[]>();
+    this.tous.filter(w => this.passes || w.dateHeure.slice(0, 10) >= aujourdhui).forEach(w => {
+      const j = w.dateHeure.slice(0, 10);
+      map.set(j, [...(map.get(j) ?? []), w]);
+    });
+    this.jours = [...map.entries()].map(([date, items]) => ({ date, items }));
   }
 
-  heure(dateHeure: string): string {
-    return new Date(dateHeure).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-  }
-
-  comiteNom(w: any): string {
-    return w.comite?.nom || w.comiteNom || '—';
-  }
+  estJourForum(d: string): boolean { return d === this.edition?.dateEvenement; }
 }

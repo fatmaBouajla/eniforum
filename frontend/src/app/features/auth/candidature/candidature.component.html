@@ -1,0 +1,148 @@
+<div class="page">
+  <header class="head">
+    <div class="wrap head-in">
+      <a routerLink="/" class="logos">
+        <img src="assets/logo-enicarthage.png" alt="ENICarthage"><span class="sep"></span><img src="assets/logo-forum.png" alt="Forum Entreprises">
+      </a>
+      <a routerLink="/auth/login" class="btn btn-secondary btn-sm"><lucide-icon name="lock" [size]="15"></lucide-icon> Connexion</a>
+    </div>
+  </header>
+
+  <main class="wrap main">
+    <!-- Confirmation -->
+    <div class="card done" *ngIf="envoye">
+      <span class="done-ico"><lucide-icon name="circle-check" [size]="34"></lucide-icon></span>
+      <h1>Candidature envoyée</h1>
+      <p>Merci {{ form.value.prenom }} ! Votre candidature pour le comité <b>{{ form.value.comite }}</b> a bien été reçue.
+        Le comité de pilotage l’étudiera et vous répondra par email à <b>{{ form.value.email }}</b>.</p>
+      <div class="row center">
+        <a class="btn btn-primary" routerLink="/">Retour à l’accueil</a>
+      </div>
+    </div>
+
+    <ng-container *ngIf="!envoye">
+      <div class="intro">
+        <span class="eyebrow"><lucide-icon [name]="estChef ? 'crown' : 'user-plus'" [size]="14"></lucide-icon>
+          {{ estChef ? 'Poste de chef de comité' : 'Rejoindre un comité' }}</span>
+        <h1>{{ estChef ? 'Candidater comme chef de comité' : 'Devenir membre du Forum' }}</h1>
+        <p class="muted">{{ estChef
+          ? 'Vous dirigerez une équipe de bénévoles : présentez votre expérience et votre vision pour le comité.'
+          : 'Quelques minutes suffisent. Votre CV sera étudié par le comité de pilotage.' }}</p>
+        <a class="switch" [routerLink]="estChef ? '/auth/inscription-membre' : '/auth/candidature-chef'">
+          {{ estChef ? 'Vous voulez plutôt être membre ?' : 'Vous visez un poste de chef de comité ?' }}
+          <lucide-icon name="arrow-right" [size]="14"></lucide-icon>
+        </a>
+      </div>
+
+      <form class="card" [formGroup]="form" (ngSubmit)="envoyer()" novalidate>
+        <!-- 1. Identité -->
+        <section class="sec">
+          <h2><span class="n">1</span> Vos informations</h2>
+          <div class="form-grid">
+            <div class="field">
+              <label for="prenom">Prénom <span class="req">*</span></label>
+              <input id="prenom" class="input" formControlName="prenom" autocomplete="given-name">
+              <span class="field-error" *ngIf="invalide('prenom')">Prénom requis</span>
+            </div>
+            <div class="field">
+              <label for="nom">Nom <span class="req">*</span></label>
+              <input id="nom" class="input" formControlName="nom" autocomplete="family-name">
+              <span class="field-error" *ngIf="invalide('nom')">Nom requis</span>
+            </div>
+            <div class="field">
+              <label for="email">Email <span class="req">*</span></label>
+              <input id="email" class="input" type="email" formControlName="email" placeholder="prenom.nom@exemple.tn" autocomplete="email">
+              <span class="field-error" *ngIf="invalide('email')">Adresse email invalide</span>
+            </div>
+            <div class="field">
+              <label for="tel">Téléphone <span class="req">*</span></label>
+              <input id="tel" class="input" formControlName="telephone" placeholder="+216 20 123 456" autocomplete="tel">
+              <span class="field-error" *ngIf="invalide('telephone')">Numéro tunisien à 8 chiffres</span>
+            </div>
+            <div class="field">
+              <label for="niveau">Année d’études <span class="req">*</span></label>
+              <select id="niveau" class="select" formControlName="niveauEtudes">
+                <option value="" disabled>Choisir…</option>
+                <option *ngFor="let n of niveaux" [value]="n">{{ n }}{{ n === 1 ? 're' : 'e' }} année</option>
+              </select>
+              <span class="field-error" *ngIf="invalide('niveauEtudes')">Choisissez votre année</span>
+              <span class="hint" *ngIf="estChef">Poste ouvert aux étudiants de 3e à 5e année.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Comité -->
+        <section class="sec">
+          <h2><span class="n">2</span> Comité souhaité <span class="req">*</span></h2>
+          <div class="comites">
+            <label class="comite" *ngFor="let c of comites" [class.on]="form.value.comite === c">
+              <input type="radio" formControlName="comite" [value]="c">
+              <lucide-icon [name]="icone(c)" [size]="20"></lucide-icon>
+              <span>{{ c }}</span>
+            </label>
+          </div>
+          <span class="field-error" *ngIf="invalide('comite')">Choisissez un comité</span>
+        </section>
+
+        <!-- 3. Motivation -->
+        <section class="sec">
+          <h2><span class="n">3</span> Motivation et parcours</h2>
+          <div class="stack">
+            <div class="field">
+              <label for="motivation">Pourquoi ce comité ? <span class="req">*</span></label>
+              <textarea id="motivation" class="textarea" rows="5" formControlName="motivation"
+                [placeholder]="estChef ? 'Votre vision pour le comité, ce que vous apporterez à l’équipe…' : 'Ce qui vous motive, ce que vous aimeriez apprendre…'"></textarea>
+              <span class="hint">{{ (form.value.motivation || '').length }} caractères — minimum {{ estChef ? 80 : 40 }}</span>
+              <span class="field-error" *ngIf="invalide('motivation')">Motivation trop courte</span>
+            </div>
+            <div class="field">
+              <label for="experience">{{ estChef ? 'Expérience d’encadrement ou associative' : 'Expérience associative (facultatif)' }}</label>
+              <textarea id="experience" class="textarea" rows="3" formControlName="experience"
+                placeholder="Ex. : responsable design du club IEEE, bénévole au Forum 2025…"></textarea>
+            </div>
+            <div class="field">
+              <label for="competences">Compétences clés (facultatif)</label>
+              <input id="competences" class="input" formControlName="competences" placeholder="Ex. : Figma, négociation, Excel, montage vidéo">
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. CV -->
+        <section class="sec">
+          <h2><span class="n">4</span> Votre CV <span class="req">*</span></h2>
+          <label class="drop" [class.over]="survol" [class.has]="cv" (dragover)="$event.preventDefault(); survol = true"
+                 (dragleave)="survol = false" (drop)="deposer($event)">
+            <input type="file" accept="application/pdf,.pdf" (change)="choisir($event)">
+            <ng-container *ngIf="!cv">
+              <lucide-icon name="upload" [size]="24"></lucide-icon>
+              <span><b>Glissez votre CV ici</b> ou cliquez pour le choisir</span>
+              <small>PDF, 10 Mo maximum</small>
+            </ng-container>
+            <ng-container *ngIf="cv">
+              <lucide-icon name="file-text" [size]="24"></lucide-icon>
+              <span><b>{{ cv.name }}</b> · {{ taille(cv.size) }}</span>
+              <small>Cliquez pour remplacer le fichier</small>
+            </ng-container>
+          </label>
+          <span class="field-error" *ngIf="cvErreur">{{ cvErreur }}</span>
+
+          <label class="consent">
+            <input type="checkbox" formControlName="consentement">
+            <span>J’accepte que mes informations et mon CV soient utilisés par l’équipe du Forum ENICarthage pour étudier ma candidature.</span>
+          </label>
+          <span class="field-error" *ngIf="invalide('consentement')">Votre accord est nécessaire</span>
+        </section>
+
+        <div class="alert alert-error mx" *ngIf="erreur"><lucide-icon name="circle-alert" [size]="18"></lucide-icon>{{ erreur }}</div>
+
+        <div class="card-foot">
+          <a class="btn btn-secondary" routerLink="/">Annuler</a>
+          <button class="btn btn-primary" type="submit" [disabled]="envoi">
+            <span class="spinner" *ngIf="envoi"></span>
+            <ng-container *ngIf="!envoi"><lucide-icon name="send" [size]="16"></lucide-icon> Envoyer ma candidature</ng-container>
+          </button>
+        </div>
+      </form>
+    </ng-container>
+  </main>
+</div>

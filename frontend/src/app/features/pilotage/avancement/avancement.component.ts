@@ -1,3 +1,12 @@
 import { Component } from '@angular/core';
-@Component({ selector:'app-avancement', template:`<app-layout title="Avancement" subtitle="État détaillé de tous les comités"><div style="padding:60px;text-align:center;color:#64748B;font-size:14px;">📊 Voir le Dashboard pour l'avancement global.</div></app-layout>` })
+
+/** Avancement détaillé de chaque comité, les plus en difficulté en premier. */
+@Component({
+  selector: 'app-avancement',
+  template: `
+    <app-layout title="Avancement" subtitle="État détaillé de chaque comité, les plus en difficulté en premier">
+      <app-bilan-comites></app-bilan-comites>
+    </app-layout>
+  `,
+})
 export class AvancementComponent {}

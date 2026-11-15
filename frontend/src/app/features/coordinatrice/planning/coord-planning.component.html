@@ -1,46 +1,39 @@
-<!-- coord-planning.component.html -->
-<app-layout title="Planning des Événements" subtitle="Calendrier des workshops et conférences validés">
+<app-layout title="Planning" subtitle="Workshops et conférences validés, jour par jour">
+  <div class="alert alert-error" *ngIf="erreur"><lucide-icon name="circle-alert" [size]="18"></lucide-icon>{{ erreur }}</div>
 
-  <div class="loading-state" *ngIf="loading">Chargement du planning...</div>
-
-  <div class="empty-state" *ngIf="!loading && workshops.length === 0">
-    <div class="empty-icon">📅</div>
-    <h3>Aucun événement planifié</h3>
-    <p>Les workshops validés apparaîtront ici. Validez des workshops depuis l'espace Workshops.</p>
+  <div class="toolbar">
+    <span class="badge badge-blue" *ngIf="edition"><lucide-icon name="flag" [size]="13"></lucide-icon> Forum le {{ edition.dateEvenement | date:'EEEE d MMMM y' }}</span>
+    <a class="badge badge-amber" *ngIf="enAttente" routerLink="/coordinatrice/workshops">{{ enAttente }} proposition(s) à valider</a>
+    <span class="spacer"></span>
+    <label class="row small strong"><input type="checkbox" [(ngModel)]="passes" (change)="grouper()"> Afficher les dates passées</label>
   </div>
 
-  <div class="planning-timeline" *ngIf="!loading && workshops.length > 0">
+  <div class="skeleton" style="height:240px" *ngIf="loading"></div>
 
-    <div class="day-group" *ngFor="let group of groupedByDate">
-      <div class="day-header">
-        <div class="day-line"></div>
-        <div class="day-label">{{ group.date }}</div>
-        <div class="day-line"></div>
+  <div class="timeline" *ngIf="!loading && jours.length">
+    <section class="jour" *ngFor="let j of jours">
+      <div class="j-head">
+        <span class="j-date">{{ j.date | date:'EEEE d MMMM' }}</span>
+        <span class="badge badge-green" *ngIf="estJourForum(j.date)">Jour du Forum</span>
+        <span class="muted small">{{ j.items.length }} événement(s)</span>
       </div>
-
-      <div class="events-list">
-        <div class="event-card" *ngFor="let w of group.items">
-          <div class="event-time">
-            <div class="time-val">{{ heure(w.dateHeure) }}</div>
-            <div class="time-dot"></div>
-          </div>
-          <div class="event-body">
-            <div class="event-header">
-              <div>
-                <h3 class="event-titre">{{ w.titre }}</h3>
-                <p class="event-desc">{{ w.description }}</p>
-              </div>
-              <span class="event-badge">✅ Validé</span>
-            </div>
-            <div class="event-meta">
-              <span class="meta-item">👤 {{ w.intervenant }}</span>
-              <span class="meta-item" *ngIf="comiteNom(w) !== '—'">📋 {{ comiteNom(w) }}</span>
+      <div class="card">
+        <div class="list">
+          <div class="list-item" *ngFor="let w of j.items">
+            <span class="heure">{{ w.dateHeure | date:'HH:mm' }}</span>
+            <span class="trait"></span>
+            <div class="grow">
+              <div class="strong">{{ w.titre }}</div>
+              <div class="muted small">{{ w.intervenant }}<ng-container *ngIf="w.comite"> · Comité {{ w.comite.nom }}</ng-container></div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-
+    </section>
   </div>
-
+  <div class="card" *ngIf="!loading && !jours.length">
+    <app-empty icon="calendar-days" title="Aucun événement planifié" text="Les workshops validés apparaîtront ici.">
+      <a class="btn btn-secondary btn-sm" routerLink="/coordinatrice/workshops">Voir les propositions</a>
+    </app-empty>
+  </div>
 </app-layout>

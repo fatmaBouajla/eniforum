@@ -3,6 +3,7 @@ import { Subscription, from, of } from 'rxjs';
 import { catchError, concatMap } from 'rxjs/operators';
 import { CandidatureCVService } from '../../../core/services/api.services';
 import { CandidatureCV } from '../../../core/models';
+import { ToastService } from '../../../core/services/toast.service';
 import {
   AnalyseIA, CodeRecommandation, RECO_LABELS, libellePoste, lireAnalyse, lireDossier,
 } from '../../../core/utils/analyse-ia';
@@ -27,7 +28,6 @@ export class ModuleIAComponent implements OnInit, OnDestroy {
   lignes: Ligne[] = [];
   loading = false;
   erreur = '';
-  info = '';
 
   // Filtres
   recherche = '';
@@ -43,17 +43,14 @@ export class ModuleIAComponent implements OnInit, OnDestroy {
   analyseEnCours = new Set<number>();
   progression: { fait: number; total: number } | null = null;
 
-  // Décisions
-  aAccepter: Ligne | null = null;
-  aRefuser: Ligne | null = null;
-  motifRefus = '';
-  decisionEnCours = false;
+  // Décision en cours (acceptation ou refus)
+  decision: { c: CandidatureCV; mode: 'accepter' | 'refuser' } | null = null;
 
   readonly recoLabels = RECO_LABELS;
   readonly maxComparaison = MAX_COMPARAISON;
   private batch?: Subscription;
 
-  constructor(private cvService: CandidatureCVService) {}
+  constructor(private cvService: CandidatureCVService, private toast: ToastService) {}
 
   ngOnInit(): void { this.charger(); }
   ngOnDestroy(): void { this.batch?.unsubscribe(); }
@@ -134,15 +131,14 @@ export class ModuleIAComponent implements OnInit, OnDestroy {
     this.analyseEnCours.add(l.c.id);
     this.cvService.analyserIA(l.c.id).subscribe({
       next: c => { this.remplacer(c); this.analyseEnCours.delete(l.c.id); },
-      error: (e: Error) => { this.erreur = `Analyse impossible : ${e.message}`; this.analyseEnCours.delete(l.c.id); },
+      error: (e: Error) => { this.toast.error(`Analyse impossible : ${e.message}`); this.analyseEnCours.delete(l.c.id); },
     });
   }
 
   /** Analyse une à une (le service IA n'est pas saturé et la progression reste visible). */
   analyserNonAnalysees(): void {
     const cibles = this.lignes.filter(l => !l.a.analysee || l.a.dimensions.length === 0);
-    if (!cibles.length) { this.info = 'Toutes les candidatures sont déjà analysées avec la nouvelle IA.'; return; }
-    this.info = '';
+    if (!cibles.length) { this.toast.info('Toutes les candidatures sont déjà analysées'); return; }
     this.progression = { fait: 0, total: cibles.length };
     this.batch = from(cibles).pipe(
       concatMap(l => {
@@ -158,7 +154,7 @@ export class ModuleIAComponent implements OnInit, OnDestroy {
         this.analyseEnCours.clear();
         const total = this.progression?.total ?? 0;
         this.progression = null;
-        this.info = `${total} candidature(s) analysée(s).`;
+        this.toast.success(`${total} candidature(s) analysée(s)`);
       },
     });
   }
@@ -201,28 +197,9 @@ export class ModuleIAComponent implements OnInit, OnDestroy {
   }
 
   // ------------------------------------------------------------ décisions
-  confirmerAcceptation(): void {
-    const l = this.aAccepter;
-    if (!l) return;
-    this.decisionEnCours = true;
-    this.cvService.accepter(l.c.id).subscribe({
-      next: c => { this.remplacer(c); this.fermerDecision(); this.info = `Candidature de ${l.c.candidatNom} acceptée : compte créé et identifiants envoyés par email.`; },
-      error: (e: Error) => { this.erreur = `Acceptation impossible : ${e.message}`; this.fermerDecision(); },
-    });
-  }
-
-  confirmerRefus(): void {
-    const l = this.aRefuser;
-    if (!l || !this.motifRefus.trim()) return;
-    this.decisionEnCours = true;
-    this.cvService.refuser(l.c.id, this.motifRefus.trim()).subscribe({
-      next: c => { this.remplacer(c); this.fermerDecision(); },
-      error: (e: Error) => { this.erreur = `Refus impossible : ${e.message}`; this.fermerDecision(); },
-    });
-  }
-
-  fermerDecision(): void {
-    this.aAccepter = null; this.aRefuser = null; this.motifRefus = ''; this.decisionEnCours = false;
+  finDecision(c: CandidatureCV | null): void {
+    this.decision = null;
+    if (c) this.remplacer(c);
   }
 
   telecharger(l: Ligne): void {
@@ -231,15 +208,18 @@ export class ModuleIAComponent implements OnInit, OnDestroy {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = (l.c.fichierCV || 'cv.pdf').split(/[/\\]/).pop()?.replace(/^\d+_/, '') || 'cv.pdf';
+        a.download = `CV_${l.c.candidatNom.replace(/\s+/g, '_')}.pdf`;
         a.click();
         URL.revokeObjectURL(url);
       },
-      error: (e: Error) => { this.erreur = `Téléchargement impossible : ${e.message}`; },
+      error: (e: Error) => this.toast.error(`Téléchargement impossible : ${e.message}`),
     });
   }
 
   initiale(l: Ligne): string { return (l.c.candidatNom || '?').charAt(0).toUpperCase(); }
   recoLabel(code: CodeRecommandation | null): string { return code ? this.recoLabels[code] : 'Non analysé'; }
+  recoClasse(code: CodeRecommandation | null): string {
+    return code === 'PRIORISER' ? 'badge-green' : code === 'ENTRETIEN' ? 'badge-amber' : code === 'RESERVE' ? 'badge-red' : '';
+  }
   trackById(_: number, l: Ligne): number { return l.c.id; }
 }

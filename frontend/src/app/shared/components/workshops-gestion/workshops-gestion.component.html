@@ -1,0 +1,95 @@
+<div class="alert alert-error" *ngIf="erreur"><lucide-icon name="circle-alert" [size]="18"></lucide-icon>{{ erreur }}</div>
+
+<div class="toolbar">
+  <div class="segmented">
+    <button class="seg-btn" *ngFor="let f of filtres" [class.active]="filtre === f.cle" (click)="filtre = f.cle">
+      {{ f.libelle }} <span class="count">{{ nombre(f.cle) }}</span>
+    </button>
+  </div>
+  <span class="spacer"></span>
+  <button class="btn btn-primary" (click)="ouvrir(null)" [disabled]="!comites.length">
+    <lucide-icon name="plus" [size]="16"></lucide-icon> {{ estChef ? 'Proposer un workshop' : 'Ajouter un workshop' }}
+  </button>
+</div>
+
+<div class="stack" *ngIf="loading"><div class="skeleton" style="height:110px" *ngFor="let i of [1,2,3]"></div></div>
+
+<div class="stack" *ngIf="!loading">
+  <div class="card ws" *ngFor="let w of visibles" [ngClass]="w.statut">
+    <div class="date">
+      <b>{{ w.dateHeure | date:'d' }}</b><span>{{ w.dateHeure | date:'MMM' }}</span><small>{{ w.dateHeure | date:'HH:mm' }}</small>
+    </div>
+    <div class="body">
+      <div class="row">
+        <h3>{{ w.titre }}</h3>
+        <app-statut-badge [statut]="w.statut"></app-statut-badge>
+      </div>
+      <p>{{ w.description }}</p>
+      <div class="meta">
+        <span><lucide-icon name="mic" [size]="14"></lucide-icon> {{ w.intervenant }}</span>
+        <span *ngIf="w.comite"><lucide-icon name="layers" [size]="14"></lucide-icon> Comité {{ w.comite.nom }}</span>
+        <span *ngIf="w.proposePar"><lucide-icon name="user" [size]="14"></lucide-icon> Proposé par {{ w.proposePar.nom }}</span>
+      </div>
+      <div class="motif" *ngIf="w.statut === 'REFUSE' && w.motifRefus"><b>Motif du refus :</b> {{ w.motifRefus }}</div>
+    </div>
+    <div class="acts">
+      <ng-container *ngIf="!estChef && w.statut === 'PROPOSE'">
+        <button class="btn btn-success btn-sm" (click)="valider(w)"><lucide-icon name="check" [size]="15"></lucide-icon> Valider</button>
+        <button class="btn btn-danger btn-sm" (click)="aRefuser = w; motif = ''">Refuser</button>
+      </ng-container>
+      <button class="icon-btn" *ngIf="modifiable(w)" title="Modifier" (click)="ouvrir(w)"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
+      <button class="icon-btn danger" *ngIf="modifiable(w)" title="Supprimer" (click)="aSupprimer = w"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
+    </div>
+  </div>
+  <div class="card" *ngIf="!visibles.length && !erreur">
+    <app-empty icon="presentation" title="Aucun workshop" [text]="filtre === 'PROPOSE' ? 'Aucune proposition en attente de validation.' : 'Aucun workshop dans cette catégorie.'"></app-empty>
+  </div>
+</div>
+
+<app-modal [open]="modalOuvert" [title]="edition ? 'Modifier le workshop' : (estChef ? 'Proposer un workshop' : 'Ajouter un workshop')"
+           [subtitle]="estChef && !edition ? 'La proposition sera validée par la coordinatrice' : ''" (close)="modalOuvert = false">
+  <form [formGroup]="form" id="formWs" class="form-grid" (ngSubmit)="enregistrer()">
+    <div class="field full">
+      <label for="w-titre">Titre <span class="req">*</span></label>
+      <input id="w-titre" class="input" formControlName="titre" placeholder="Ex. : Atelier CV et LinkedIn">
+    </div>
+    <div class="field full">
+      <label for="w-desc">Description <span class="req">*</span></label>
+      <textarea id="w-desc" class="textarea" rows="3" formControlName="description"></textarea>
+    </div>
+    <div class="field">
+      <label for="w-int">Intervenant / entreprise <span class="req">*</span></label>
+      <input id="w-int" class="input" formControlName="intervenant">
+    </div>
+    <div class="field">
+      <label for="w-date">Date et heure <span class="req">*</span></label>
+      <input id="w-date" class="input" type="datetime-local" formControlName="dateHeure">
+    </div>
+    <div class="field full" *ngIf="!estChef">
+      <label for="w-com">Comité organisateur <span class="req">*</span></label>
+      <select id="w-com" class="select" formControlName="comiteId">
+        <option [ngValue]="null" disabled>Choisir…</option>
+        <option *ngFor="let c of comites" [ngValue]="c.id">{{ c.nom }}</option>
+      </select>
+    </div>
+    <div class="alert alert-error full" *ngIf="erreurForm"><lucide-icon name="circle-alert" [size]="18"></lucide-icon>{{ erreurForm }}</div>
+  </form>
+  <div modal-footer>
+    <button class="btn btn-secondary" (click)="modalOuvert = false">Annuler</button>
+    <button class="btn btn-primary" type="submit" form="formWs" [disabled]="enregistrement">{{ estChef && !edition ? 'Envoyer la proposition' : 'Enregistrer' }}</button>
+  </div>
+</app-modal>
+
+<app-modal [open]="!!aRefuser" title="Refuser le workshop" [subtitle]="aRefuser?.titre ?? ''" (close)="aRefuser = null">
+  <div class="field">
+    <label for="w-motif">Motif du refus <span class="req">*</span></label>
+    <textarea id="w-motif" class="textarea" rows="3" [(ngModel)]="motif" placeholder="Ex. : créneau déjà occupé, merci de proposer une autre date."></textarea>
+  </div>
+  <div modal-footer>
+    <button class="btn btn-secondary" (click)="aRefuser = null">Annuler</button>
+    <button class="btn btn-danger-solid" (click)="refuser()" [disabled]="!motif.trim()">Refuser</button>
+  </div>
+</app-modal>
+
+<app-confirm-modal [open]="!!aSupprimer" title="Supprimer ce workshop ?" icon="trash-2" [danger]="true" confirmLabel="Supprimer"
+  [message]="'« ' + (aSupprimer?.titre || '') + ' » sera définitivement supprimé.'" (confirm)="supprimer()" (cancel)="aSupprimer = null"></app-confirm-modal>

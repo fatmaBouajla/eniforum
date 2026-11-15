@@ -1,135 +1,116 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { ForumProject } from '../../../core/models';
+import { AvancementComite, Comite, ForumProject, User } from '../../../core/models';
+import { ToastService } from '../../../core/services/toast.service';
+import { iconeComite } from '../../../shared/icons';
 
+/** Gestion des comités : création, modification (chef, édition) et suppression. */
 @Component({
   selector: 'app-comites',
   templateUrl: './comites.component.html',
   styleUrls: ['./comites.component.scss'],
 })
 export class ComitesComponent implements OnInit {
-  comites: any[] = [];
-  users: any[] = [];
-  projects: ForumProject[] = [];
-  loading = false;
-  saving = false;
-  errorMsg = '';
-  showModal = false;
-  editMode = false;
-  editId: number | null = null;
-  confirmDelete = false;
-  deleteId: number | null = null;
+  comites: Comite[] = [];
+  avancement = new Map<string, AvancementComite>();
+  chefs: User[] = [];
+  editions: ForumProject[] = [];
+  loading = true;
+  erreur = '';
+
+  modalOuvert = false;
+  edition: Comite | null = null;
+  enregistrement = false;
+  erreurForm = '';
+  aSupprimer: Comite | null = null;
   form: FormGroup;
 
-  nomsComites = ['Sponsoring','Design','Logistique','Projet','Programme','Media'];
+  private api = environment.apiUrl;
 
-  private apiComites  = `${environment.apiUrl}/comites`;
-  private apiUsers    = `${environment.apiUrl}/utilisateurs`;
-  private apiProjects = `${environment.apiUrl}/forum-projects`;
-
-  constructor(private fb: FormBuilder, private http: HttpClient) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private toast: ToastService) {
     this.form = this.fb.group({
-      nom:            ['', Validators.required],
-      description:    ['', Validators.required],
+      nom: ['', Validators.required],
+      description: ['', Validators.required],
       forumProjectId: [null, Validators.required],
-      chefId:         [null],
+      chefId: [null],
     });
   }
 
-  ngOnInit(): void { this.load(); this.loadUsers(); this.loadProjects(); }
+  ngOnInit(): void { this.charger(); }
 
-  load(): void {
-    this.loading = true;
-    this.http.get<any[]>(this.apiComites).subscribe({
-      next: c => { this.comites = c; this.loading = false; },
-      error: () => {
-        this.comites = [
-          { id:1, nom:'Design',     description:'Identite visuelle',          avancement:72, nombreTaches:38 },
-          { id:2, nom:'Sponsoring', description:'Relations entreprises',      avancement:60, nombreTaches:32 },
-          { id:3, nom:'Logistique', description:'Organisation materielle',    avancement:45, nombreTaches:40 },
-        ];
+  charger(): void {
+    forkJoin({
+      comites: this.http.get<Comite[]>(`${this.api}/comites`),
+      av: this.http.get<AvancementComite[]>(`${this.api}/stats/comites`),
+      users: this.http.get<User[]>(`${this.api}/utilisateurs`),
+      editions: this.http.get<ForumProject[]>(`${this.api}/forum-projects`),
+    }).subscribe({
+      next: r => {
+        this.comites = r.comites;
+        this.avancement = new Map(r.av.map(a => [a.comiteNom, a]));
+        this.chefs = r.users.filter(u => u.role === 'CHEF_COMITE');
+        this.editions = r.editions;
         this.loading = false;
       },
+      error: (e: Error) => { this.erreur = e.message; this.loading = false; },
     });
   }
 
-  loadUsers(): void {
-    this.http.get<any[]>(this.apiUsers).subscribe({
-      next: (p: any) => {
-        const all = Array.isArray(p) ? p : (p.content || []);
-        this.users = all.filter((u: any) => u.role === 'CHEF_COMITE');
-      },
-      error: () => {}
+  ouvrir(c: Comite | null): void {
+    this.edition = c;
+    this.erreurForm = '';
+    const courante = this.editions.find(e => e.statut !== 'CLOTURE')?.id ?? null;
+    this.form.reset({
+      nom: c?.nom ?? '', description: c?.description ?? '',
+      forumProjectId: c?.forumProject?.id ?? courante, chefId: c?.chef?.id ?? null,
     });
+    this.modalOuvert = true;
   }
 
-  loadProjects(): void {
-    this.http.get<ForumProject[]>(this.apiProjects).subscribe({
-      next: p => this.projects = p,
-      error: () => {}
-    });
+  // Chefs libres + chef actuel du comité édité
+  get chefsDisponibles(): User[] {
+    const pris = new Set(this.comites.filter(c => c.id !== this.edition?.id && c.chef).map(c => c.chef!.id));
+    return this.chefs.filter(u => !pris.has(u.id));
   }
 
-  openCreate(): void {
-    this.editMode = false; this.editId = null; this.errorMsg = '';
-    this.form.reset();
-    this.showModal = true;
-  }
-
-  openEdit(c: any): void {
-    this.editMode = true; this.editId = c.id; this.errorMsg = '';
-    this.form.patchValue({
-      nom: c.nom,
-      description: c.description,
-      forumProjectId: c.forumProject?.id,
-      chefId: c.chef?.id
-    });
-    this.showModal = true;
-  }
-
-  save(): void {
+  enregistrer(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.saving = true; this.errorMsg = '';
-
-    const val = this.form.value;
-
-    // Backend attend un objet Comite avec forumProject et chef imbriqués
-    const body: any = {
-      nom: val.nom,
-      description: val.description,
-      forumProject: val.forumProjectId ? { id: val.forumProjectId } : null,
-      chef: val.chefId ? { id: val.chefId } : null,
+    this.enregistrement = true;
+    const v = this.form.value;
+    const corps = {
+      nom: v.nom, description: v.description,
+      forumProject: { id: +v.forumProjectId },
+      chef: v.chefId ? { id: +v.chefId } : null,
     };
-
-    const req = this.editMode && this.editId
-      ? this.http.put<any>(`${this.apiComites}/${this.editId}`, body)
-      : this.http.post<any>(this.apiComites, body);
-
+    const req = this.edition
+      ? this.http.put(`${this.api}/comites/${this.edition.id}`, corps)
+      : this.http.post(`${this.api}/comites`, corps);
     req.subscribe({
-      next: () => { this.showModal = false; this.saving = false; this.load(); },
-      error: e => { this.errorMsg = e.error?.message || `Erreur ${e.status}`; this.saving = false; }
+      next: () => {
+        this.enregistrement = false; this.modalOuvert = false;
+        this.toast.success(this.edition ? 'Comité modifié' : 'Comité créé');
+        this.charger();
+      },
+      error: (e: Error) => { this.enregistrement = false; this.erreurForm = e.message; },
     });
   }
 
-  confirmDel(id: number): void { this.deleteId = id; this.confirmDelete = true; }
-  doDelete(): void {
-    this.http.delete(`${this.apiComites}/${this.deleteId}`).subscribe({
-      next: () => { this.confirmDelete = false; this.load(); },
-      error: () => { this.confirmDelete = false; this.load(); }
+  supprimer(): void {
+    const c = this.aSupprimer;
+    this.aSupprimer = null;
+    if (!c) return;
+    this.http.delete(`${this.api}/comites/${c.id}`).subscribe({
+      next: () => { this.toast.success('Comité supprimé'); this.charger(); },
+      error: (e: Error) => this.toast.error(e.message),
     });
   }
 
-  colorByNom(nom: string): string {
-    const map: Record<string,string> = { Design:'#DBEAFE',Sponsoring:'#D1FAE5',Logistique:'#FEF3C7',Programme:'#EDE9FE',Media:'#FCE7F3',Projet:'#FEE2E2' };
-    return map[nom] ?? '#F1F5F9';
-  }
-
-  iconByNom(nom: string): string {
-    const map: Record<string,string> = { Design:'🎨',Sponsoring:'🤝',Logistique:'🏗',Programme:'📅',Media:'📸',Projet:'⚙' };
-    return map[nom] ?? '📋';
-  }
-
+  icone(nom: string): string { return iconeComite(nom); }
+  pourcent(c: Comite): number { return this.avancement.get(c.nom)?.avancement ?? 0; }
+  taches(c: Comite): number { return this.avancement.get(c.nom)?.total ?? 0; }
+  initiales(nom: string): string { return nom.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2); }
   get f() { return this.form.controls; }
 }

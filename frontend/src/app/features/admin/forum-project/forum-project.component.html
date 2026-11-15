@@ -1,120 +1,94 @@
-<!-- src/app/features/admin/forum-project/forum-project.component.html -->
-<app-layout title="Forum Projects" subtitle="Gestion des éditions annuelles du Forum ENICarthage">
+<app-layout title="Édition du Forum" subtitle="Chaque édition regroupe ses comités, tâches et workshops">
+  <div class="alert alert-error" *ngIf="erreur"><lucide-icon name="circle-alert" [size]="18"></lucide-icon>{{ erreur }}</div>
 
   <div class="toolbar">
-    <div class="toolbar-info">{{ projects.length }} édition(s)</div>
-    <button class="btn btn-primary" (click)="openCreate()">+ Nouvelle édition</button>
+    <span class="spacer"></span>
+    <button class="btn btn-primary" (click)="ouvrir(null)"><lucide-icon name="plus" [size]="16"></lucide-icon> Nouvelle édition</button>
   </div>
 
-  <div class="loading-state" *ngIf="loading">⏳ Chargement...</div>
+  <div class="skeleton" style="height:180px" *ngIf="loading"></div>
 
-  <div class="projects-list" *ngIf="!loading">
-    <div class="project-card" *ngFor="let p of projects" [class.current]="p.statut === 'EN_COURS'">
-
-      <div class="project-side" [ngClass]="statutColor(p.statut)">
-        <div class="project-year">{{ p.edition }}</div>
-        <div class="project-statut">{{ p.statut }}</div>
-      </div>
-
-      <div class="project-body">
-        <div class="project-top">
-          <div>
-            <h3>{{ p.nom }}</h3>
-            <p class="project-desc">{{ p.description }}</p>
-          </div>
-          <span class="project-badge" [ngClass]="statutColor(p.statut)">{{ p.statut }}</span>
-        </div>
-
-        <div class="project-meta-row">
-          <div class="meta-chip">📅 Début : {{ p.dateDebut | date:'dd/MM/yyyy' }}</div>
-          <div class="meta-chip accent">🎯 Événement : {{ p.dateEvenement | date:'dd/MM/yyyy' }}</div>
-          <div class="meta-chip">📍 {{ p.lieu }}</div>
-        </div>
-
-        <div class="project-actions">
-          <button class="btn btn-outline btn-sm" (click)="openEdit(p)" *ngIf="p.statut !== 'CLOTURE'">✏ Modifier</button>
-          <button class="btn btn-danger  btn-sm" (click)="askCloturer(p.id)" *ngIf="p.statut === 'EN_COURS'">🔒 Archiver</button>
-          <span class="archived-label" *ngIf="p.statut === 'CLOTURE'">📁 Archivé</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="empty-state" *ngIf="projects.length === 0">
-      Aucune édition. Créez la première !
-    </div>
-  </div>
-
-  <!-- ========== MODAL ========== -->
-  <div class="modal-overlay" *ngIf="showModal" (click)="showModal = false">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal-hd">
-        <h3>{{ editMode ? 'Modifier' : 'Créer' }} une édition du Forum</h3>
-        <button class="modal-close" (click)="showModal = false">✕</button>
-      </div>
-      <form [formGroup]="form" (ngSubmit)="save()">
-        <div class="modal-body">
-
-          <!-- Erreur backend -->
-          <div class="alert-error" *ngIf="errorMsg">⚠ {{ errorMsg }}</div>
-
-          <div class="form-row">
-            <div class="field" [class.error]="f['nom'].touched && f['nom'].invalid">
-              <label>Nom du Forum *</label>
-              <input type="text" formControlName="nom" placeholder="Forum d'Entreprise ENICarthage 2026">
-              <span class="field-error" *ngIf="f['nom'].touched && f['nom'].invalid">Requis</span>
-            </div>
-            <div class="field" [class.error]="f['edition'].touched && f['edition'].invalid">
-              <label>Édition / Année *</label>
-              <input type="text" formControlName="edition" placeholder="2026">
-              <span class="field-error" *ngIf="f['edition'].touched && f['edition'].invalid">Requis</span>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="field" [class.error]="f['dateDebut'].touched && f['dateDebut'].invalid">
-              <label>Date de début *</label>
-              <input type="date" formControlName="dateDebut">
-              <span class="field-error" *ngIf="f['dateDebut'].touched && f['dateDebut'].invalid">Requis</span>
-            </div>
-            <div class="field" [class.error]="f['dateEvenement'].touched && f['dateEvenement'].invalid">
-              <label>Date de l'événement *</label>
-              <input type="date" formControlName="dateEvenement">
-              <span class="field-error" *ngIf="f['dateEvenement'].touched && f['dateEvenement'].invalid">Requis</span>
-            </div>
-          </div>
-
-          <div class="field" [class.error]="f['lieu'].touched && f['lieu'].invalid">
-            <label>Lieu *</label>
-            <input type="text" formControlName="lieu" placeholder="ENICarthage, Ariana">
-            <span class="field-error" *ngIf="f['lieu'].touched && f['lieu'].invalid">Requis</span>
-          </div>
-
-          <div class="field">
-            <label>Description</label>
-            <textarea formControlName="description" rows="3" placeholder="Thématiques et objectifs..."></textarea>
+  <ng-container *ngIf="!loading">
+    <div class="section-title">Édition en cours</div>
+    <div class="stack">
+      <div class="card edition" *ngFor="let e of actives">
+        <div class="year">{{ e.edition }}</div>
+        <div class="grow">
+          <div class="row"><h3>{{ e.nom }}</h3><app-statut-badge [statut]="e.statut"></app-statut-badge></div>
+          <p class="muted" *ngIf="e.description">{{ e.description }}</p>
+          <div class="meta">
+            <span><lucide-icon name="calendar" [size]="15"></lucide-icon> Début : {{ e.dateDebut | date:'d MMM y' }}</span>
+            <span><lucide-icon name="flag" [size]="15"></lucide-icon> Forum : {{ e.dateEvenement | date:'d MMMM y' }}</span>
+            <span><lucide-icon name="map-pin" [size]="15"></lucide-icon> {{ e.lieu }}</span>
+            <span *ngIf="jours(e) !== null && jours(e)! >= 0" class="badge badge-blue">J-{{ jours(e) }}</span>
           </div>
         </div>
-
-        <div class="modal-ft">
-          <button type="button" class="btn btn-outline" (click)="showModal = false" [disabled]="saving">Annuler</button>
-          <button type="submit" class="btn btn-primary" [disabled]="saving">
-            <span *ngIf="!saving">{{ editMode ? 'Sauvegarder' : 'Créer' }}</span>
-            <span *ngIf="saving" class="spinner"></span>
+        <div class="acts">
+          <button class="btn btn-success btn-sm" *ngIf="e.statut === 'PLANIFICATION'" (click)="changerStatut(e, 'EN_COURS')">
+            <lucide-icon name="rocket" [size]="15"></lucide-icon> Lancer
           </button>
+          <button class="btn btn-secondary btn-sm" (click)="ouvrir(e)"><lucide-icon name="pencil" [size]="15"></lucide-icon> Modifier</button>
+          <button class="btn btn-danger btn-sm" (click)="aCloturer = e"><lucide-icon name="archive" [size]="15"></lucide-icon> Clôturer</button>
         </div>
-      </form>
+      </div>
+      <div class="card" *ngIf="!actives.length">
+        <app-empty icon="calendar-days" title="Aucune édition en cours" text="Créez l’édition de l’année pour commencer l’organisation.">
+          <button class="btn btn-primary" (click)="ouvrir(null)"><lucide-icon name="plus" [size]="16"></lucide-icon> Créer l’édition</button>
+        </app-empty>
+      </div>
     </div>
-  </div>
 
-  <app-confirm-modal
-    [open]="confirmCloture"
-    title="Archiver cette édition"
-    message="Le projet sera archivé en lecture seule. Cette action est irréversible."
-    confirmLabel="Archiver"
-    icon="🔒"
-    [danger]="true"
-    (confirm)="doCloturer()"
-    (cancel)="confirmCloture = false">
-  </app-confirm-modal>
+    <ng-container *ngIf="cloturees.length">
+      <div class="section-title mt">Éditions clôturées</div>
+      <div class="card">
+        <div class="list">
+          <div class="list-item" *ngFor="let e of cloturees">
+            <span class="year sm">{{ e.edition }}</span>
+            <div class="grow"><div class="strong">{{ e.nom }}</div><div class="muted small">{{ e.dateEvenement | date:'d MMMM y' }} · {{ e.lieu }}</div></div>
+            <a class="btn btn-ghost btn-sm" routerLink="/admin/historique">Voir l’historique</a>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </ng-container>
 
+  <app-modal [open]="modalOuvert" [title]="edition ? 'Modifier l’édition' : 'Nouvelle édition'" (close)="modalOuvert = false">
+    <form [formGroup]="form" id="formEd" class="form-grid" (ngSubmit)="enregistrer()">
+      <div class="field full">
+        <label for="e-nom">Nom <span class="req">*</span></label>
+        <input id="e-nom" class="input" formControlName="nom">
+      </div>
+      <div class="field">
+        <label for="e-an">Année <span class="req">*</span></label>
+        <input id="e-an" class="input" formControlName="edition" placeholder="2027" inputmode="numeric">
+        <span class="field-error" *ngIf="f['edition'].touched && f['edition'].invalid">Année sur 4 chiffres</span>
+      </div>
+      <div class="field">
+        <label for="e-lieu">Lieu <span class="req">*</span></label>
+        <input id="e-lieu" class="input" formControlName="lieu">
+      </div>
+      <div class="field">
+        <label for="e-deb">Début de l’organisation <span class="req">*</span></label>
+        <input id="e-deb" class="input" type="date" formControlName="dateDebut">
+      </div>
+      <div class="field">
+        <label for="e-ev">Date du Forum <span class="req">*</span></label>
+        <input id="e-ev" class="input" type="date" formControlName="dateEvenement">
+        <span class="field-error" *ngIf="form.errors?.['dates']">Doit être après le début de l’organisation</span>
+      </div>
+      <div class="field full">
+        <label for="e-desc">Description</label>
+        <textarea id="e-desc" class="textarea" rows="3" formControlName="description" placeholder="Thématiques, objectifs…"></textarea>
+      </div>
+      <div class="alert alert-error full" *ngIf="erreurForm"><lucide-icon name="circle-alert" [size]="18"></lucide-icon>{{ erreurForm }}</div>
+    </form>
+    <div modal-footer>
+      <button class="btn btn-secondary" (click)="modalOuvert = false">Annuler</button>
+      <button class="btn btn-primary" type="submit" form="formEd" [disabled]="enregistrement">Enregistrer</button>
+    </div>
+  </app-modal>
+
+  <app-confirm-modal [open]="!!aCloturer" title="Clôturer cette édition ?" icon="archive" [danger]="true" confirmLabel="Clôturer"
+    message="L’édition passera en lecture seule : plus aucune tâche, aucun comité ni workshop ne pourra être modifié."
+    (confirm)="cloturer()" (cancel)="aCloturer = null"></app-confirm-modal>
 </app-layout>

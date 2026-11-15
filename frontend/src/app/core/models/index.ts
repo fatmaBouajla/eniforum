@@ -39,9 +39,9 @@ export interface Comite {
     id: number; nom: string; email: string;
     role: Role; actif: boolean;
   };
-  // on garde ces alias pour ne pas casser l'admin qui les utilise peut-être
   chefId?: number; chefNom?: string;
   membres?: User[]; forumProjectId?: number;
+  forumProject?: { id: number; nom: string; edition?: string; statut?: StatutProjet };
   nombreTaches?: number; avancement?: number;
 }
 
@@ -60,13 +60,15 @@ export interface Workshop {
   id: number; titre: string; description: string;
   intervenant: string; dateHeure: string;
   statut: StatutWorkshop;
-  comiteId: number; comiteNom?: string;
-  proposeParId?: number; proposeParNom?: string;
+  motifRefus?: string;
+  comite?: { id: number; nom: string };
+  proposePar?: { id: number; nom: string };
+  comiteId?: number; comiteNom?: string;
 }
 
 export interface CandidatureCV {
   id: number; fichierCV: string; posteVise: string;
-  scoreIA: number; statut: StatutCV;
+  scoreIA: number | null; statut: StatutCV;
   commentaire?: string; dateDepot: string;
   candidatId: number; candidatNom: string;
   candidatEmail?: string;
@@ -74,6 +76,7 @@ export interface CandidatureCV {
   justificationIA?: string;
   competencesExtraites?: string;
   dateAnalyseIA?: string;
+  motDePasseProvisoire?: string;
 }
 
 // ─── NOTIFICATION ─────────────────────────────────────────────
@@ -86,7 +89,7 @@ export interface Notification {
 // ─── COMMENTAIRE ──────────────────────────────────────────────
 export interface Commentaire {
   id: number; contenu: string; dateCreation: string;
-  auteurId: number; auteurNom: string;
+  auteur?: { id: number; nom: string; role?: Role };
 }
 
 export interface KPIs {
@@ -94,10 +97,10 @@ export interface KPIs {
   tachesTerminees: number; tachesEnRetard: number;
   totalWorkshops: number; workshopsValides: number;
   totalCandidatures: number; avancementGlobal: number;
-  tachesAFaire: number;   // ← AJOUTER
-  tachesEnCours: number;  // ← AJOUTER
+  tachesAFaire: number; tachesEnCours: number;
+  candidaturesAcceptees: number; totalComites: number;
 }
 
 export interface AvancementComite {
-  comiteNom: string; total: number; terminees: number; avancement: number;
+  comiteId?: number; comiteNom: string; total: number; terminees: number; avancement: number;
 }

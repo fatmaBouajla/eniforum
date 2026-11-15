@@ -1,113 +1,47 @@
-<!-- src/app/features/membre/taches/membre-taches.component.html -->
-<app-layout title="Mes Tâches" subtitle="Consulter et mettre à jour l'avancement de mes tâches">
+<app-layout title="Mes tâches" subtitle="Faites avancer vos tâches et tenez votre équipe informée">
+  <div class="alert alert-error" *ngIf="erreur"><lucide-icon name="circle-alert" [size]="18"></lucide-icon>{{ erreur }}</div>
+  <div class="board" *ngIf="loading"><div class="skeleton" style="height:260px" *ngFor="let i of [1,2,3]"></div></div>
 
-  <!-- Filtres -->
-  <div class="filter-tabs" style="margin-bottom:20px;">
-    <button class="tab-btn" *ngFor="let s of allFilters"
-            [class.active]="filterStatut === s"
-            (click)="filterStatut = s">
-      {{ s === 'TOUS' ? 'Toutes' : (s | statut) }}
-      <span class="tab-count">{{ countByStatut(s) }}</span>
-    </button>
+  <div class="card" *ngIf="!loading && !erreur && !taches.length">
+    <app-empty icon="list-todo" title="Aucune tâche pour le moment" text="Votre chef de comité vous en assignera bientôt. Vous recevrez une notification."></app-empty>
   </div>
 
-  <div class="loading-state" *ngIf="loading">Chargement...</div>
-
-  <!-- Liste tâches -->
-  <div class="taches-list" *ngIf="!loading">
-    <div class="tache-card" *ngFor="let t of filtered"
-         [class.retard]="t.statut === 'EN_RETARD'"
-         [class.urgente]="t.priorite === 'URGENTE'">
-
-      <div class="tc-side" [ngClass]="t.statut.toLowerCase().replace('_','-')"></div>
-
-      <div class="tc-body">
-        <div class="tc-top">
-          <div>
-            <h3 class="tc-titre">{{ t.titre }}</h3>
-            <p class="tc-desc">{{ t.description }}</p>
-          </div>
-          <div class="tc-badges">
-            <app-statut-badge [statut]="t.priorite"></app-statut-badge>
-            <app-statut-badge [statut]="t.statut"></app-statut-badge>
-          </div>
-        </div>
-
-        <div class="tc-meta-row">
-          <span class="tc-meta-chip">📋 {{ t.comiteNom }}</span>
-          <span class="tc-meta-chip" [class.danger]="t.statut === 'EN_RETARD'">
-            📅 Échéance : {{ t.dateFin | date:'dd/MM/yyyy' }}
-          </span>
-          <span class="tc-meta-chip" *ngIf="t.commentaires?.length">
-            💬 {{ t.commentaires!.length }} commentaire(s)
-          </span>
-        </div>
-
-        <div class="tc-actions">
-          <!-- Bouton avancer statut -->
-          <button class="btn btn-primary btn-sm"
-                  *ngIf="t.statut !== 'TERMINEE'"
-                  [disabled]="updatingStatut === t.id"
-                  (click)="changerStatut(t, nextStatut(t.statut))">
-            {{ t.statut === 'A_FAIRE' ? '▶ Démarrer' : t.statut === 'EN_COURS' ? '✅ Marquer terminée' : '↩ Reprendre' }}
-          </button>
-          <button class="btn btn-outline btn-sm" (click)="openDetail(t)">
-            💬 Commentaires ({{ t.commentaires?.length || 0 }})
-          </button>
-        </div>
+  <div class="board" *ngIf="!loading && taches.length">
+    <section class="col" *ngFor="let c of colonnes">
+      <div class="col-head">
+        <lucide-icon [name]="c.icone" [size]="16"></lucide-icon>
+        <span>{{ c.titre }}</span>
+        <span class="count">{{ de(c).length }}</span>
       </div>
-    </div>
-
-    <div class="empty-state" *ngIf="filtered.length === 0">
-      🎉 Aucune tâche pour ce filtre.
-    </div>
-  </div>
-
-  <!-- Detail + Commentaires panel -->
-  <div class="modal-overlay" *ngIf="showDetail && selectedTache" (click)="showDetail = false">
-    <div class="detail-panel" (click)="$event.stopPropagation()">
-      <div class="modal-hd">
-        <h3>{{ selectedTache.titre }}</h3>
-        <button class="modal-close" (click)="showDetail = false">✕</button>
-      </div>
-
-      <div class="detail-body">
-        <p class="detail-desc">{{ selectedTache.description }}</p>
-
-        <div class="detail-meta">
-          <div class="dm-row"><span class="dm-label">Statut</span><app-statut-badge [statut]="selectedTache.statut"></app-statut-badge></div>
-          <div class="dm-row"><span class="dm-label">Priorité</span><app-statut-badge [statut]="selectedTache.priorite"></app-statut-badge></div>
-          <div class="dm-row"><span class="dm-label">Comité</span><span>{{ selectedTache.comiteNom }}</span></div>
-          <div class="dm-row"><span class="dm-label">Échéance</span><span>{{ selectedTache.dateFin | date:'dd/MM/yyyy' }}</span></div>
-        </div>
-
-        <!-- Commentaires -->
-        <div class="comments-section">
-          <div class="comments-title">💬 Commentaires</div>
-          <div class="comments-list">
-            <div class="comment-item" *ngFor="let c of selectedTache.commentaires">
-              <div class="comment-av">{{ c.auteurNom[0] }}</div>
-              <div class="comment-body">
-                <div class="comment-header">
-                  <span class="comment-author">{{ c.auteurNom }}</span>
-                  <span class="comment-date">{{ c.dateCreation | date:'dd/MM HH:mm' }}</span>
-                </div>
-                <div class="comment-text">{{ c.contenu }}</div>
-              </div>
-            </div>
-            <div class="no-comments" *ngIf="!selectedTache.commentaires?.length">Aucun commentaire.</div>
+      <div class="cards">
+        <article class="card tache" *ngFor="let t of de(c)" [class.retard]="t.statut === 'EN_RETARD'" [class.done]="t.statut === 'TERMINEE'">
+          <div class="row top">
+            <span class="badge badge-amber" *ngIf="t.priorite === 'URGENTE'"><lucide-icon name="flag" [size]="12"></lucide-icon> Urgente</span>
+            <span class="badge badge-red" *ngIf="t.statut === 'EN_RETARD'">En retard</span>
+            <span class="spacer"></span>
+            <span class="muted small">{{ t.comiteNom }}</span>
           </div>
-
-          <!-- Nouveau commentaire -->
-          <form [formGroup]="commentForm" (ngSubmit)="addComment()" class="comment-form">
-            <textarea formControlName="contenu" rows="2" placeholder="Ajouter un commentaire..."></textarea>
-            <button type="submit" class="btn btn-primary btn-sm" [disabled]="submittingComment || commentForm.invalid">
-              {{ submittingComment ? '...' : 'Envoyer' }}
+          <h3>{{ t.titre }}</h3>
+          <p class="muted small" *ngIf="t.description">{{ t.description }}</p>
+          <div class="row due">
+            <lucide-icon name="calendar" [size]="14"></lucide-icon>
+            <span>{{ t.dateFin | date:'d MMM y' }}</span>
+            <span class="small strong" [ngClass]="echeance(t).classe">{{ echeance(t).texte }}</span>
+          </div>
+          <div class="actions">
+            <button class="btn btn-ghost btn-sm" (click)="commentaires = t"><lucide-icon name="message-square" [size]="15"></lucide-icon> Commentaires</button>
+            <span class="spacer"></span>
+            <button class="btn btn-primary btn-sm" *ngIf="t.statut === 'A_FAIRE'" (click)="changer(t, 'EN_COURS')" [disabled]="enCours === t.id">Démarrer</button>
+            <button class="btn btn-success btn-sm" *ngIf="t.statut === 'EN_COURS' || t.statut === 'EN_RETARD'" (click)="changer(t, 'TERMINEE')" [disabled]="enCours === t.id">
+              <lucide-icon name="check" [size]="15"></lucide-icon> Terminer
             </button>
-          </form>
-        </div>
+            <button class="btn btn-secondary btn-sm" *ngIf="t.statut === 'TERMINEE'" (click)="changer(t, 'EN_COURS')" [disabled]="enCours === t.id">Rouvrir</button>
+          </div>
+        </article>
+        <div class="vide" *ngIf="!de(c).length">Aucune tâche</div>
       </div>
-    </div>
+    </section>
   </div>
 
+  <app-commentaires [tacheId]="commentaires?.id ?? null" [titre]="commentaires?.titre ?? ''" (close)="commentaires = null"></app-commentaires>
 </app-layout>

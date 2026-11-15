@@ -1,81 +1,61 @@
-/* src/app/features/pilotage/dashboard/pilotage-dashboard.component.ts */
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { forkJoin } from 'rxjs';
-import { StatistiquesService, TacheService } from '../../../core/services/api.services';
-import { KPIs, AvancementComite, Tache } from '../../../core/models';
-import { Chart, registerables } from 'chart.js';
-Chart.register(...registerables);
+import { Chart } from 'chart.js';
+import { CandidatureCVService, StatistiquesService, TacheService } from '../../../core/services/api.services';
+import { AvancementComite, CandidatureCV, KPIs, Tache } from '../../../core/models';
+import { graphiqueTermineesRestantes } from '../../../core/utils/graphiques';
+import { AnalyseIA, RECO_LABELS, libellePoste, lireAnalyse, lireDossier } from '../../../core/utils/analyse-ia';
 
+/** Tableau de bord du comité de pilotage : supervision et candidatures à traiter. */
 @Component({
   selector: 'app-pilotage-dashboard',
   templateUrl: './pilotage-dashboard.component.html',
   styleUrls: ['./pilotage-dashboard.component.scss'],
 })
-export class PilotageDashboardComponent implements OnInit {
+export class PilotageDashboardComponent implements OnInit, OnDestroy {
+  @ViewChild('cComites') cComites?: ElementRef<HTMLCanvasElement>;
   kpis: KPIs | null = null;
   avancements: AvancementComite[] = [];
-  tachesRetard: Tache[] = [];
-
+  retards: Tache[] = [];
+  aTraiter: { c: CandidatureCV; a: AnalyseIA; comite: string }[] = [];
+  enAttente = 0;
+  loading = true;
   erreur = '';
+  readonly reco = RECO_LABELS;
+  private graphique: Chart | null = null;
 
-  private chartInstance: Chart | null = null;
-
-
-  constructor(private stats: StatistiquesService, private tacheService: TacheService) {}
+  constructor(private stats: StatistiquesService, private taches: TacheService, private cvs: CandidatureCVService) {}
 
   ngOnInit(): void {
     forkJoin({
       kpis: this.stats.getKPIs(),
       av: this.stats.getAvancementComites(),
-      retard: this.tacheService.getAll({ statut: 'EN_RETARD' }),
+      retards: this.taches.getAll({ statut: 'EN_RETARD' }),
+      cvs: this.cvs.getAll(),
     }).subscribe({
-      next: ({ kpis, av, retard }) => {
-        this.kpis = kpis;
-        this.avancements = av;
-        this.tachesRetard = (retard ?? []).slice(0, 5);
-        setTimeout(() => this.buildChart(), 50);
+      next: r => {
+        this.kpis = r.kpis;
+        this.avancements = r.av;
+        this.retards = r.retards.slice(0, 6);
+        const attente = r.cvs.filter(c => c.statut === 'EN_ATTENTE');
+        this.enAttente = attente.length;
+        // Les candidatures les mieux notées par l'IA en premier
+        this.aTraiter = attente
+          .map(c => ({ c, a: lireAnalyse(c), comite: lireDossier(c.dossierComplet)['Comité'] ?? '' }))
+          .sort((x, y) => (y.a.score ?? -1) - (x.a.score ?? -1))
+          .slice(0, 4);
+        this.loading = false;
+        setTimeout(() => {
+          this.graphique?.destroy();
+          this.graphique = graphiqueTermineesRestantes(this.cComites?.nativeElement ?? null, this.avancements);
+        });
       },
-      error: () => {
-        this.kpis = null;
-        this.avancements = [];
-        this.tachesRetard = [];
-        this.erreur = 'Impossible de joindre le serveur : les données ne peuvent pas être affichées. Vérifiez que le backend est démarré.';
-      },
+      error: (e: Error) => { this.erreur = e.message; this.loading = false; },
     });
   }
 
-  private chartData(): AvancementComite[] {
-    return this.avancements ?? [];
-  }
+  ngOnDestroy(): void { this.graphique?.destroy(); }
 
-  buildChart(): void {
-    const el = document.getElementById('chartAv') as HTMLCanvasElement;
-    if (!el) return;
-    const src = this.chartData();
-    this.chartInstance?.destroy();
-    this.chartInstance = new Chart(el, {
-      type: 'bar',
-      data: {
-        labels: src.map(a => a.comiteNom),
-        datasets: [
-          { label: 'Terminées', data: src.map(a => a.terminees), backgroundColor: '#10B981', borderRadius: 6 },
-          {
-            label: 'Restantes',
-            data: src.map(a => (a.total ?? 0) - a.terminees),
-            backgroundColor: '#F1F5F9',
-            borderRadius: 6,
-          },
-        ],
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true } } },
-        scales: { x: { stacked: true }, y: { stacked: true } },
-      },
-    });
-  }
-
-  statusColor(s: string): string {
-    return { A_FAIRE:'a-faire',EN_COURS:'en-cours',TERMINEE:'terminee',EN_RETARD:'en-retard' }[s] ?? '';
-  }
+  poste(p: string): string { return libellePoste(p); }
+  initiale(n: string): string { return (n || '?').charAt(0).toUpperCase(); }
 }

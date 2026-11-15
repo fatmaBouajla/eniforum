@@ -1,0 +1,16 @@
+.rapport { padding: 28px 32px; display: flex; flex-direction: column; gap: 26px; }
+.r-head { display: flex; align-items: center; gap: 16px; padding-bottom: 18px; border-bottom: 2px solid var(--brand-100); }
+.r-head img { height: 54px; width: auto; }
+.r-head .eni { height: 40px; }
+.r-head h2 { font-size: 22px; }
+.grow { flex: 1; }
+h3 { font-size: 15px; margin-bottom: 10px; }
+.kpi { padding: 14px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); font-size: 12.5px; color: var(--text-3); font-weight: 600; }
+.kpi span { display: block; font-size: 22px; font-weight: 800; color: var(--brand-900); }
+.kpi.red span { color: var(--danger); }
+.bar { flex: 1; }
+@media print {
+  .rapport { border: 0; padding: 0; }
+  .table th { background: #F2F5F9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .progress, .progress > div { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
