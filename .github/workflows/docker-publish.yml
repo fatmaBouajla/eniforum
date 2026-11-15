@@ -61,11 +61,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Nom de l'image
+        id: nom
+        env:
+          COMPTE: ${{ secrets.DOCKERHUB_USERNAME }}
+        run: |
+          COMPTE=$(printf '%s' "${COMPTE:-eniforum}" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
+          echo "image=${COMPTE}/eniforum-${{ matrix.service }}" >> "$GITHUB_OUTPUT"
+
       - name: Tags de l'image
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKERHUB_USERNAME || 'eniforum' }}/eniforum-${{ matrix.service }}
+          images: ${{ steps.nom.outputs.image }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,format=short
