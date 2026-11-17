@@ -90,12 +90,7 @@ public class DemoDataLoader implements CommandLineRunner {
                 sponso, chefSponso, StatutWorkshop.PROPOSE, 40);
 
         // Candidatures avec de vrais PDF (CV fictifs)
-        List<Long> aAnalyser = List.of();
-        try {
-            aAnalyser = candidatures();
-        } catch (IOException e) {
-            log.warn("Candidatures de démonstration ignorées (dossier des CV non accessible) : {}", e.getMessage());
-        }
+        List<Long> aAnalyser = candidaturesSiPossible();
         tacheService.detecterRetards();
         log.info("Données de démonstration chargées (mot de passe : {})", MOT_DE_PASSE_DEMO);
 
@@ -103,6 +98,15 @@ public class DemoDataLoader implements CommandLineRunner {
         Thread t = new Thread(() -> analyserQuandIaPrete(aAnalyser), "demo-analyse-ia");
         t.setDaemon(true);
         t.start();
+    }
+
+    private List<Long> candidaturesSiPossible() throws Exception {
+        try {
+            return candidatures();
+        } catch (IOException e) {
+            log.warn("Candidatures de démonstration ignorées (dossier des CV non accessible) : {}", e.getMessage());
+            return List.of();
+        }
     }
 
     private Utilisateur compte(String nom, String email, RoleEnum role) {
