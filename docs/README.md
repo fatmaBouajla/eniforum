@@ -1,12 +1,13 @@
 # Documentation
 
-- [Cahier des charges v2.0 (PDF)](cahier-des-charges.pdf)
+- [Cahier des charges v2.1 (PDF)](cahier-des-charges.pdf)
 - Diagrammes (SVG) :
   - [Cas d'utilisation](diagrammes/cas-utilisation.svg)
   - [Classes](diagrammes/classes.svg)
   - [Séquence : dépôt, analyse IA et décision](diagrammes/sequence-candidature.svg)
   - [États d'une candidature](diagrammes/etats-candidature.svg)
   - [Traitement d'un CV par l'IA](diagrammes/traitement-ia.svg)
+  - [Analyse détaillée par RAG](diagrammes/analyse-detaillee-rag.svg)
   - [Architecture logique](diagrammes/architecture.svg)
   - [Déploiement Docker](diagrammes/deploiement-docker.svg)
 - [Prototype Figma](prototype-figma.txt)

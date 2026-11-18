@@ -4,8 +4,8 @@ node [fontname="Inter", fontsize=10];
 edge [color="#64748B", arrowhead=none, penwidth=0.9];
 
 node [shape=box, style="rounded,filled", fillcolor="#EEF2FF", color="#6366F1", fontcolor="#1E1B4B", width=1.5];
-Admin [label="👤 Administrateur"]; Pilotage [label="👤 Comité de pilotage"]; Coord [label="👤 Coordinatrice"];
-Chef [label="👤 Chef de comité"]; Membre [label="👤 Membre"]; Candidat [label="👤 Candidat\n(visiteur)"];
+Admin [label="Administrateur"]; Pilotage [label="Comité de pilotage"]; Coord [label="Coordinatrice"];
+Chef [label="Chef de comité"]; Membre [label="Membre"]; Candidat [label="Candidat\n(visiteur)"];
 
 subgraph cluster_sys {
   label="Plateforme EniForum"; fontsize=13; fontcolor="#1E3A8A"; style="rounded,dashed"; color="#3B82F6"; margin=16;
@@ -30,7 +30,7 @@ subgraph cluster_sys {
 }
 
 node [shape=box, style="rounded,filled", fillcolor="#FFF7ED", color="#F97316", fontcolor="#7C2D12", width=1.4];
-IA [label="⚙ Service IA"]; Mail [label="✉ Serveur mail"];
+IA [label="Service IA"]; Mail [label="Serveur mail"];
 
 Admin -> {login projet users comites stats};
 Pilotage -> {login suivi cvs ia stats};

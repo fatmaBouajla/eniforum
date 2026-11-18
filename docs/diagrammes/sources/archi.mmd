@@ -1,5 +1,5 @@
 flowchart TB
-    U(["🌐 Navigateur<br/>utilisateurs et candidats"])
+    U(["Navigateur<br/>utilisateurs et candidats"])
 
     subgraph FE["Frontend — Angular 17 (servi par Nginx)"]
         direction LR
@@ -16,11 +16,14 @@ flowchart TB
     subgraph AI["Service IA — Python 3.11 · FastAPI"]
         direction LR
         A1["POST /analyze"] --> A2["Extraction PDF<br/>+ signaux du CV"] --> A3["Compétences<br/>catalogue FR/EN"] --> A4["Similarité sémantique<br/>sentence-transformers"] --> A5["Score pondéré<br/>+ justification"]
+        A6["POST /evaluation"] --> A7["Recherche (RAG)<br/>passages du CV<br/>+ guide de recrutement"] --> A8["Contrôle de la réponse<br/>sources, garde-fous"]
     end
+
+    OL["Ollama<br/>modèle Qwen2.5 local"]
 
     DB[("MySQL 8")]
     FS[/"Stockage des CV<br/>volume uploads/"/]
-    M["✉ SMTP Gmail"]
+    M["SMTP Gmail"]
 
     U -->|HTTPS| F1
     F2 -->|"REST JSON + Bearer JWT"| B2
@@ -28,6 +31,8 @@ flowchart TB
     B3 --> FS
     B3 -->|"identifiants, décisions"| M
     B6 -->|"multipart : PDF, poste, dossier"| A1
+    B6 -->|"analyse détaillée"| A6
+    A7 -->|"prompt + extraits"| OL
 
     classDef fe fill:#FEF2F2,stroke:#F87171,color:#7F1D1D
     classDef be fill:#F0FDF4,stroke:#4ADE80,color:#14532D
@@ -35,8 +40,8 @@ flowchart TB
     classDef ext fill:#FFFBEB,stroke:#F59E0B,color:#78350F
     class F1,F2,F3 fe
     class B1,B2,B3,B4,B5,B6 be
-    class A1,A2,A3,A4,A5 ai
-    class DB,FS,M ext
+    class A1,A2,A3,A4,A5,A6,A7,A8 ai
+    class DB,FS,M,OL ext
     style FE fill:#FFF7F7,stroke:#FCA5A5
     style BE fill:#F7FEF9,stroke:#86EFAC
     style AI fill:#FAF8FF,stroke:#C4B5FD

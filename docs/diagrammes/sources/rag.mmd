@@ -1,0 +1,17 @@
+flowchart LR
+    C["Candidature<br/>CV (PDF) + poste + dossier"] --> M["Matching<br/>score, compétences,<br/>manques vérifiés"]
+    C --> R1["Recherche dans le CV<br/>6 passages proches<br/>des attentes du poste"]
+    G[("Guide de recrutement<br/>forum, comités, rôles")] --> R2["Recherche dans le guide<br/>3 passages du comité<br/>et du rôle visés"]
+    M --> P["Consigne<br/>extraits numérotés<br/>CV1… G1…"]
+    R1 --> P
+    R2 --> P
+    P --> L["Ollama<br/>Qwen2.5 local"]
+    L --> V["Contrôles<br/>sources existantes<br/>manques du matching<br/>outils présents dans le CV"]
+    V --> O["Analyse détaillée<br/>points forts · manques<br/>3 questions d'entretien"]
+
+    classDef step fill:#EEF2FF,stroke:#6366F1,color:#1E1B4B
+    classDef data fill:#FFFBEB,stroke:#F59E0B,color:#78350F
+    classDef out fill:#D1FAE5,stroke:#10B981,color:#064E3B
+    class M,R1,R2,P,L,V step
+    class C,G data
+    class O out
