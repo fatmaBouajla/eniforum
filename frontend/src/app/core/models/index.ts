@@ -77,6 +77,8 @@ export interface CandidatureCV {
   competencesExtraites?: string;
   dateAnalyseIA?: string;
   motDePasseProvisoire?: string;
+  analyseDetaillee?: string;
+  etatAnalyseDetaillee?: 'EN_COURS' | 'PRETE' | 'ERREUR' | null;
 }
 
 // ─── NOTIFICATION ─────────────────────────────────────────────

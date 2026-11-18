@@ -1,0 +1,56 @@
+<section class="ad">
+  <div class="ad-head">
+    <h4><lucide-icon name="sparkles" [size]="14"></lucide-icon> Analyse détaillée</h4>
+    <button class="btn btn-ghost btn-sm" *ngIf="etat === 'PRETE' || etat === 'ERREUR'" (click)="lancer()">
+      <lucide-icon name="refresh-cw" [size]="14"></lucide-icon> Relancer
+    </button>
+  </div>
+
+  <div class="ad-vide" *ngIf="etat === 'AUCUNE'">
+    <p class="muted small">Le modèle de langage relit le CV avec le guide de recrutement du comité et propose des points forts, des manques et des questions d’entretien.</p>
+    <button class="btn btn-secondary btn-sm" (click)="lancer()">Générer l’analyse</button>
+  </div>
+
+  <div class="ad-attente" *ngIf="etat === 'EN_COURS'">
+    <span class="spinner dark"></span>
+    <span class="small">Analyse en cours… cela peut prendre une à deux minutes.</span>
+  </div>
+
+  <div class="alert alert-error small" *ngIf="etat === 'ERREUR'">
+    <lucide-icon name="circle-alert" [size]="16"></lucide-icon>{{ erreur }}
+  </div>
+
+  <ng-container *ngIf="etat === 'PRETE' && analyse as a">
+    <div class="ad-grid">
+      <div *ngIf="a.points_forts.length">
+        <h5>Points forts</h5>
+        <ul>
+          <li *ngFor="let p of a.points_forts">
+            {{ p.texte }}
+            <button class="ad-src" *ngIf="p.source" [class.on]="source === p.source" (click)="voir(p.source)">{{ p.source }}</button>
+          </li>
+        </ul>
+      </div>
+      <div *ngIf="a.manques.length">
+        <h5>Manques</h5>
+        <ul>
+          <li *ngFor="let p of a.manques">
+            {{ p.texte }}
+            <button class="ad-src" *ngIf="p.source" [class.on]="source === p.source" (click)="voir(p.source)">{{ p.source }}</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <blockquote class="ad-extrait" *ngIf="source && a.sources[source]">
+      <b>{{ source.startsWith('CV') ? 'Extrait du CV' : 'Guide de recrutement' }}</b> — {{ a.sources[source] }}
+    </blockquote>
+
+    <div *ngIf="a.questions_entretien.length">
+      <h5>Questions d’entretien</h5>
+      <ol><li *ngFor="let q of a.questions_entretien">{{ q }}</li></ol>
+    </div>
+
+    <div class="ad-modele">Généré par {{ a.modele }} à partir du CV et du guide de recrutement. À vérifier avant toute décision.</div>
+  </ng-container>
+</section>

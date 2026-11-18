@@ -43,6 +43,12 @@ public class CandidatureCVController {
         return ResponseEntity.ok(toDto(saved));
     }
 
+    @PostMapping("/{id}/analyse-detaillee")
+    @PreAuthorize("hasAnyRole('ADMIN','COMITE_PILOTAGE','CHEF_COMITE')")
+    public CandidatureCVDto analyseDetaillee(@PathVariable Long id, Authentication auth) {
+        return toDto(candidatureCVService.demanderAnalyseDetaillee(id, auth.getName()));
+    }
+
     @PostMapping("/{id}/analyser-ia")
     @PreAuthorize("hasAnyRole('ADMIN','COMITE_PILOTAGE')")
     public CandidatureCVDto analyserIA(@PathVariable Long id) {
@@ -93,6 +99,8 @@ public class CandidatureCVController {
                 .posteVise(c.getPosteVise())
                 .scoreIA(c.getScoreIA())
                 .justificationIA(c.getJustificationIA())
+                .analyseDetaillee(c.getAnalyseDetaillee())
+                .etatAnalyseDetaillee(c.getEtatAnalyseDetaillee())
                 .competencesExtraites(c.getCompetencesExtraites())
                 .statut(c.getStatut() != null ? c.getStatut().name() : null)
                 .commentaire(c.getCommentaire())

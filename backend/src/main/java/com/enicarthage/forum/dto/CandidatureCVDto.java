@@ -12,6 +12,8 @@ public class CandidatureCVDto {
     private String posteVise;
     private Double scoreIA;
     private String justificationIA;
+    private String analyseDetaillee;
+    private String etatAnalyseDetaillee;
     private String competencesExtraites;
     private String statut;
     private String commentaire;

@@ -8,7 +8,7 @@ Elle permet de gérer les utilisateurs, les comités, les tâches et les candida
 
 - **Backend :** Spring Boot 3.2
 - **Frontend :** Angular 17
-- **Intelligence artificielle :** Python, FastAPI et Sentence Transformers
+- **Intelligence artificielle :** Python, FastAPI, Sentence Transformers et Ollama (Qwen2.5)
 - **Base de données :** MySQL 8
 - **Déploiement :** Docker
 
@@ -31,21 +31,24 @@ Le module IA permet de :
 - Donner un score de pertinence sur 100.
 - Identifier les points forts et les compétences manquantes.
 - Classer les candidats selon leur profil.
+- Générer une analyse détaillée (points forts, manques et questions d'entretien) avec un modèle de langage local, à partir du CV et du guide de recrutement du comité (RAG).
 
 ## 2. Architecture
 
-Le projet contient quatre services principaux :
+Le projet contient cinq services principaux :
 
 1. **Frontend :** interface utilisateur développée avec Angular.
 2. **Backend :** gestion des fonctionnalités et des données avec Spring Boot.
 3. **Base de données :** stockage des informations avec MySQL.
 4. **Service IA :** analyse et comparaison des CV avec Python et FastAPI.
+5. **Ollama :** modèle de langage local utilisé pour l'analyse détaillée des CV.
 
 ## 3. Lancer le projet avec Docker
 
 ### Prérequis
 
 - Docker Desktop installé et démarré.
+- 8 Go de RAM conseillés (modèle de langage).
 - Une connexion Internet.
 
 ### Étape 1 : Télécharger le projet
@@ -65,6 +68,8 @@ docker compose up -d
 ```
 
 Docker télécharge et démarre automatiquement les différents services.
+
+Au premier lancement, le modèle de langage (environ 2 Go) est aussi téléchargé. L'analyse détaillée des CV est disponible après quelques minutes. Sur un ordinateur peu puissant, ajouter `OLLAMA_MODEL=qwen2.5:1.5b` dans le fichier `.env` pour un modèle plus léger.
 
 ### Étape 3 : Accéder à l'application
 
@@ -163,6 +168,12 @@ Installer les dépendances :
 pip install -r requirements.txt
 python download_model.py
 uvicorn main:app --port 8000
+```
+
+Pour l'analyse détaillée, installer [Ollama](https://ollama.com) puis télécharger le modèle :
+
+```bash
+ollama pull qwen2.5:3b
 ```
 
 ### Lancer le Backend

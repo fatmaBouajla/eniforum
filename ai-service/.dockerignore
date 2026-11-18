@@ -3,5 +3,6 @@
 !main.py
 !download_model.py
 !matcher/
+!rag/
 !data/
 **/__pycache__

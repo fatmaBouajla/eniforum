@@ -25,9 +25,22 @@ services:
       timeout: 5s
       retries: 30
 
+  # Modèle de langage local pour l'analyse détaillée des CV.
+  # Le modèle (environ 2 Go) est téléchargé au premier lancement puis gardé dans le volume.
+  ollama:
+    image: ollama/ollama:0.12.6
+    restart: unless-stopped
+    volumes:
+      - ollama-data:/root/.ollama
+
   ai:
     image: ${DOCKERHUB_USER:-fatmabouajla}/eniforum-ai:${ENIFORUM_TAG:-latest}
     restart: unless-stopped
+    depends_on:
+      - ollama
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}   # qwen2.5:1.5b sur une machine peu puissante
     ports:
       - "${AI_PORT:-8000}:8000"        # documentation interactive : http://localhost:8000/docs
 
@@ -68,3 +81,4 @@ services:
 volumes:
   mysql-data:
   cv-uploads:
+  ollama-data:

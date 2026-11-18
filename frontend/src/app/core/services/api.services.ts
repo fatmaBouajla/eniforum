@@ -185,6 +185,10 @@ export class CandidatureCVService {
     });
   }
 
+  analyseDetaillee(id: number): Observable<CandidatureCV> {
+    return this.http.post<CandidatureCV>(`${this.url}/${id}/analyse-detaillee`, {});
+  }
+
   analyserIA(id: number): Observable<CandidatureCV> {
     return this.http.post<CandidatureCV>(`${this.url}/${id}/analyser-ia`, {});
   }

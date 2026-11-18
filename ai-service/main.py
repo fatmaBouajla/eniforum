@@ -1,9 +1,10 @@
 """
 Microservice IA de matching de CV — Forum ENICarthage.
 
-Contrat utilisé par le backend Spring Boot (inchangé) :
-    POST /analyze  (multipart : file, poste_vise, contexte)
+Contrat utilisé par le backend Spring Boot :
+    POST /analyze     (multipart : file, poste_vise, contexte)
     ->  {"score": float, "justification": str, "competences": [str], "details": {...}}
+    POST /evaluation  (mêmes champs) -> analyse détaillée générée par RAG
 Le backend ignore "details" ; il sert à la démo (/docs) et au débogage.
 
 Lancement :  uvicorn main:app --port 8000
@@ -12,20 +13,23 @@ import logging
 from contextlib import asynccontextmanager
 from typing import Dict, List
 
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 
 from matcher import CvMatcher
 from matcher.extraction import extract_pdf_text
+from rag import EvaluateurRag
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s : %(message)s")
 
 matcher = CvMatcher()
+rag = EvaluateurRag(matcher)
 
 
 @asynccontextmanager
 async def lifespan(_app):
-    matcher.semantic.load_async()  # chargement du modèle en arrière-plan
+    matcher.semantic.load_async()  # chargement des modèles en arrière-plan
+    rag.llm.preparer_async()
     yield
 
 
@@ -53,7 +57,8 @@ class TextRequest(BaseModel):
 @app.get("/health")
 def health():
     return {"status": "ok", "moteur_semantique": matcher.semantic.status,
-            "moteur_actif": matcher.semantic.engine.name}
+            "moteur_actif": matcher.semantic.engine.name,
+            "modele_langage": {"modele": rag.llm.modele, "statut": rag.llm.statut}}
 
 
 @app.get("/postes")
@@ -80,3 +85,22 @@ def analyze_text(req: TextRequest):
     r = matcher.analyze(req.texte_cv, req.poste_vise, req.contexte)
     return AnalyzeResponse(score=r.score, justification=r.justification,
                            competences=r.competences, details=r.details)
+
+
+@app.post("/evaluation")
+def evaluation(
+    file: UploadFile = File(...),
+    poste_vise: str = Form(""),
+    contexte: str = Form(""),
+):
+    """Analyse détaillée : points forts, manques et questions d'entretien (RAG)."""
+    if not rag.llm.pret:
+        raise HTTPException(503, f"Modèle de langage {rag.llm.statut}")
+    text = extract_pdf_text(file.file.read())
+    analyse = matcher.analyze(text, poste_vise, contexte)
+    try:
+        return rag.evaluer(text, poste_vise, contexte, analyse)
+    except ValueError as exc:
+        raise HTTPException(502, str(exc))
+    except OSError as exc:  # délai dépassé ou Ollama arrêté
+        raise HTTPException(503, f"Modèle de langage injoignable : {exc}")

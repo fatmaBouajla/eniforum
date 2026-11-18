@@ -54,5 +54,7 @@
     <p class="synthese" *ngIf="!a.dimensions.length && !a.synthese && a.texteBrut">{{ a.texteBrut }}</p>
 
     <div class="moteur" *ngIf="a.moteur">Moteur : {{ a.moteur }}</div>
+
+    <app-analyse-detaillee [candidature]="candidature"></app-analyse-detaillee>
   </ng-container>
 </div>

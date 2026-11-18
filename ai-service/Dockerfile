@@ -39,11 +39,13 @@ COPY --from=build --chown=app:app /opt/hf /opt/hf
 WORKDIR /app
 COPY --chown=app:app main.py download_model.py ./
 COPY --chown=app:app matcher ./matcher
+COPY --chown=app:app rag ./rag
 COPY --chown=app:app data ./data
 
 ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 \
     HF_HOME=/opt/hf HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
-    CV_AI_MODEL=${MODEL_NAME} OMP_NUM_THREADS=2
+    CV_AI_MODEL=${MODEL_NAME} OMP_NUM_THREADS=2 \
+    OLLAMA_URL=http://ollama:11434 OLLAMA_MODEL=qwen2.5:3b
 USER app
 EXPOSE 8000
 

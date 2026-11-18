@@ -25,6 +25,11 @@ public class CandidatureCV {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dateAnalyseIA;
 
+    // Analyse détaillée générée par le RAG (JSON) et son état : EN_COURS, PRETE ou ERREUR
+    @Column(columnDefinition = "TEXT")
+    private String analyseDetaillee;
+    private String etatAnalyseDetaillee;
+
     @Enumerated(EnumType.STRING)
     private StatutCandidature statut;
 

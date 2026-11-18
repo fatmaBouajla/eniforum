@@ -12,6 +12,7 @@ import { StatCardComponent }     from './components/stat-card/stat-card.componen
 import { ConfirmModalComponent } from './components/confirm-modal/confirm-modal.component';
 import { StatutPipe }            from './pipes/statut.pipe';
 import { ScoreRingComponent }    from './components/score-ring/score-ring.component';
+import { AnalyseDetailleeComponent } from './components/analyse-detaillee/analyse-detaillee.component';
 import { AnalyseIaComponent }    from './components/analyse-ia/analyse-ia.component';
 import { ModalComponent }        from './components/modal/modal.component';
 import { EmptyComponent }        from './components/empty/empty.component';
@@ -28,7 +29,7 @@ import { ICONES }                from './icons';
   declarations: [
     SidebarComponent, TopbarComponent, LayoutComponent,
     StatutBadgeComponent, StatCardComponent, ConfirmModalComponent,
-    StatutPipe, ScoreRingComponent, AnalyseIaComponent,
+    StatutPipe, ScoreRingComponent, AnalyseIaComponent, AnalyseDetailleeComponent,
     ModalComponent, EmptyComponent, ToastsComponent, DecisionComponent,
     CommentairesComponent, TachesGestionComponent, BilanComitesComponent, WorkshopsGestionComponent,
   ],
@@ -37,7 +38,7 @@ import { ICONES }                from './icons';
     CommonModule, RouterModule, ReactiveFormsModule, FormsModule, LucideAngularModule,
     SidebarComponent, TopbarComponent, LayoutComponent,
     StatutBadgeComponent, StatCardComponent, ConfirmModalComponent,
-    StatutPipe, ScoreRingComponent, AnalyseIaComponent,
+    StatutPipe, ScoreRingComponent, AnalyseIaComponent, AnalyseDetailleeComponent,
     ModalComponent, EmptyComponent, ToastsComponent, DecisionComponent,
     CommentairesComponent, TachesGestionComponent, BilanComitesComponent, WorkshopsGestionComponent,
   ],

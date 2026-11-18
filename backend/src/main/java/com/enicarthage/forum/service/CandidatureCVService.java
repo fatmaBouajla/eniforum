@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -32,6 +34,12 @@ import java.util.stream.Collectors;
 @Log4j2
 @RequiredArgsConstructor
 public class CandidatureCVService {
+
+    private static final String ETAT_EN_COURS = "EN_COURS";
+    // Une analyse détaillée à la fois : le modèle de langage tourne sur le processeur
+    private final java.util.concurrent.ExecutorService fileAnalyses = java.util.concurrent.Executors.newSingleThreadExecutor();
+    private final java.util.Set<Long> analysesEnCours = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
 
     public static final String UPLOAD_DIR = "uploads/cv/";
 
@@ -93,6 +101,52 @@ public class CandidatureCVService {
         candidature.setCompetencesExtraites(null);
         log.warn("Analyse IA impossible pour la candidature {} : {}", candidature.getId(), message);
     }
+
+    /** Lance l'analyse détaillée en arrière-plan ; l'écran suit son état. */
+    public CandidatureCV demanderAnalyseDetaillee(Long id, String actorEmail) {
+        CandidatureCV c = candidatureCVRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Candidature non trouvee"));
+        verifierAccesChef(c, actorEmail);
+        if (ETAT_EN_COURS.equals(c.getEtatAnalyseDetaillee()) && analysesEnCours.contains(id)) {
+            return c;
+        }
+        c.setEtatAnalyseDetaillee(ETAT_EN_COURS);
+        CandidatureCV saved = candidatureCVRepository.save(c);
+        analysesEnCours.add(id);
+        Runnable tache = () -> fileAnalyses.submit(() -> genererAnalyseDetaillee(id));
+        // Lancement après l'enregistrement de l'état EN_COURS
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCommit() { tache.run(); }
+            });
+        } else {
+            tache.run();
+        }
+        return saved;
+    }
+
+    private void genererAnalyseDetaillee(Long id) {
+        try {
+            CandidatureCV c = candidatureCVRepository.findById(id).orElseThrow();
+            Path path = Paths.get(c.getFichierCV());
+            try {
+                if (!Files.exists(path)) throw new IllegalStateException("Fichier CV introuvable");
+                c.setAnalyseDetaillee(cvAiClient.evaluer(path, c.getPosteVise(), c.getDossierComplet()));
+                c.setEtatAnalyseDetaillee("PRETE");
+            } catch (IllegalStateException e) {
+                c.setAnalyseDetaillee(objectMapper.writeValueAsString(java.util.Map.of("erreur", e.getMessage())));
+                c.setEtatAnalyseDetaillee("ERREUR");
+            }
+            candidatureCVRepository.save(c);
+        } catch (Exception e) {
+            log.error("Analyse détaillée de la candidature {} interrompue", id, e);
+        } finally {
+            analysesEnCours.remove(id);
+        }
+    }
+
+    @jakarta.annotation.PreDestroy
+    void arreter() { fileAnalyses.shutdownNow(); }
 
     public CandidatureCV reAnalyser(Long id) {
         CandidatureCV c = candidatureCVRepository.findById(id)
