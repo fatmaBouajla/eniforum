@@ -56,20 +56,20 @@ public class UtilisateurController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> supprimer(@PathVariable Long id) {
-        utilisateurService.supprimer(id);
+    public ResponseEntity<Void> supprimer(@PathVariable Long id, Authentication auth) {
+        utilisateurService.supprimer(id, auth.getName());
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/activer")
     @PreAuthorize("hasRole('ADMIN')")
-    public Utilisateur activer(@PathVariable Long id, @RequestParam boolean actif) {
-        return utilisateurService.activerCompte(id, actif);
+    public Utilisateur activer(@PathVariable Long id, @RequestParam boolean actif, Authentication auth) {
+        return utilisateurService.activerCompte(id, actif, auth.getName());
     }
 
     @PatchMapping("/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
-    public Utilisateur assignerRole(@PathVariable Long id, @RequestParam RoleEnum role) {
-        return utilisateurService.assignerRole(id, role);
+    public Utilisateur assignerRole(@PathVariable Long id, @RequestParam RoleEnum role, Authentication auth) {
+        return utilisateurService.assignerRole(id, role, auth.getName());
     }
 }

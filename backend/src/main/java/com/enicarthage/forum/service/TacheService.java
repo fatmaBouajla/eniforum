@@ -65,13 +65,16 @@ public class TacheService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vous ne pouvez créer des tâches que pour votre comité");
         }
         if (dto.getMembreId() != null) {
-            boolean dansComite = comite.getMembres().stream().anyMatch(m -> m.getId().equals(dto.getMembreId()))
-                    || (comite.getChef() != null && comite.getChef().getId().equals(dto.getMembreId()));
-            if (!dansComite) {
+            if (!faitPartieDuComite(comite, dto.getMembreId())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La personne assignée doit faire partie du comité");
             }
         }
         return creer(dto);
+    }
+
+    private boolean faitPartieDuComite(Comite comite, Long utilisateurId) {
+        return comite.getMembres().stream().anyMatch(m -> m.getId().equals(utilisateurId))
+                || (comite.getChef() != null && comite.getChef().getId().equals(utilisateurId));
     }
 
     public Tache creer(TacheDTO dto) {
@@ -119,6 +122,9 @@ public class TacheService {
         if (dto.getPriorite() != null) tache.setPriorite(dto.getPriorite());
         if (dto.getStatut() != null) tache.setStatut(dto.getStatut());
         if (dto.getComiteId() != null && !dto.getComiteId().equals(tache.getComite().getId())) {
+            if (actor.getRole() == RoleEnum.CHEF_COMITE) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Une tâche ne peut pas être déplacée vers un autre comité");
+            }
             Comite nouveau = comiteRepository.findById(dto.getComiteId())
                     .orElseThrow(() -> new ResourceNotFoundException("Comite non trouve"));
             forumEditionGuard.assertForumOuvert(nouveau.getId());
@@ -127,6 +133,9 @@ public class TacheService {
         if (dto.getMembreId() != null) {
             Utilisateur membre = utilisateurRepository.findById(dto.getMembreId())
                     .orElseThrow(() -> new ResourceNotFoundException("Membre non trouve"));
+            if (!faitPartieDuComite(tache.getComite(), membre.getId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La personne assignée doit faire partie du comité");
+            }
             boolean changed = tache.getMembre() == null
                     || !tache.getMembre().getId().equals(membre.getId());
             tache.setMembre(membre);
@@ -204,6 +213,16 @@ public class TacheService {
 
     public List<Tache> findAll() {
         return tacheRepository.findAll();
+    }
+
+    public Tache findByIdPour(Long id, String email) {
+        Tache tache = findById(id);
+        Utilisateur u = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
+        if (!tacheAuthorizationHelper.peutAccederTache(u, tache)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès refusé à cette tâche");
+        }
+        return tache;
     }
 
     public Tache findById(Long id) {

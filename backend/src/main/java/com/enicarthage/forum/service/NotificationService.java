@@ -37,9 +37,12 @@ public class NotificationService {
         return notificationRepository.findByDestinationId(userId);
     }
 
-    public Notification marquerLu(Long id) {
+    public Notification marquerLu(Long id, String email) {
         Notification notif = notificationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Notification non trouvee"));
+        if (notif.getDestination() == null || !notif.getDestination().getEmail().equals(email)) {
+            throw new ResourceNotFoundException("Notification non trouvee");
+        }
         notif.setLu(true);
         return notificationRepository.save(notif);
     }

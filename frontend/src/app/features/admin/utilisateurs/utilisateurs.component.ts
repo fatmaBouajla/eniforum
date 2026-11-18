@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { forkJoin, Observable, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Role, User } from '../../../core/models';
+import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 
 /** Gestion des comptes : création, modification, rôle, activation, suppression. */
@@ -34,7 +35,9 @@ export class UtilisateursComponent implements OnInit {
   ];
   private api = `${environment.apiUrl}/utilisateurs`;
 
-  constructor(private fb: FormBuilder, private http: HttpClient, private toast: ToastService) {
+  get monEmail(): string { return this.auth.currentUser?.email ?? ''; }
+
+  constructor(private fb: FormBuilder, private http: HttpClient, private toast: ToastService, private auth: AuthService) {
     this.form = this.fb.group({
       nom: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],

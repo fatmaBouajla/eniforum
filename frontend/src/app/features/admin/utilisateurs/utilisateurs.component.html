@@ -38,10 +38,12 @@
             </td>
             <td class="actions">
               <button class="icon-btn" title="Modifier" (click)="ouvrir(u)"><lucide-icon name="pencil" [size]="16"></lucide-icon></button>
-              <button class="icon-btn" [title]="u.actif ? 'Désactiver le compte' : 'Réactiver le compte'" (click)="basculerActif(u)">
-                <lucide-icon [name]="u.actif ? 'lock' : 'lock-open'" [size]="16"></lucide-icon>
-              </button>
-              <button class="icon-btn danger" title="Supprimer" (click)="aSupprimer = u"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
+              <ng-container *ngIf="u.email !== monEmail">
+                <button class="icon-btn" [title]="u.actif ? 'Désactiver le compte' : 'Réactiver le compte'" (click)="basculerActif(u)">
+                  <lucide-icon [name]="u.actif ? 'lock' : 'lock-open'" [size]="16"></lucide-icon>
+                </button>
+                <button class="icon-btn danger" title="Supprimer" (click)="aSupprimer = u"><lucide-icon name="trash-2" [size]="16"></lucide-icon></button>
+              </ng-container>
             </td>
           </tr>
         </tbody>

@@ -135,6 +135,8 @@ public class CandidatureCVService {
         if (c.getStatut() != StatutCandidature.EN_ATTENTE) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Cette candidature a déjà été traitée");
         }
+        boolean chef = c.getPosteVise() != null && c.getPosteVise().toUpperCase().contains("CHEF");
+        if (chef) verifierComiteSansChef(extractComite(c.getDossierComplet()), c.getCandidatEmail());
         c.setStatut(StatutCandidature.ACCEPTE);
         CandidatureCV saved = candidatureCVRepository.save(c);
 
@@ -169,11 +171,27 @@ public class CandidatureCVService {
         return saved;
     }
 
+    private void verifierComiteSansChef(String comiteNom, String email) {
+        comiteRepository.findAll().stream()
+            .filter(c -> Textes.memeComite(c.getNom(), comiteNom))
+            .findFirst()
+            .filter(c -> c.getChef() != null && !c.getChef().getEmail().equalsIgnoreCase(email))
+            .ifPresent(c -> {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Le comité " + c.getNom() + " a déjà un chef (" + c.getChef().getNom() + ")");
+            });
+    }
+
     private Utilisateur creerCompte(CandidatureCV c, String motDePasse, RoleEnum role) {
         Optional<Utilisateur> existing = utilisateurRepository.findByEmail(c.getCandidatEmail());
         if (existing.isPresent()) {
-            log.info("Compte déjà existant pour {}", c.getCandidatEmail());
-            return existing.get();
+            Utilisateur u = existing.get();
+            // Un membre accepté comme chef change de rôle
+            if (role == RoleEnum.CHEF_COMITE && u.getRole() == RoleEnum.MEMBRE) {
+                u.setRole(RoleEnum.CHEF_COMITE);
+                return utilisateurRepository.save(u);
+            }
+            return u;
         }
         Utilisateur u = Utilisateur.builder()
                 .nom(c.getCandidatNom())
@@ -235,20 +253,30 @@ public class CandidatureCVService {
             String telephone, String niveauEtudes,
             String posteVise, String comite,
             String motivation, String experience, String competences) {
+        if (estVide(prenom) || estVide(nom) || estVide(motivation)) {
+            throw new IllegalArgumentException("Prénom, nom et motivation sont obligatoires");
+        }
+        if (email == null || !email.trim().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            throw new IllegalArgumentException("Adresse email invalide");
+        }
+        if (!"MEMBRE".equals(posteVise) && !"CHEF_COMITE".equals(posteVise)) {
+            throw new IllegalArgumentException("Poste visé invalide");
+        }
+        email = email.trim();
+        if (candidatureCVRepository.existsByCandidatEmailAndStatut(email, StatutCandidature.EN_ATTENTE)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Une candidature est déjà en attente pour cet email");
+        }
         String path = saveFile(fichier);
         String dossier = String.format(
                 "Prénom:%s | Nom:%s | Tel:%s | Niveau:%s | Comité:%s | Motivation:%s | Expérience:%s | Compétences:%s",
-                prenom, nom, telephone, niveauEtudes,
-                comite != null ? comite : "-",
-                motivation,
-                experience != null ? experience : "-",
-                competences != null ? competences : "-");
+                champ(prenom), champ(nom), champ(telephone), champ(niveauEtudes), champ(comite),
+                champ(motivation), champ(experience), champ(competences));
         CandidatureCV candidature = CandidatureCV.builder()
                 .fichierCV(path)
                 .posteVise(posteVise)
                 .statut(StatutCandidature.EN_ATTENTE)
                 .dateDepot(LocalDateTime.now())
-                .candidatNom(prenom + " " + nom)
+                .candidatNom(prenom.trim() + " " + nom.trim())
                 .candidatEmail(email)
                 .dossierComplet(dossier)
                 .candidat(null)
@@ -258,6 +286,11 @@ public class CandidatureCVService {
         analyserAvecIA(saved);
         return saved;
     }
+
+    private static boolean estVide(String v) { return v == null || v.isBlank(); }
+
+    // Le dossier est découpé sur « | » : on retire ce caractère des saisies
+    private static String champ(String v) { return estVide(v) ? "-" : v.replace('|', '/').trim(); }
 
     public CandidatureCV refuser(Long id, String commentaire, String actorEmail) {
         CandidatureCV c = candidatureCVRepository.findById(id)

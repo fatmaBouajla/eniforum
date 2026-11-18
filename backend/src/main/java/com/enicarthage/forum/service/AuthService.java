@@ -38,11 +38,20 @@ public class AuthService {
      */
     public Utilisateur register(RegisterRequest request) {
         log.info("Inscription : {}", request.getEmail());
+        if (request.getNom() == null || request.getNom().isBlank()) {
+            throw new IllegalArgumentException("Le nom est obligatoire");
+        }
+        if (request.getEmail() == null || !request.getEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            throw new IllegalArgumentException("Adresse email invalide");
+        }
+        if (request.getMotDePasse() == null || request.getMotDePasse().length() < 8) {
+            throw new IllegalArgumentException("Mot de passe : 8 caractères minimum");
+        }
         if (utilisateurRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email deja utilise : " + request.getEmail());
         }
         Utilisateur user = Utilisateur.builder()
-                .nom(request.getNom())
+                .nom(request.getNom().trim())
                 .email(request.getEmail())
                 .motDePasse(passwordEncoder.encode(request.getMotDePasse()))
                 .role(RoleEnum.MEMBRE)

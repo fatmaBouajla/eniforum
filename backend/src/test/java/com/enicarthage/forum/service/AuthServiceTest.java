@@ -50,7 +50,9 @@ class AuthServiceTest {
     @Test
     void testerRegisterEmailDuplique() {
         RegisterRequest req = new RegisterRequest();
+        req.setNom("Test");
         req.setEmail("existe@test.com");
+        req.setMotDePasse("Test@2026");
         when(utilisateurRepository.existsByEmail("existe@test.com")).thenReturn(true);
         assertThrows(IllegalArgumentException.class, () -> authService.register(req));
     }

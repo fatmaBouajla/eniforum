@@ -34,8 +34,8 @@ public class NotificationController {
     }
 
     @PutMapping("/{id}/lu")
-    public NotificationDto marquerLu(@PathVariable Long id) {
-        return toDto(notificationService.marquerLu(id));
+    public NotificationDto marquerLu(@PathVariable Long id, Authentication auth) {
+        return toDto(notificationService.marquerLu(id, auth.getName()));
     }
 
     @PatchMapping("/tout-lu")

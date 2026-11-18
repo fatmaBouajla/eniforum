@@ -39,13 +39,13 @@ public class ForumProjectService {
 
     public ForumProject modifier(Long id, ForumProject data) {
         ForumProject fp = findById(id);
-        fp.setNom(data.getNom());
-        fp.setEdition(data.getEdition());
-        fp.setDateDebut(data.getDateDebut());
-        fp.setDateEvenement(data.getDateEvenement());
-        fp.setLieu(data.getLieu());
-        fp.setDescription(data.getDescription());
-        fp.setStatut(data.getStatut());
+        if (data.getNom() != null) fp.setNom(data.getNom());
+        if (data.getEdition() != null) fp.setEdition(data.getEdition());
+        if (data.getDateDebut() != null) fp.setDateDebut(data.getDateDebut());
+        if (data.getDateEvenement() != null) fp.setDateEvenement(data.getDateEvenement());
+        if (data.getLieu() != null) fp.setLieu(data.getLieu());
+        if (data.getDescription() != null) fp.setDescription(data.getDescription());
+        if (data.getStatut() != null) fp.setStatut(data.getStatut());
         return forumProjectRepository.save(fp);
     }
 

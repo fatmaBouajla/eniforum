@@ -33,8 +33,8 @@ public class TacheController {
     }
 
     @GetMapping("/{id}")
-    public TacheResponseDTO getById(@PathVariable Long id) {
-        return tacheService.toDTO(tacheService.findById(id));
+    public TacheResponseDTO getById(@PathVariable Long id, Authentication auth) {
+        return tacheService.toDTO(tacheService.findByIdPour(id, auth.getName()));
     }
 
     @PostMapping
