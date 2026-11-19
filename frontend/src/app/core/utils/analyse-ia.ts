@@ -1,14 +1,13 @@
 import { CandidatureCV } from '../models';
 
-/** Analyse IA lue depuis les champs existants de la candidature (scoreIA, justificationIA,
- *  competencesExtraites). Le service Python écrit une justification structurée,
- *  une ligne par rubrique : « Rubrique : contenu ». Aucune modification du backend requise. */
+/** Analyse IA d'une candidature. La justification du service IA contient
+ *  une ligne par rubrique : « Rubrique : contenu ». */
 export interface DimensionScore { libelle: string; points: number; max: number; pct: number; }
 
 export type CodeRecommandation = 'PRIORISER' | 'ENTRETIEN' | 'RESERVE';
 
 export interface AnalyseIA {
-  /** false = pas de vraie analyse (service IA éteint, ancien format, fichier absent). */
+  /** false si le CV n'a pas été analysé (service IA indisponible, fichier absent). */
   analysee: boolean;
   score: number | null;
   recommandation: CodeRecommandation | null;
@@ -61,7 +60,7 @@ export function lireAnalyse(c: Pick<CandidatureCV, 'scoreIA' | 'justificationIA'
   let recommandation: CodeRecommandation | null =
     code === 'PRIORISER' || code === 'ENTRETIEN' || code === 'RESERVE' ? code : null;
   if (!recommandation && analysee && c.scoreIA != null) {
-    // Ancien format (avant la nouvelle IA) : on déduit la recommandation du score
+    // Justification sans rubriques : recommandation déduite du score
     recommandation = c.scoreIA >= 70 ? 'PRIORISER' : c.scoreIA >= 50 ? 'ENTRETIEN' : 'RESERVE';
   }
 

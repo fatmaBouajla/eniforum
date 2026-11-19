@@ -1,4 +1,3 @@
-/*importations*/
 package com.enicarthage.forum.aop;
 
 

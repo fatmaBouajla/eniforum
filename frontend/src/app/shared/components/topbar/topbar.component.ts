@@ -1,5 +1,4 @@
 import { Component, HostListener, Input, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { NotificationService } from '../../../core/services/api.services';
 import { AuthService } from '../../../core/services/auth.service';
 import { Notification } from '../../../core/models';
@@ -21,7 +20,6 @@ export class TopbarComponent implements OnInit {
   constructor(
     private notifService: NotificationService,
     public auth: AuthService,
-    private router: Router,
     public ui: UiService
   ) {}
 

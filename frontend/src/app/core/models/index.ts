@@ -1,30 +1,24 @@
-// ─── ENUMS ────────────────────────────────────────────────────
 export type Role = 'ADMIN' | 'COMITE_PILOTAGE' | 'COORDINATRICE' | 'CHEF_COMITE' | 'MEMBRE';
 export type StatutProjet = 'PLANIFICATION' | 'EN_COURS' | 'CLOTURE';
 export type StatutTache = 'A_FAIRE' | 'EN_COURS' | 'TERMINEE' | 'EN_RETARD';
 export type Priorite = 'NORMALE' | 'URGENTE';
 export type StatutWorkshop = 'PROPOSE' | 'VALIDE' | 'REFUSE';
 export type StatutCV = 'EN_ATTENTE' | 'ACCEPTE' | 'REFUSE';
-export type TypeNotification = 'RETARD' | 'ASSIGNATION' | 'VALIDATION' | 'ALERTE' | 'INFO';
+export type TypeNotification = 'TACHE_ASSIGNEE' | 'TACHE_EN_RETARD' | 'WORKSHOP_VALIDE' | 'WORKSHOP_REFUSE' | 'CANDIDATURE_MISE_A_JOUR';
 
-// ─── AUTH ─────────────────────────────────────────────────────
 export interface LoginRequest  { email: string; motDePasse: string; }
-export interface RegisterRequest { nom: string; email: string; motDePasse: string; role: Role; }
 
-// Réponse RÉELLE du backend Spring Boot
 export interface AuthResponse {
   token: string;
-  type: string;   // "Bearer"
+  type: string;
   email: string;
   role: string;
 }
 
-// ─── USER ─────────────────────────────────────────────────────
 export interface User {
   id: number; nom: string; email: string; role: Role; actif: boolean;
 }
 
-// ─── FORUM PROJECT ────────────────────────────────────────────
 export interface ForumProject {
   id: number; nom: string; edition: string;
   dateDebut: string; dateEvenement: string;
@@ -32,7 +26,6 @@ export interface ForumProject {
   comites?: Comite[];
 }
 
-// ─── COMITE ───────────────────────────────────────────────────
 export interface Comite {
   id: number; nom: string; description: string;
   chef?: {
@@ -45,7 +38,6 @@ export interface Comite {
   nombreTaches?: number; avancement?: number;
 }
 
-// ─── TACHE ────────────────────────────────────────────────────
 export interface Tache {
   id: number; titre: string; description: string;
   dateDebut: string; dateFin: string;
@@ -55,7 +47,6 @@ export interface Tache {
   commentaires?: Commentaire[];
 }
 
-// ─── WORKSHOP ─────────────────────────────────────────────────
 export interface Workshop {
   id: number; titre: string; description: string;
   intervenant: string; dateHeure: string;
@@ -81,14 +72,12 @@ export interface CandidatureCV {
   etatAnalyseDetaillee?: 'EN_COURS' | 'PRETE' | 'ERREUR' | null;
 }
 
-// ─── NOTIFICATION ─────────────────────────────────────────────
 export interface Notification {
   id: number; message: string; lu: boolean;
   dateEnvoi: string; type: TypeNotification;
   destinationId?: number; tacheId?: number;
 }
 
-// ─── COMMENTAIRE ──────────────────────────────────────────────
 export interface Commentaire {
   id: number; contenu: string; dateCreation: string;
   auteur?: { id: number; nom: string; role?: Role };

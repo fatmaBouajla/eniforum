@@ -1,9 +1,6 @@
-# =====================================================================
-#  Construire les images à partir du code source (développement / publication)
-#
-#     docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
-#     docker compose -f docker-compose.yml -f docker-compose.build.yml push   # publier
-# =====================================================================
+# Construire les images à partir du code source (développement / publication)
+#    docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+#    docker compose -f docker-compose.yml -f docker-compose.build.yml push   # publier
 services:
   ai:
     build: ./ai-service

@@ -91,7 +91,7 @@ public class CandidatureCVController {
         return toDto(candidatureCVService.refuser(id, commentaire, auth.getName()));
     }
 
-    // ← Conversion entité → DTO sans relations circulaires
+    // Entité vers DTO, sans relations circulaires
     private CandidatureCVDto toDto(CandidatureCV c) {
         return CandidatureCVDto.builder()
                 .id(c.getId())

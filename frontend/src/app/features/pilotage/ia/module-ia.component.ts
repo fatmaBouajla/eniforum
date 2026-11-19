@@ -55,7 +55,7 @@ export class ModuleIAComponent implements OnInit, OnDestroy {
   ngOnInit(): void { this.charger(); }
   ngOnDestroy(): void { this.batch?.unsubscribe(); }
 
-  // ------------------------------------------------------------ données
+  // Données
   charger(): void {
     this.loading = true;
     this.erreur = '';
@@ -88,7 +88,7 @@ export class ModuleIAComponent implements OnInit, OnDestroy {
     if (i >= 0) this.lignes[i] = this.versLigne(c);
   }
 
-  // ------------------------------------------------------------ filtres & classement
+  // Filtres et classement
   get comites(): string[] {
     return [...new Set(this.lignes.map(l => l.comite).filter(Boolean))].sort();
   }
@@ -126,7 +126,7 @@ export class ModuleIAComponent implements OnInit, OnDestroy {
     this.recherche = ''; this.filtreComite = ''; this.filtrePoste = ''; this.filtreStatut = ''; this.filtreReco = '';
   }
 
-  // ------------------------------------------------------------ analyse IA
+  // Analyse IA
   analyser(l: Ligne): void {
     this.analyseEnCours.add(l.c.id);
     this.cvService.analyserIA(l.c.id).subscribe({
@@ -159,7 +159,7 @@ export class ModuleIAComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ------------------------------------------------------------ détail & comparaison
+  // Détail et comparaison
   basculer(l: Ligne): void {
     this.ouverts.has(l.c.id) ? this.ouverts.delete(l.c.id) : this.ouverts.add(l.c.id);
   }
@@ -196,7 +196,7 @@ export class ModuleIAComponent implements OnInit, OnDestroy {
     return v >= 0 && v === Math.max(...vals) && vals.filter(x => x === v).length === 1;
   }
 
-  // ------------------------------------------------------------ décisions
+  // Décisions
   finDecision(c: CandidatureCV | null): void {
     this.decision = null;
     if (c) this.remplacer(c);

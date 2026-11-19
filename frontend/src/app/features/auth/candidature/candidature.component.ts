@@ -54,7 +54,6 @@ export class CandidatureComponent implements OnInit {
   icone(c: string): string { return iconeComite(c); }
   invalide(nom: string): boolean { return this.f[nom].touched && this.f[nom].invalid; }
 
-  // ---- CV ----
   choisir(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.verifierCv(input.files?.[0] ?? null);
@@ -77,7 +76,6 @@ export class CandidatureComponent implements OnInit {
 
   taille(octets: number): string { return octets > 1048576 ? (octets / 1048576).toFixed(1) + ' Mo' : Math.round(octets / 1024) + ' Ko'; }
 
-  // ---- Envoi ----
   envoyer(): void {
     this.form.markAllAsTouched();
     if (!this.cv) this.cvErreur = 'Le CV est obligatoire.';

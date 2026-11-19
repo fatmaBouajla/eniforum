@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { forkJoin, Observable, of } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Role, User } from '../../../core/models';
 import { AuthService } from '../../../core/services/auth.service';

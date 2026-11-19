@@ -213,6 +213,13 @@ cd ai-service
 python -m pytest tests -q
 ```
 
+Pour mesurer la qualité du classement sur 30 CV de référence (le rapport est écrit dans `ai-service/tests/donnees/rapport_evaluation.md`) :
+
+```bash
+cd ai-service
+python tests/evaluer.py
+```
+
 ## 7. Structure du projet
 
 ```text

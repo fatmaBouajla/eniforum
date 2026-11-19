@@ -150,11 +150,7 @@ public class TacheService {
         return tacheRepository.save(tache);
     }
 
-    /**
-     * Changement de statut — appelé uniquement par le MEMBRE.
-     * On évite assertTacheOuverte() qui charge trop d'entités et cause le 500.
-     * La vérification d'autorisation suffit.
-     */
+    /** Changement de statut par la personne assignée ou un responsable de la tâche. */
     public Tache changerStatut(Long id, StatutTache statut, String actorEmail) {
         Tache tache = tacheRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tache non trouvee"));
@@ -162,19 +158,17 @@ public class TacheService {
         Utilisateur actor = utilisateurRepository.findByEmail(actorEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
 
-        // Vérification autorisation — membre doit être assigné à cette tâche
         if (!tacheAuthorizationHelper.peutAccederTache(actor, tache)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Changement de statut refuse");
         }
 
-        // UPDATE direct en base — pas de chargement d'entités supplémentaires
+        // Mise à jour ciblée du seul statut
         tacheRepository.updateStatut(id, statut);
         tache.setStatut(statut);
 
         log.info("Statut tache {} change en {} par {}", id, statut, actorEmail);
         return tache;
     }
-    
 
     public List<Tache> listerPourUtilisateur(String email, StatutTache filtreStatut) {
         Utilisateur u = utilisateurRepository.findByEmail(email)

@@ -1,13 +1,9 @@
-# =====================================================================
-#  EniForum — lancement complet en une commande, à partir des images Docker Hub
-#
-#     docker compose up -d
-#
-#  Application : http://localhost:4200
-#  Administrateur créé au démarrage du backend : admin@eniforum.tn / Admin@2026
-#  Comptes de démonstration (DEMO_DATA=true) : mot de passe Demo@2026, voir README
-#  Personnalisation : fichier .env (voir .env.example)
-# =====================================================================
+# EniForum — lancement complet en une commande, à partir des images Docker Hub
+#    docker compose up -d
+# Application : http://localhost:4200
+# Administrateur créé au démarrage du backend : admin@eniforum.tn / Admin@2026
+# Comptes de démonstration (DEMO_DATA=true) : mot de passe Demo@2026, voir README
+# Personnalisation : fichier .env (voir .env.example)
 name: eniforum
 
 services:

@@ -1,10 +1,8 @@
 # syntax=docker/dockerfile:1.7
-# =====================================================================
-#  EniForum — API Spring Boot
-#  Image finale : JRE 17, utilisateur non-root, jar découpé en couches
-# =====================================================================
+# EniForum — API Spring Boot
+# Image finale : JRE 17, utilisateur non-root, jar découpé en couches
 
-# ---------- 1. Build (Maven) ----------
+# 1. Build (Maven)
 FROM --platform=$BUILDPLATFORM maven:3.9.9-eclipse-temurin-17-alpine AS build
 WORKDIR /build
 # Dépendances d'abord : couche réutilisée tant que pom.xml ne change pas
@@ -15,7 +13,7 @@ RUN --mount=type=cache,target=/root/.m2 mvn -B -q -DskipTests package \
  && cp target/*.jar app.jar \
  && java -Djarmode=layertools -jar app.jar extract --destination extracted
 
-# ---------- 2. Exécution ----------
+# 2. Exécution
 FROM eclipse-temurin:17-jre
 LABEL org.opencontainers.image.title="eniforum-backend" \
       org.opencontainers.image.description="API REST Spring Boot de la plateforme EniForum" \

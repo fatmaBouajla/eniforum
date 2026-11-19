@@ -79,7 +79,7 @@ class SemanticScorer:
         self._lock = threading.Lock()
         self._pret = threading.Event()   # levé quand le chargement est terminé (réussi ou non)
 
-    # -- chargement -------------------------------------------------
+    # Chargement
     def load_async(self) -> None:
         if os.getenv("CV_AI_DISABLE_EMBEDDINGS", "").lower() in ("1", "true", "yes"):
             self.status = "désactivé (CV_AI_DISABLE_EMBEDDINGS)"
@@ -112,7 +112,7 @@ class SemanticScorer:
         with self._lock:
             return self.embedding or self.tfidf
 
-    # -- calcul -----------------------------------------------------
+    # Calcul
     def match(self, attentes: List[str], chunks: List[str]):
         """Pour chaque attente du poste : meilleure similarité avec un bloc du CV.
         Retourne (score global 0-1, [(attente, score 0-1, extrait du CV)], nom du moteur)."""

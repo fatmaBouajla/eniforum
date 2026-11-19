@@ -38,6 +38,7 @@ rag/base.py           découpage du guide en passages (par comité et par rôle)
 rag/evaluation.py     recherche des passages, consigne, contrôles de la réponse
 rag/llm.py            client Ollama (téléchargement du modèle au premier lancement)
 tests/                tests unitaires (python -m pytest tests -q)
+tests/evaluer.py      évaluation du classement sur 30 CV de référence
 ```
 
 ## Options

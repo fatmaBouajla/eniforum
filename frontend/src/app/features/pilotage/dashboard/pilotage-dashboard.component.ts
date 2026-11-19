@@ -30,7 +30,7 @@ export class PilotageDashboardComponent implements OnInit, OnDestroy {
     forkJoin({
       kpis: this.stats.getKPIs(),
       av: this.stats.getAvancementComites(),
-      retards: this.taches.getAll({ statut: 'EN_RETARD' }),
+      retards: this.taches.getAll('EN_RETARD'),
       cvs: this.cvs.getAll(),
     }).subscribe({
       next: r => {

@@ -15,7 +15,7 @@ public class TacheResponseDTO {
     private PrioriteTache priorite;
     private StatutTache statut;
     private Long comiteId;
-    private String comiteNom;   // ← clé
+    private String comiteNom;
     private Long membreId;
-    private String membreNom;   // ← clé
+    private String membreNom;
 }

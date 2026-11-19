@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 
 from .text_utils import normalize, normalize_aligned, split_lines
 
-# ---------------------------------------------------------------- PDF
+# PDF
 
 
 def extract_pdf_text(data: bytes) -> str:
@@ -27,7 +27,7 @@ def extract_pdf_text(data: bytes) -> str:
         return ""
 
 
-# ---------------------------------------------------------------- Dossier du formulaire
+# Dossier du formulaire
 
 # Format produit par CandidatureCVService.deposerPublic (backend Spring Boot) :
 # "Prénom:x | Nom:y | Tel:z | Niveau:3 | Comité:Design | Motivation:... | Expérience:... | Compétences:..."
@@ -53,7 +53,7 @@ def parse_dossier(contexte: str) -> Dict[str, str]:
     return result
 
 
-# ---------------------------------------------------------------- Signaux du CV
+# Signaux du CV
 
 _SECTION_WORDS = [
     "formation", "education", "experience", "experiences", "competences", "skills",

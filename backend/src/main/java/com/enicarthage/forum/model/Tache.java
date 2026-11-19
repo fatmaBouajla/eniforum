@@ -42,7 +42,6 @@ public class Tache {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Utilisateur membre;
 
-    // ← AJOUTER
     @OneToMany(mappedBy = "tache", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"tache", "hibernateLazyInitializer"})
     @Builder.Default

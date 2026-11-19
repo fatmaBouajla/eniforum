@@ -24,7 +24,6 @@ public class ComiteService {
     private final ForumEditionGuard forumEditionGuard;
 
     public Comite creer(Comite comite) {
-        // Résoudre forumProject
         if (comite.getForumProject() != null && comite.getForumProject().getId() != null) {
             ForumProject fp = forumProjectRepository.findById(comite.getForumProject().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Forum introuvable"));
@@ -32,13 +31,12 @@ public class ComiteService {
             comite.setForumProject(fp);
         }
 
-        // Résoudre chef — nullable
         if (comite.getChef() != null && comite.getChef().getId() != null) {
             Utilisateur chef = utilisateurRepository.findById(comite.getChef().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Chef introuvable"));
             comite.setChef(chef);
         } else {
-            comite.setChef(null);  // ← explicitement null
+            comite.setChef(null);
         }
 
         Comite saved = comiteRepository.save(comite);

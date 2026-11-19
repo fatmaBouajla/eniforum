@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface ComiteRepository extends JpaRepository<Comite, Long> {
     List<Comite> findByForumProjectId(Long forumProjectId);
-    Optional<Comite> findByChefId(Long chefId); // ✅ AJOUT
+    Optional<Comite> findByChefId(Long chefId);
 }

@@ -51,21 +51,6 @@ public class CandidatureCVService {
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
 
-    public CandidatureCV deposer(MultipartFile fichier, String posteVise, Utilisateur candidat) {
-        String path = saveFile(fichier);
-        CandidatureCV candidature = CandidatureCV.builder()
-                .fichierCV(path)
-                .posteVise(posteVise)
-                .statut(StatutCandidature.EN_ATTENTE)
-                .dateDepot(LocalDateTime.now())
-                .candidat(candidat)
-                .forumProject(forumProjectService.findEditionCourante().orElse(null))
-                .build();
-        CandidatureCV saved = candidatureCVRepository.save(candidature);
-        analyserAvecIA(saved);
-        return saved;
-    }
-
     public void analyserAvecIA(CandidatureCV candidature) {
         Path path = Paths.get(candidature.getFichierCV());
         if (!Files.exists(path)) {

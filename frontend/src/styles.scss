@@ -193,7 +193,6 @@ h1, h2, h3, h4 { color: var(--brand-900); line-height: 1.25; font-weight: 800; l
 .badge-amber { background: var(--warning-bg); color: var(--warning); }
 .badge-red { background: var(--danger-bg); color: var(--danger); }
 .badge-violet { background: var(--violet-bg); color: var(--violet); }
-.badge-outline { background: transparent; border: 1px solid var(--border-2); }
 .chip {
   display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px;
   font-size: 12px; font-weight: 600; background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border);
@@ -223,7 +222,6 @@ h1, h2, h3, h4 { color: var(--brand-900); line-height: 1.25; font-weight: 800; l
 }
 .alert-error { background: var(--danger-bg); color: #8E1B1B; border-color: #F5C2C2; }
 .alert-info { background: var(--info-bg); color: var(--brand-700); border-color: #BCD9F2; }
-.alert-success { background: var(--success-bg); color: #13692F; border-color: #B8E4C6; }
 .alert-warning { background: var(--warning-bg); color: #8A4B08; border-color: #F4D58D; }
 .alert .grow { flex: 1; }
 

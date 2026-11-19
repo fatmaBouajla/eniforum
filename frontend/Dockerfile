@@ -1,9 +1,7 @@
 # syntax=docker/dockerfile:1.7
-# =====================================================================
-#  EniForum — Frontend Angular servi par Nginx (non-root, port 8080)
-# =====================================================================
+# EniForum — Frontend Angular servi par Nginx (non-root, port 8080)
 
-# ---------- 1. Build Angular ----------
+# 1. Build Angular
 FROM --platform=$BUILDPLATFORM node:20-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -12,7 +10,7 @@ COPY angular.json tsconfig*.json ./
 COPY src ./src
 RUN npx ng build --configuration production
 
-# ---------- 2. Serveur web ----------
+# 2. Serveur web
 FROM nginxinc/nginx-unprivileged:1.27-alpine
 LABEL org.opencontainers.image.title="eniforum-frontend" \
       org.opencontainers.image.description="Interface web Angular de la plateforme EniForum" \

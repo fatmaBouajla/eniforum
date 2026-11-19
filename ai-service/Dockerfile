@@ -1,16 +1,13 @@
 # syntax=docker/dockerfile:1.7
-# =====================================================================
-#  EniForum — Service IA de matching CV (FastAPI)
-#  Le modèle sémantique est inclus dans l'image : fonctionne hors ligne.
-# =====================================================================
+# EniForum — Service IA de matching CV (FastAPI)
+# Le modèle sémantique est inclus dans l'image : fonctionne hors ligne.
 ARG PYTHON_VERSION=3.11
 ARG MODEL_NAME=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
 
-# ---------- 1. Dépendances + modèle ----------
+# 1. Dépendances + modèle
 FROM python:${PYTHON_VERSION}-slim AS build
 ARG MODEL_NAME
-# Téléchargements robustes : nouvelles tentatives + cache pip conservé entre deux builds
-# (une connexion coupée en plein téléchargement ne fait plus tout recommencer).
+# Nouvelles tentatives et cache pip : une connexion coupée ne fait pas tout recommencer
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=10 \
     VIRTUAL_ENV=/opt/venv PATH="/opt/venv/bin:$PATH" \
     HF_HOME=/opt/hf
@@ -26,7 +23,7 @@ RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTr
  && find /opt/venv -type d -name "__pycache__" -prune -exec rm -rf {} + \
  && rm -rf /opt/venv/lib/python*/site-packages/torch/include
 
-# ---------- 2. Exécution ----------
+# 2. Exécution
 FROM python:${PYTHON_VERSION}-slim
 ARG MODEL_NAME
 LABEL org.opencontainers.image.title="eniforum-ai" \

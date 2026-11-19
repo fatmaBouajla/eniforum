@@ -17,8 +17,7 @@ public class WorkshopController {
 
     private final WorkshopService workshopService;
 
-    // Tous les workshops — accessible à tous les rôles authentifiés
-    // Le service filtre selon le rôle
+    // Un chef ne reçoit que les workshops de son comité
     @GetMapping
     public List<Workshop> getAll(Authentication auth) {
         if (auth == null) return List.of();
@@ -28,13 +27,6 @@ public class WorkshopController {
             return workshopService.findByChef(auth.getName());
         }
         return workshopService.findAll();
-    }
-
-    // Endpoint dédié chef (appelé par chef-workshops.component.ts)
-    @GetMapping("/mes-workshops")
-    @PreAuthorize("hasRole('CHEF_COMITE')")
-    public List<Workshop> getMesWorkshops(Authentication auth) {
-        return workshopService.findByChef(auth.getName());
     }
 
     @GetMapping("/{id}")

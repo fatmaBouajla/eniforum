@@ -65,7 +65,7 @@ class CvMatcher:
         if unknown:
             raise ValueError(f"Compétences absentes du catalogue : {sorted(set(unknown))}")
 
-    # ------------------------------------------------------------ poste visé
+    # Poste visé
     def resolve_poste(self, poste_vise: str, dossier: Dict[str, str]) -> Tuple[str, str]:
         p = normalize(poste_vise)
         if "coordinat" in p:
@@ -86,7 +86,7 @@ class CvMatcher:
             comite = "projet"  # la coordination générale s'appuie sur la fiche « pilotage »
         return role, comite
 
-    # ------------------------------------------------------------ analyse
+    # Analyse
     def analyze(self, cv_text: str, poste_vise: str = "", contexte: str = "") -> MatchResult:
         dossier = parse_dossier(contexte)
         role_key, comite_key = self.resolve_poste(poste_vise, dossier)
@@ -104,7 +104,7 @@ class CvMatcher:
         forts: List[str] = []
         a_verifier: List[str] = []
 
-        # 1) Compétences ------------------------------------------------
+        # 1) Compétences
         requises = list(dict.fromkeys(comite["requises"] + role["requises_en_plus"]))
         atouts = [a for a in comite["atouts"] if a not in requises]
         cv_skills = self.catalog.detect(cv_text)
@@ -135,7 +135,7 @@ class CvMatcher:
             a_verifier.append(
                 f"Compétences déclarées dans le formulaire mais absentes du CV : {_join(declarees_non_prouvees)}")
 
-        # 2) Adéquation sémantique --------------------------------------
+        # 2) Adéquation sémantique
         attentes = comite["attentes"] + role["attentes_en_plus"]
         chunks = chunk_text(cv_text) + chunk_text(dossier.get("experience", ""))
         sem, sem_details, moteur = self.semantic.match(attentes, chunks)
@@ -147,7 +147,7 @@ class CvMatcher:
             forts.append(f"Répond à l'attente « {best[0]} » (ex. : « {_short(best[2], 60)} »)")
         attentes_faibles = [f"Peu d'éléments sur : « {att} »" for att, _, _ in faible[:2]]
 
-        # 3) Expérience & responsabilités -------------------------------
+        # 3) Expérience & responsabilités
         assoc = signals.lignes_associatives + signals_form.lignes_associatives
         lead = signals.lignes_responsabilite + signals_form.lignes_responsabilite
         stages = signals.lignes_stage + signals_form.lignes_stage
@@ -172,7 +172,7 @@ class CvMatcher:
         if n_stage:
             forts.append(f"Expérience professionnelle (stage / projet) : {n_stage} mention(s)")
 
-        # 4) Formation & langues ----------------------------------------
+        # 4) Formation & langues
         niveau = parse_niveau(dossier.get("niveau")) or signals.niveau_cv
         if role_key == "MEMBRE":
             table = {1: 0.75, 2: 0.85, 3: 1.0, 4: 1.0, 5: 0.9}
@@ -185,7 +185,7 @@ class CvMatcher:
         if len(langues) >= 3:
             forts.append(f"Trilingue ou plus : {_join(langues, 4)}")
 
-        # 5) Motivation ---------------------------------------------------
+        # 5) Motivation
         motivation = dossier.get("motivation", "")
         if motivation:
             mots = len(motivation.split())
@@ -202,7 +202,7 @@ class CvMatcher:
             sub["motivation"] = 0.5
             a_verifier.append("Motivation non fournie")
 
-        # Score final ------------------------------------------------------
+        # Score final
         points = {k: sub[k] * poids[k] for k in DIMENSIONS}
         score = sum(points.values())
 

@@ -33,8 +33,7 @@ public class AuthService {
     }
 
     /**
-     * Inscription publique : toujours rôle MEMBRE (les autres rôles sont créés par l'ADMIN).
-     * Le champ {@code role} éventuel du formulaire est ignoré pour respecter le cahier des charges.
+     * Inscription publique : toujours un compte MEMBRE (les autres rôles sont attribués par l'administrateur).
      */
     public Utilisateur register(RegisterRequest request) {
         log.info("Inscription : {}", request.getEmail());

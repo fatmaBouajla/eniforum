@@ -6,5 +6,4 @@ import java.util.List;
 public interface CandidatureCVRepository extends JpaRepository<CandidatureCV, Long> {
     boolean existsByCandidatEmailAndStatut(String candidatEmail, StatutCandidature statut);
     List<CandidatureCV> findByStatutOrderByScoreIADesc(StatutCandidature statut);
-    List<CandidatureCV> findByCandidatId(Long candidatId);
 }
