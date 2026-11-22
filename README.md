@@ -65,8 +65,4 @@ Le projet contient également six candidatures de démonstration avec des CV PDF
 
 
 
-Projet réalisé à l'ENICarthage par :
 
-- Fatma Bouajla
-- Mayssa Abdouli
-- Rawen Zgarni
